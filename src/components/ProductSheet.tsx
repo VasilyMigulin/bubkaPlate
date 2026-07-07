@@ -18,9 +18,16 @@ const RX_OPTS: { rx: Reaction; e: string; label: string }[] = [
 const isDark = () => window.matchMedia('(prefers-color-scheme: dark)').matches;
 
 export function ProductSheet({ food, onClose }: { food: Food; onClose: () => void }) {
-  const [age, setAge] = useState('6');
+  const { logFood, startAllergen, showToast, ageMonths } = useStore();
+  // открываем на возрасте ребёнка: наибольшая ступень serve, которая уже наступила
+  const initialAge = (() => {
+    const keys = Object.keys(food.serve).map(Number).sort((a, b) => a - b);
+    if (ageMonths == null) return '6';
+    const fit = keys.filter((k) => k <= ageMonths);
+    return String(fit.length ? fit[fit.length - 1] : keys[0]);
+  })();
+  const [age, setAge] = useState(initialAge);
   const [rxOpen, setRxOpen] = useState(false);
-  const { logFood, startAllergen, showToast } = useStore();
   const bg = isDark() ? food.dbg : food.bg;
   const [icon, text] = food.serve[age];
   const ages = Object.keys(food.serve);

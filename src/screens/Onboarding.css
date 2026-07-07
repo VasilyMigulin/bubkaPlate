@@ -1,0 +1,35 @@
+.onb {
+  max-width:440px; margin:0 auto; min-height:100dvh; background:var(--bg);
+  display:flex; flex-direction:column; padding:0 22px calc(28px + env(safe-area-inset-bottom));
+}
+.onb-top { text-align:center; padding-top:56px; }
+.onb-logo { font-size:52px; }
+.onb-brand { font-size:13px; font-weight:700; letter-spacing:.18em; text-transform:uppercase; color:var(--accent); margin-top:8px; }
+
+.onb-body { flex:1; display:flex; align-items:center; }
+.onb-step { width:100%; animation:rise .4s cubic-bezier(.22,.9,.3,1) both; }
+.onb-step h1 { font-size:26px; font-weight:750; letter-spacing:-.02em; text-align:center; text-wrap:balance; }
+.onb-step p { font-size:14px; color:var(--text2); line-height:1.5; text-align:center; margin-top:10px; text-wrap:balance; }
+
+.onb-input {
+  width:100%; border:1.5px solid var(--hairline); background:var(--card); border-radius:16px; padding:15px 16px; margin-top:22px;
+  font-family:inherit; font-size:16px; font-weight:600; color:var(--text); text-align:center; outline:none; transition:border-color .2s;
+  -webkit-appearance:none;
+}
+.onb-input:focus { border-color:var(--accent); }
+.onb-input::placeholder { color:var(--text2); font-weight:500; }
+
+.onb-opts { margin-top:22px; display:flex; flex-direction:column; gap:10px; }
+.onb-opt { display:flex; align-items:center; gap:12px; border:1.5px solid var(--hairline); background:var(--card); border-radius:16px;
+  padding:14px 15px; text-align:left; transition:all .2s; }
+.onb-opt.on { border-color:var(--accent); background:var(--accent-soft); }
+.onb-opt-e { font-size:22px; flex:none; }
+.onb-opt b { font-size:15px; display:block; }
+.onb-opt-s { font-size:12.5px; color:var(--text2); }
+.onb-radio { color:var(--accent); font-size:16px; flex:none; }
+
+.onb-foot { display:flex; flex-direction:column; gap:10px; }
+.onb-dots { display:flex; gap:6px; justify-content:center; margin-bottom:6px; }
+.onb-dots span { width:7px; height:7px; border-radius:99px; background:var(--hairline); transition:all .3s; }
+.onb-dots span.on { background:var(--accent); width:18px; }
+.onb-back { background:none; border:none; font-family:inherit; font-size:13.5px; font-weight:600; color:var(--text2); padding:6px; }

@@ -52,3 +52,32 @@
 .rx.ok { background:var(--accent-soft); color:var(--accent); }
 .rx.bad { background:color-mix(in srgb,var(--danger) 14%,transparent); color:var(--danger); }
 .rx.wait { background:var(--sand-soft); color:var(--sand); }
+
+/* чеклист готовности */
+.ready-card { background:linear-gradient(135deg, var(--terra-soft), var(--sand-soft)); box-shadow:var(--shadow); }
+.ready-list { margin-top:12px; display:flex; flex-direction:column; gap:8px; }
+.ready-item { display:flex; align-items:center; gap:11px; background:var(--card); border:none; border-radius:14px; padding:12px 14px;
+  text-align:left; font-size:13.5px; font-weight:600; color:var(--text); box-shadow:var(--shadow); }
+.ready-box { flex:none; width:24px; height:24px; border-radius:8px; border:2px solid var(--hairline); background:var(--bg);
+  color:transparent; font-size:13px; display:flex; align-items:center; justify-content:center; }
+.ready-item.on .ready-box { background:var(--accent); border-color:var(--accent); color:#fff; }
+.ready-e { font-size:19px; flex:none; }
+
+/* схема введения */
+.sched-week { background:var(--card); border-radius:16px; padding:13px 15px; box-shadow:var(--shadow); margin-bottom:9px; }
+.sched-line { display:flex; align-items:center; gap:10px; }
+.sched-badge { font-size:11px; font-weight:700; letter-spacing:.05em; text-transform:uppercase; color:#fff; background:var(--accent);
+  border-radius:8px; padding:4px 9px; flex:none; }
+.sched-focus { font-size:14.5px; font-weight:650; }
+.sched-foods { display:flex; flex-wrap:wrap; gap:6px; margin:9px 0 8px; }
+.sched-chip { border:none; background:var(--elev); color:var(--text); font-size:12.5px; font-weight:600; border-radius:999px; padding:6px 11px; }
+.sched-note { font-size:12.5px; color:var(--text2); line-height:1.45; }
+
+/* объёмы порций */
+.portion-row { display:flex; align-items:center; gap:12px; padding:10px 0; border-bottom:1px solid var(--hairline); }
+.portion-row:last-of-type { border-bottom:none; }
+.portion-m { font-size:13px; font-weight:700; width:70px; flex:none; color:var(--text2); font-variant-numeric:tabular-nums; }
+.portion-p { font-size:14px; font-weight:600; }
+
+.reset-link { display:block; margin:24px auto 8px; background:none; border:none; font-family:inherit; font-size:12px;
+  font-weight:600; color:var(--text2); padding:6px 12px; }

@@ -38,3 +38,20 @@ export interface AllergenWindow {
   day: number;       // 1..3
   reaction: 'bad' | null;
 }
+
+export type FeedingApproach = 'puree' | 'blw' | 'both';
+
+export interface Profile {
+  name: string;
+  birthDate: string;        // ISO yyyy-mm-dd
+  approach: FeedingApproach;
+  started: boolean;         // начали ли прикорм
+}
+
+export interface PersistedState {
+  profile: Profile | null;
+  introduced: string[];
+  log: LogEntry[];
+  windows: AllergenWindow[];
+  readiness: string[];      // отмеченные признаки готовности
+}

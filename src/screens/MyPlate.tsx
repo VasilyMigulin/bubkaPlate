@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react';
 import { CATEGORIES, FOODS } from '../data/foods';
+import { PORTIONS, READINESS, SCHEDULE } from '../data/schedule';
 import { useStore } from '../state/store';
 import { PlateScan } from '../components/PlateScan';
 import './MyPlate.css';
@@ -12,9 +13,14 @@ const RX_BADGE: Record<string, { cls: string; label: string }> = {
 };
 
 export function MyPlate({ goCatalog }: { goCatalog: () => void }) {
-  const { introduced, log, windows, ironCovered, ironTotal, markAllergenDay, showToast } = useStore();
+  const { introduced, log, windows, ironCovered, ironTotal, markAllergenDay, showToast,
+    ageMonths, readiness, toggleReadiness, resetAll } = useStore();
   const [scanOpen, setScanOpen] = useState(false);
   const [mapOpen, setMapOpen] = useState(false);
+  const [schedOpen, setSchedOpen] = useState(false);
+
+  const notReady = ageMonths != null && ageMonths < 6;
+  const readyCount = READINESS.filter((r) => readiness.has(r.key)).length;
 
   const coverage = useMemo(() =>
     CATEGORIES.map((cat) => {
@@ -28,6 +34,29 @@ export function MyPlate({ goCatalog }: { goCatalog: () => void }) {
 
   return (
     <>
+      {notReady && (
+        <div className="card ready-card">
+          <div className="eyebrow" style={{ color: 'var(--terra)' }}>Скоро прикорм · готовность</div>
+          <div className="h-card" style={{ marginTop: 2 }}>{readyCount} из {READINESS.length} признаков</div>
+          <div className="sub" style={{ marginTop: 4 }}>Прикорм начинают около 6 месяцев и когда малыш готов. Отметьте, что уже есть:</div>
+          <div className="ready-list">
+            {READINESS.map((r) => {
+              const on = readiness.has(r.key);
+              return (
+                <button key={r.key} className={`ready-item ${on ? 'on' : ''}`} onClick={() => toggleReadiness(r.key)}>
+                  <span className="ready-box">{on ? '✓' : ''}</span>
+                  <span className="ready-e">{r.e}</span>
+                  <span className="grow">{r.text}</span>
+                </button>
+              );
+            })}
+          </div>
+          {readyCount === READINESS.length && (
+            <div className="note" style={{ marginTop: 10 }}><span className="ne">🎉</span><span>Все признаки есть — можно знакомиться с первым овощем. Загляните в «Схему введения» ниже.</span></div>
+          )}
+        </div>
+      )}
+
       <button className="plate-cta" onClick={() => setScanOpen(true)}>
         <div className="pc-ico">📸</div>
         <div className="grow">
@@ -123,13 +152,44 @@ export function MyPlate({ goCatalog }: { goCatalog: () => void }) {
         📄 Сводка для аллерголога (PDF)
       </button>
 
-      <div className="section-t">План на неделю</div>
-      <div className="card next-card" style={{ background: 'var(--accent-soft)' }}>
-        <div className="eyebrow" style={{ color: 'var(--accent)' }}>Автоплан · bubka+ ✨</div>
-        <div className="h-card">Неделя 3: жёлтые овощи + первое железо</div>
-        <div className="sub" style={{ marginTop: 6 }}>Учитывает, что уже введено, напоминает повторять и добавляет новое раз в 2–3 дня утром. Со списком покупок.</div>
-        <button className="btn btn-primary" style={{ marginTop: 12 }} onClick={() => showToast('✨', 'bubka+', '7 дней бесплатно — скоро')}>Открыть план · 7 дней бесплатно</button>
+      <div className="section-t">Схема введения по неделям</div>
+      <div className="sched">
+        {SCHEDULE.map((w, i) => (
+          <div key={i} className="sched-week">
+            <div className="sched-line">
+              <div className="sched-badge">{w.week}</div>
+              <div className="sched-focus">{w.focus}</div>
+            </div>
+            <div className="sched-foods">
+              {w.foods.map((id) => {
+                const f = FOODS.find((x) => x.id === id);
+                return f ? <button key={id} className="sched-chip" onClick={goCatalog}>{f.e} {f.n}</button> : null;
+              })}
+            </div>
+            <div className="sched-note">{w.note}</div>
+          </div>
+        ))}
       </div>
+
+      <button className="fmap-status" onClick={() => setSchedOpen((v) => !v)}>
+        <div className="fs-item"><span className="fs-e">⚖️</span><b>Объёмы порций</b><span>по возрасту</span></div>
+        <span className="fs-chev" style={{ transform: schedOpen ? 'rotate(180deg)' : 'none' }}>▾</span>
+      </button>
+      {schedOpen && (
+        <div className="card rise">
+          {PORTIONS.map((p) => (
+            <div key={p.months} className="portion-row">
+              <div className="portion-m">{p.months}</div>
+              <div className="grow"><div className="portion-p">{p.portion}</div><div className="fm-d">{p.meals}</div></div>
+            </div>
+          ))}
+          <div className="sub" style={{ marginTop: 8 }}>Ориентир. Молоко или смесь — по требованию сверх прикорма. Аппетит малыша важнее граммов.</div>
+        </div>
+      )}
+
+      <button className="reset-link" onClick={() => { if (confirm('Сбросить профиль и данные? Пройдёте онбординг заново.')) resetAll(); }}>
+        Сбросить профиль (демо)
+      </button>
 
       {scanOpen && <PlateScan onClose={() => setScanOpen(false)} goSafety={goCatalog} />}
     </>

@@ -4,8 +4,18 @@ import { MyPlate } from './screens/MyPlate';
 import { Catalog } from './screens/Catalog';
 import { Recipes } from './screens/Recipes';
 import { Safety } from './screens/Safety';
+import { Onboarding } from './screens/Onboarding';
 
 type Tab = 'mine' | 'catalog' | 'recipes' | 'safety';
+
+function ageLabel(months: number): string {
+  if (months < 1) return 'меньше месяца';
+  const y = Math.floor(months / 12), m = months % 12;
+  const mm = (n: number) => `${n} ${n % 10 === 1 && n % 100 !== 11 ? 'месяц' : n % 10 >= 2 && n % 10 <= 4 && (n % 100 < 10 || n % 100 >= 20) ? 'месяца' : 'месяцев'}`;
+  if (y === 0) return mm(m);
+  const yy = `${y} ${y === 1 ? 'год' : y >= 2 && y <= 4 ? 'года' : 'лет'}`;
+  return m ? `${yy} ${mm(m)}` : yy;
+}
 
 const TABS: { key: Tab; icon: string; label: string }[] = [
   { key: 'mine', icon: '📋', label: 'Мой прикорм' },
@@ -36,13 +46,29 @@ function Toast() {
 
 function Shell() {
   const [tab, setTab] = useState<Tab>('mine');
+  const { profile, ageMonths } = useStore();
+  if (!profile) return <Onboarding />;
   const head = HEAD[tab];
   return (
     <div className="app">
       <div className="app-scroll" key={tab}>
         <div className="screen-head rise">
-          <h1 className="h-screen">{head.title}</h1>
-          <div className="sub">{head.sub}</div>
+          {tab === 'mine' ? (
+            <>
+              <div className="kid-row">
+                <div className="kid-ava">👶</div>
+                <div className="grow">
+                  <h1 className="h-screen" style={{ fontSize: 22 }}>{profile.name}</h1>
+                  <div className="sub">{ageMonths != null ? ageLabel(ageMonths) : ''} · {profile.approach === 'puree' ? 'пюре' : profile.approach === 'blw' ? 'кусочки' : 'пюре и кусочки'}</div>
+                </div>
+              </div>
+            </>
+          ) : (
+            <>
+              <h1 className="h-screen">{head.title}</h1>
+              <div className="sub">{head.sub}</div>
+            </>
+          )}
         </div>
         <div className="rise">
           {tab === 'mine' && <MyPlate goCatalog={() => setTab('catalog')} />}

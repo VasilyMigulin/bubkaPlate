@@ -11,7 +11,7 @@ export function Catalog() {
   const [q, setQ] = useState('');
   const [ageFilter, setAgeFilter] = useState<number | null>(null);
   const [open, setOpen] = useState<Food | null>(null);
-  const { introduced } = useStore();
+  const { introduced, ageMonths } = useStore();
 
   const filtered = useMemo(() => {
     const query = q.toLowerCase().trim();
@@ -57,7 +57,11 @@ export function Catalog() {
                       {f.iron && <span className="food-iron">железо</span>}
                       {f.allergen && f.allergen !== 'глютен' && <span className="food-al">аллерген</span>}
                     </div>
-                    <div className="food-age">{f.cat.toLowerCase()}</div>
+                    <div className="food-age">
+                      {ageMonths != null && f.fromMonth > ageMonths
+                        ? <span className="food-soon">рано · с {f.fromMonth} мес</span>
+                        : f.cat.toLowerCase()}
+                    </div>
                   </div>
                 </button>
               );
