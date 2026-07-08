@@ -28,6 +28,7 @@ export interface Food {
   cook: string;
   store: string;
   caution: string;      // «когда нельзя»
+  choose?: string;      // как выбрать / признак спелости
   serve: ServeMap;
 }
 

@@ -21,6 +21,11 @@
 .food-name { font-size:14.5px; font-weight:650; color:var(--text); display:flex; align-items:center; gap:6px; flex-wrap:wrap; }
 .food-age { font-size:11.5px; color:var(--text2); margin-top:3px; }
 .food-soon { color:var(--warn); font-weight:600; }
+.food.early { opacity:.6; }
+.food-from { position:absolute; top:8px; left:8px; background:color-mix(in srgb, var(--card) 88%, transparent);
+  backdrop-filter:blur(6px); color:var(--text); font-size:10.5px; font-weight:700; padding:2px 7px; border-radius:8px; }
+.food-serve { display:flex; align-items:center; gap:5px; margin-top:4px; font-size:11.5px; font-weight:600; color:var(--text2); }
+.food-serve svg { flex:none; margin:-4px; }
 .food-iron { font-size:9.5px; font-weight:700; letter-spacing:.04em; color:var(--terra); background:var(--terra-soft); border-radius:6px; padding:2px 6px; }
 .food-al { font-size:9.5px; font-weight:700; letter-spacing:.04em; color:var(--danger);
   background:color-mix(in srgb, var(--danger) 12%, transparent); border-radius:6px; padding:2px 6px; }

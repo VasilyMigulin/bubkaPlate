@@ -1,11 +1,19 @@
 import { useMemo, useState } from 'react';
 import { AGE_LABEL, AGE_STEPS, FOODS } from '../data/foods';
 import { ProductSheet } from '../components/ProductSheet';
+import { ServeShape, serveLabel } from '../components/ServeShape';
 import { useStore } from '../state/store';
 import type { Food } from '../types';
 import './Catalog.css';
 
-const isDark = () => window.matchMedia('(prefers-color-scheme: dark)').matches;
+const isDarkMode = () => window.matchMedia('(prefers-color-scheme: dark)').matches;
+
+/** Форма подачи под возраст ребёнка (или стартовая, если возраст не задан). */
+function serveForAge(f: Food, ageMonths: number | null) {
+  const keys = Object.keys(f.serve).map(Number).sort((a, b) => a - b);
+  const target = ageMonths == null ? keys[0] : (keys.filter((k) => k <= ageMonths).pop() ?? keys[0]);
+  return f.serve[String(target)];
+}
 
 export function Catalog() {
   const [q, setQ] = useState('');
@@ -43,12 +51,15 @@ export function Catalog() {
           <div className="cat-month">{AGE_LABEL[month]}</div>
           <div className="food-grid">
             {foods.map((f) => {
-              const bg = isDark() ? f.dbg : f.bg;
+              const bg = isDarkMode() ? f.dbg : f.bg;
               const done = introduced.has(f.id);
+              const tooEarly = ageMonths != null && f.fromMonth > ageMonths;
+              const [shape] = serveForAge(f, ageMonths);
               return (
-                <button key={f.id} className="food" onClick={() => setOpen(f)}>
+                <button key={f.id} className={`food ${tooEarly ? 'early' : ''}`} onClick={() => setOpen(f)}>
                   <div className="food-pic" style={{ background: `radial-gradient(circle at 32% 28%, ${bg[0]}, ${bg[1]})` }}>
                     {f.e}
+                    <span className="food-from">с {f.fromMonth}</span>
                     {done && <span className="food-done">✓</span>}
                   </div>
                   <div className="food-meta">
@@ -57,11 +68,14 @@ export function Catalog() {
                       {f.iron && <span className="food-iron">железо</span>}
                       {f.allergen && f.allergen !== 'глютен' && <span className="food-al">аллерген</span>}
                     </div>
-                    <div className="food-age">
-                      {ageMonths != null && f.fromMonth > ageMonths
-                        ? <span className="food-soon">рано · с {f.fromMonth} мес</span>
-                        : f.cat.toLowerCase()}
-                    </div>
+                    {tooEarly ? (
+                      <div className="food-age"><span className="food-soon">рано · с {f.fromMonth} мес</span></div>
+                    ) : (
+                      <div className="food-serve">
+                        <ServeShape shape={shape} color={bg} size={26} />
+                        <span>{serveLabel(shape)}</span>
+                      </div>
+                    )}
                   </div>
                 </button>
               );
