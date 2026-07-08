@@ -14,7 +14,9 @@
 .food { background:var(--card); border-radius:20px; overflow:hidden; box-shadow:var(--shadow); border:none; text-align:left; padding:0;
   transition:transform .18s cubic-bezier(.34,1.56,.64,1); }
 .food:active { transform:scale(.96); }
-.food-pic { height:92px; display:flex; align-items:center; justify-content:center; font-size:44px; position:relative; }
+.food-pic { height:108px; display:flex; align-items:center; justify-content:center; font-size:44px; position:relative; overflow:hidden; }
+.food-photo { width:100%; height:100%; object-fit:contain; padding:8px; }
+.food-emoji { line-height:1; }
 .food-done { position:absolute; top:8px; right:8px; width:22px; height:22px; border-radius:50%; background:var(--accent); color:#fff;
   font-size:12px; display:flex; align-items:center; justify-content:center; box-shadow:var(--shadow); }
 .food-meta { padding:11px 13px 13px; }
