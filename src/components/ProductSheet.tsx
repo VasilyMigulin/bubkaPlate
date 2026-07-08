@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import type { Food, Reaction } from '../types';
 import { useStore } from '../state/store';
+import { ServeShape, serveLabel } from './ServeShape';
 import './ProductSheet.css';
 
 const AGE_TABS: { key: string; label: string }[] = [
@@ -29,7 +30,7 @@ export function ProductSheet({ food, onClose }: { food: Food; onClose: () => voi
   const [age, setAge] = useState(initialAge);
   const [rxOpen, setRxOpen] = useState(false);
   const bg = isDark() ? food.dbg : food.bg;
-  const [icon, text] = food.serve[age];
+  const [shape, text] = food.serve[age];
   const ages = Object.keys(food.serve);
   const canAllergen = food.allergen && food.allergen !== 'глютен';
 
@@ -64,8 +65,11 @@ export function ProductSheet({ food, onClose }: { food: Food; onClose: () => voi
             ))}
           </div>
           <div className="serve-card">
-            <div className="serve-ico">{icon}</div>
-            <div className="serve-text">{text}</div>
+            <ServeShape shape={shape} color={bg} />
+            <div className="serve-info">
+              <div className="serve-shape-label">{serveLabel(shape)}</div>
+              <div className="serve-text">{text}</div>
+            </div>
           </div>
 
           <div className="section-t">О продукте</div>

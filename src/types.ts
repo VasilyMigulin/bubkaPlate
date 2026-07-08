@@ -1,10 +1,16 @@
-// Модель данных прикорм-приложения bubka-food
+// Модель данных прикорм-приложения bubka plate
 
 export type Reaction = 'ok' | 'wait' | 'skin' | 'tummy';
 export type FoodStatus = 'loved' | 'liked' | 'trying' | 'disliked' | null;
 
-/** Подача по возрастам: ключ — месяц (6/8/10/12), значение — [эмодзи-иконка, текст] */
-export type ServeMap = Record<string, [string, string]>;
+/** Ключ векторной формы подачи (см. ServeShape). */
+export type ShapeKey =
+  | 'puree' | 'porridge' | 'stick' | 'halfmoon' | 'wedge' | 'floret'
+  | 'cubes' | 'dice' | 'grated' | 'spread' | 'flakes' | 'ball'
+  | 'coin' | 'scramble' | 'whole' | 'wait';
+
+/** Подача по возрастам: ключ — месяц (6/8/10/12), значение — [форма подачи, текст] */
+export type ServeMap = Record<string, [ShapeKey, string]>;
 
 export interface Food {
   id: string;
