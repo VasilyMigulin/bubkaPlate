@@ -65,7 +65,7 @@ export function ProductSheet({ food, onClose }: { food: Food; onClose: () => voi
               const isNow = a === currentStep;
               return (
                 <div key={a} className={`serve-row ${isNow ? 'now' : ''}`}>
-                  <ServeShape shape={shape} color={bg} size={62} />
+                  <ServeShape shape={shape} color={bg} size={104} />
                   <div className="serve-info">
                     <div className="serve-age">{AGE_LABEL[a]}{isNow && <span className="serve-now-tag">сейчас</span>}</div>
                     <div className="serve-shape-label">{serveLabel(shape)}</div>
