@@ -2,6 +2,7 @@ import { useState } from 'react';
 import type { Food, Reaction } from '../types';
 import { CHOOSE, FOODS, RELATED } from '../data/foods';
 import { MAIN_PHOTOS } from '../data/mainPhotos';
+import { SERVE_PHOTOS } from '../data/servePhotos';
 import { useStore } from '../state/store';
 import { FoodIcon } from './FoodIcon';
 import { ServeShape, serveLabel } from './ServeShape';
@@ -67,7 +68,9 @@ export function ProductSheet({ food, onClose }: { food: Food; onClose: () => voi
               const isNow = a === currentStep;
               return (
                 <div key={a} className={`serve-row ${isNow ? 'now' : ''}`}>
-                  <ServeShape shape={shape} color={bg} size={104} />
+                  {SERVE_PHOTOS[f.id]?.[a]
+                    ? <img className="serve-photo" src={SERVE_PHOTOS[f.id][a]} alt={`${f.n}, ${AGE_LABEL[a]}`} loading="lazy" />
+                    : <ServeShape shape={shape} color={bg} size={104} />}
                   <div className="serve-info">
                     <div className="serve-age">{AGE_LABEL[a]}{isNow && <span className="serve-now-tag">сейчас</span>}</div>
                     <div className="serve-shape-label">{serveLabel(shape)}</div>
