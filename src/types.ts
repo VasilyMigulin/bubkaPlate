@@ -9,8 +9,9 @@ export type ShapeKey =
   | 'cubes' | 'dice' | 'grated' | 'spread' | 'flakes' | 'ball'
   | 'coin' | 'scramble' | 'whole' | 'wait';
 
-/** Подача по возрастам: ключ — месяц (6/8/10/12), значение — [форма подачи, текст] */
-export type ServeMap = Record<string, [ShapeKey, string]>;
+/** Подача: ключ — ступень (6/8/10/12), значение — [форма, текст, необязательная подпись возраста].
+ *  Подпись возраста нужна там, где по документу способ доступен раньше/с условием (напр. у яблока все способы с 6 мес). */
+export type ServeMap = Record<string, [ShapeKey, string] | [ShapeKey, string, string]>;
 
 export interface Food {
   id: string;

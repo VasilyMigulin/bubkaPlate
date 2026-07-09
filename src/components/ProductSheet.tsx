@@ -64,15 +64,16 @@ export function ProductSheet({ food, onClose }: { food: Food; onClose: () => voi
           <div className="section-t">Подача по возрасту</div>
           <div className="serve-list">
             {ages.map((a) => {
-              const [shape, text] = f.serve[a];
-              const isNow = a === currentStep;
+              const [shape, text, ageOverride] = f.serve[a];
+              const isNow = !ageOverride && a === currentStep;
+              const ageText = ageOverride ?? AGE_LABEL[a];
               return (
                 <div key={a} className={`serve-row ${isNow ? 'now' : ''}`}>
                   {SERVE_PHOTOS[f.id]?.[a]
-                    ? <img className="serve-photo" src={SERVE_PHOTOS[f.id][a]} alt={`${f.n}, ${AGE_LABEL[a]}`} loading="lazy" />
+                    ? <img className="serve-photo" src={SERVE_PHOTOS[f.id][a]} alt={`${f.n}, ${ageText}`} loading="lazy" />
                     : <ServeShape shape={shape} color={bg} size={104} />}
                   <div className="serve-info">
-                    <div className="serve-age">{AGE_LABEL[a]}{isNow && <span className="serve-now-tag">сейчас</span>}</div>
+                    <div className="serve-age">{ageText}{isNow && <span className="serve-now-tag">сейчас</span>}</div>
                     <div className="serve-shape-label">{serveLabel(shape)}</div>
                     <div className="serve-text">{text}</div>
                   </div>
