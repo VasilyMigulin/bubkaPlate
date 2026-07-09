@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import type { Food, Reaction } from '../types';
 import { CHOOSE, FOODS, RELATED } from '../data/foods';
+import { MAIN_PHOTOS } from '../data/mainPhotos';
 import { useStore } from '../state/store';
 import { FoodIcon } from './FoodIcon';
 import { ServeShape, serveLabel } from './ServeShape';
@@ -49,8 +50,8 @@ export function ProductSheet({ food, onClose }: { food: Food; onClose: () => voi
     <div className="sheet-scrim" onClick={onClose}>
       <div className="prod-sheet" onClick={(e) => e.stopPropagation()}>
         <button className="ps-back" onClick={onClose} aria-label="Назад">‹</button>
-        <div className="ps-hero" style={{ background: `radial-gradient(circle at 30% 25%, ${bg[0]}, ${bg[1]})` }}>
-          <FoodIcon food={f} size={130} />
+        <div className="ps-hero" style={{ background: MAIN_PHOTOS[f.id] ? undefined : `radial-gradient(circle at 30% 25%, ${bg[0]}, ${bg[1]})` }}>
+          {MAIN_PHOTOS[f.id] ? <img className="ps-photo-cover" src={MAIN_PHOTOS[f.id]} alt={f.n} /> : <FoodIcon food={f} size={130} />}
         </div>
         <div className="ps-body">
           <h2>{f.n}</h2>

@@ -19,6 +19,7 @@
 .ps-hero { height:220px; display:flex; align-items:center; justify-content:center; font-size:96px; flex:none; overflow:hidden; }
 .ps-hero span { filter:drop-shadow(0 16px 28px rgba(100,60,20,.28)); }
 .ps-photo { width:100%; height:100%; object-fit:contain; padding:20px; }
+.ps-photo-cover { width:100%; height:100%; object-fit:cover; }
 .ps-body { padding:20px 18px calc(30px + env(safe-area-inset-bottom)); }
 .ps-body h2 { font-size:26px; font-weight:750; letter-spacing:-.02em; }
 

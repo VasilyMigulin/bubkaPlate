@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react';
 import { AGE_LABEL, AGE_STEPS, FOODS } from '../data/foods';
+import { MAIN_PHOTOS } from '../data/mainPhotos';
 import { FoodIcon } from '../components/FoodIcon';
 import { ProductSheet } from '../components/ProductSheet';
 import { ServeShape, serveLabel } from '../components/ServeShape';
@@ -58,8 +59,8 @@ export function Catalog() {
               const [shape] = serveForAge(f, ageMonths);
               return (
                 <button key={f.id} className={`food ${tooEarly ? 'early' : ''}`} onClick={() => setOpen(f)}>
-                  <div className="food-pic" style={{ background: `radial-gradient(circle at 32% 28%, ${bg[0]}, ${bg[1]})` }}>
-                    <FoodIcon food={f} size={60} />
+                  <div className="food-pic" style={{ background: MAIN_PHOTOS[f.id] ? undefined : `radial-gradient(circle at 32% 28%, ${bg[0]}, ${bg[1]})` }}>
+                    {MAIN_PHOTOS[f.id] ? <img className="food-photo-cover" src={MAIN_PHOTOS[f.id]} alt={f.n} loading="lazy" /> : <FoodIcon food={f} size={60} />}
                     <span className="food-from">с {f.fromMonth}</span>
                     {done && <span className="food-done">✓</span>}
                   </div>
