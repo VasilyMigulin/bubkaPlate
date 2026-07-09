@@ -145,7 +145,7 @@ export const FOODS: Food[] = [
     serve: { '6': ['puree', 'Пюре, ложка к каше при запоре.'], '8': ['puree', 'Пюре гуще.'], '10': ['scramble', 'Мелко нарезанный без косточки.'], '12': ['dice', 'Небольшими кусочками.'] },
   },
   {
-    id: 'blueberry', e: '🫐', n: 'Черника', cat: 'Фрукты', fromMonth: 6, allergen: null, choke: 'высокий (целая)', iron: false, status: null,
+    id: 'blueberry', e: '🫐', n: 'Черника', cat: 'Ягоды', fromMonth: 6, allergen: null, choke: 'высокий (целая)', iron: false, status: null,
     bg: ['#DAD9EA', '#9F9BCB'], dbg: ['#2A2B3A', '#212230'],
     benefit: 'Антиоксиданты, витамин C.', cook: 'Без готовки; раздавить или разрезать.',
     store: 'В холодильнике 2–3 дня.', caution: 'Целая ягода — риск удушья: до года давить или резать пополам.',
@@ -273,21 +273,21 @@ export const FOODS: Food[] = [
     serve: { '6': ['wait', 'Рыбу с 8 месяцев.'], '8': ['flakes', 'Хлопья без костей с пюре.'], '10': ['flakes', 'Мягкие кусочки.'], '12': ['ball', 'Котлетки.'] },
   },
   {
-    id: 'cottage', e: '🥛', n: 'Творог', cat: 'Белок', fromMonth: 7, allergen: 'молоко', choke: 'низкий', iron: false, status: null,
+    id: 'cottage', e: '🥛', n: 'Творог', cat: 'Молочное', fromMonth: 7, allergen: 'молоко', choke: 'низкий', iron: false, status: null,
     bg: ['#F3F0E8', '#E5DFCE'], dbg: ['#37342C', '#2B2922'],
     benefit: 'Кальций и белок для костей и зубов.', cook: 'Детский, без сахара; развести смесью.',
     store: 'Открытый — не более суток.', caution: '«Взрослые» сладкие сырки — нет.',
     serve: { '6': ['wait', 'С 7 месяцев.'], '8': ['puree', 'Мягкий, разведённый: 2–3 ч. л.'], '10': ['porridge', 'Погуще, с фруктом.'], '12': ['scramble', 'До 50 г в день.'] },
   },
   {
-    id: 'yogurt', e: '🥛', n: 'Йогурт', cat: 'Белок', fromMonth: 8, allergen: 'молоко', choke: 'низкий', iron: false, status: null,
+    id: 'yogurt', e: '🥛', n: 'Йогурт', cat: 'Молочное', fromMonth: 8, allergen: 'молоко', choke: 'низкий', iron: false, status: null,
     bg: ['#F2F1EC', '#E1DED2'], dbg: ['#35332C', '#2A2822'],
     benefit: 'Кальций, пробиотики, белок.', cook: 'Натуральный, без сахара и добавок.',
     store: 'В холодильнике по этикетке.', caution: 'Только без сахара; аллерген молока — правило 3 дней.',
     serve: { '6': ['wait', 'Йогурт с 8 месяцев.'], '8': ['puree', 'Натуральный, с ложки.'], '10': ['porridge', 'С раздавленным фруктом.'], '12': ['porridge', 'Как перекус.'] },
   },
   {
-    id: 'cheese', e: '🧀', n: 'Сыр', cat: 'Белок', fromMonth: 9, allergen: 'молоко', choke: 'средний', iron: false, status: null,
+    id: 'cheese', e: '🧀', n: 'Сыр', cat: 'Молочное', fromMonth: 9, allergen: 'молоко', choke: 'средний', iron: false, status: null,
     bg: ['#F6EAC8', '#EBCF84'], dbg: ['#3C3620', '#2F2919'],
     benefit: 'Кальций и белок; мягкие несолёные сорта.', cook: 'Тереть или тонкие полоски.',
     store: 'В холодильнике.', caution: 'Солёные и твёрдые сорта позже; тереть — риск удушья куском.',
@@ -302,28 +302,28 @@ export const FOODS: Food[] = [
   },
   // ─── АЛЛЕРГЕНЫ (топ) ───
   {
-    id: 'peanut', e: '🥜', n: 'Арахис', cat: 'Аллергены', fromMonth: 6, allergen: 'арахис', choke: 'высокий (цельный)', iron: false, status: null,
+    id: 'peanut', e: '🥜', n: 'Арахис', cat: 'Белок', fromMonth: 6, allergen: 'арахис', choke: 'высокий (цельный)', iron: false, status: null,
     bg: ['#F3E6D0', '#E5CBA4'], dbg: ['#3C3222', '#2F281B'],
     benefit: 'Ранний ввод снижает риск аллергии (исследование LEAP).', cook: 'Только паста без сахара и соли, разведённая в каше.',
     store: 'Паста — по этикетке.', caution: 'Цельные орехи запрещены до 4–5 лет — риск удушья!',
     serve: { '6': ['spread', '1/4 ч. л. пасты в каше, утром.'], '8': ['spread', '1/2 ч. л. 2–3 раза в неделю.'], '10': ['spread', 'Тонкий слой на хлебе.'], '12': ['spread', 'Паста регулярно.'] },
   },
   {
-    id: 'sesame', e: '⚪', n: 'Кунжут (тахини)', cat: 'Аллергены', fromMonth: 6, allergen: 'кунжут', choke: 'низкий', iron: true, status: null,
+    id: 'sesame', e: '⚪', n: 'Кунжут (тахини)', cat: 'Белок', fromMonth: 6, allergen: 'кунжут', choke: 'низкий', iron: true, status: null,
     bg: ['#F3EDDD', '#E2D3AE'], dbg: ['#37332690', '#2B2820'],
     benefit: 'Кальций, железо; вводится как ранний аллерген.', cook: 'Тахини (кунжутная паста) без добавок, в каше.',
     store: 'Паста — по этикетке.', caution: 'Аллерген: правило 3 дней. Цельные семечки позже.',
     serve: { '6': ['spread', '1/4 ч. л. тахини в каше.'], '8': ['spread', 'Тонкий слой.'], '10': ['spread', 'На хлеб.'], '12': ['spread', 'Регулярно в блюдах.'] },
   },
   {
-    id: 'wheat', e: '🍞', n: 'Пшеница (глютен)', cat: 'Аллергены', fromMonth: 6, allergen: 'глютен', choke: 'низкий', iron: false, status: null,
+    id: 'wheat', e: '🍞', n: 'Пшеница (глютен)', cat: 'Каши', fromMonth: 6, allergen: 'глютен', choke: 'низкий', iron: false, status: null,
     bg: ['#F2E6CE', '#E2C692'], dbg: ['#37301F', '#2A2418'],
     benefit: 'Ранний ввод глютена (4–6 мес окно) снижает риск целиакии.', cook: 'Каша/паста/хлеб хорошо размягчённые.',
     store: 'По продукту.', caution: 'Аллерген глютена: вводить в окно 4–6 мес, наблюдать.',
     serve: { '6': ['porridge', 'Пшеничная каша, немного.'], '8': ['stick', 'Размоченный хлеб полоской.'], '10': ['dice', 'Мягкая паста кусочками.'], '12': ['dice', 'Из семейного стола.'] },
   },
   {
-    id: 'cowmilk', e: '🥛', n: 'Коровье молоко', cat: 'Аллергены', fromMonth: 6, allergen: 'молоко', choke: 'низкий', iron: false, status: null,
+    id: 'cowmilk', e: '🥛', n: 'Коровье молоко', cat: 'Молочное', fromMonth: 6, allergen: 'молоко', choke: 'низкий', iron: false, status: null,
     bg: ['#F2F1EC', '#E1DED2'], dbg: ['#35332C', '#2A2822'],
     benefit: 'В блюдах можно с 6 мес; как основной напиток — только после года.', cook: 'До года — только в приготовлении (каши, омлеты). Поить — после года.',
     store: 'В холодильнике; цельное пастеризованное (не обезжиренное).', caution: 'Как напиток до года — нельзя: мешает усвоению железа. Рисовое молоко — нельзя до 5 лет (мышьяк).',
@@ -394,7 +394,7 @@ export const FOODS: Food[] = [
     serve: { '6': ['wait', 'Лучше с 7 мес.'], '8': ['scramble', 'Раздавленные зёрна в пюре.'], '10': ['scramble', 'Раздавленные зёрна.'], '12': ['dice', 'Целые под присмотром.'] },
   },
   {
-    id: 'strawberry', e: '🍓', n: 'Клубника', cat: 'Фрукты', fromMonth: 6, allergen: null, choke: 'средний', iron: false, status: null,
+    id: 'strawberry', e: '🍓', n: 'Клубника', cat: 'Ягоды', fromMonth: 6, allergen: null, choke: 'средний', iron: false, status: null,
     bg: ['#F6D3D6', '#E8969E'], dbg: ['#3C2528', '#2E1D1F'],
     benefit: 'Витамины C, E и A.', cook: 'Спелую — без готовки.',
     store: 'В холодильнике 2–3 дня.', caution: 'Возможны лёгкие высыпания у рта из-за кислоты — это чаще не истинная аллергия.',
@@ -498,7 +498,7 @@ export const RELATED: Record<string, string[]> = {
 };
 
 export const IRON_IDS = FOODS.filter((f) => f.iron).map((f) => f.id);
-export const CATEGORIES: Food['cat'][] = ['Овощи', 'Фрукты', 'Каши', 'Белок', 'Аллергены'];
+export const CATEGORIES: Food['cat'][] = ['Овощи', 'Фрукты', 'Ягоды', 'Каши', 'Белок', 'Молочное'];
 /** Возрастные ступени для оси «по месяцам». */
 export const AGE_STEPS = [6, 7, 8, 9];
 export const AGE_LABEL: Record<number, string> = { 6: 'с 6 мес', 7: 'с 7 мес', 8: 'с 8 мес', 9: 'с 9 мес', 10: 'с 10 мес', 12: '12+ мес' };

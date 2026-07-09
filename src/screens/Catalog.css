@@ -4,11 +4,13 @@
 }
 .search::placeholder { color:var(--text2); }
 
-.cat-month {
-  font-size:12px; font-weight:700; letter-spacing:.1em; text-transform:uppercase; color:var(--text2);
-  margin:6px 2px 10px; display:flex; align-items:center; gap:8px;
+.cat-head {
+  font-size:15px; font-weight:750; letter-spacing:-.01em; color:var(--text);
+  margin:18px 2px 12px; display:flex; align-items:center; gap:9px;
 }
-.cat-month::after { content:''; flex:1; height:1px; background:var(--hairline); }
+.cat-emoji { font-size:19px; }
+.cat-count { margin-left:auto; font-size:12px; font-weight:700; color:var(--text2); background:var(--elev); border-radius:999px; padding:2px 10px; }
+.chip-warn.on { background:var(--warn); color:#fff; }
 
 .food-grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:14px; }
 .food { background:var(--card); border-radius:20px; overflow:hidden; box-shadow:var(--shadow); border:none; text-align:left; padding:0;

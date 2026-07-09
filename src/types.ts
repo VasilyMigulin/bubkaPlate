@@ -33,7 +33,7 @@ export interface Food {
   serve: ServeMap;
 }
 
-export type FoodCategory = 'Овощи' | 'Фрукты' | 'Каши' | 'Белок' | 'Аллергены';
+export type FoodCategory = 'Овощи' | 'Фрукты' | 'Ягоды' | 'Каши' | 'Белок' | 'Молочное';
 
 export interface LogEntry {
   id: string;   // id продукта
