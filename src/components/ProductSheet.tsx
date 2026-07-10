@@ -148,10 +148,21 @@ export function ProductSheet({ food, onClose }: { food: Food; onClose: () => voi
         </div>
 
         {rxOpen && (
-          <div className="rx-scrim" onClick={() => setRxOpen(false)}>
-            <div className="rx-sheet" onClick={(e) => e.stopPropagation()}>
-              <div className="grab" />
-              <h3>{f.n}: как прошло?</h3>
+          <div className="rx-screen">
+            <div className="rx-top">
+              <button className="rx-back" onClick={() => setRxOpen(false)} aria-label="Закрыть">‹</button>
+              <div className="rx-top-title">Запись в дневник</div>
+            </div>
+            <div className="rx-scroll">
+              <div className="rx-hero">
+                <div className="rx-hero-pic" style={{ background: MAIN_PHOTOS[f.id] ? undefined : `radial-gradient(circle at 30% 25%, ${bg[0]}, ${bg[1]})` }}>
+                  {MAIN_PHOTOS[f.id] ? <img src={MAIN_PHOTOS[f.id]} alt={f.n} /> : <FoodIcon food={f} size={54} />}
+                </div>
+                <div>
+                  <div className="rx-hero-n">{f.n}</div>
+                  <div className="rx-hero-s">Как прошла проба?</div>
+                </div>
+              </div>
 
               <div className="rx-label">Впечатление малыша</div>
               <div className="rx-chips">
@@ -162,10 +173,10 @@ export function ProductSheet({ food, onClose }: { food: Food; onClose: () => voi
                 ))}
               </div>
 
-              <div className="rx-label">Заметка для себя</div>
-              <textarea className="rx-note" placeholder="Сколько съел, как реагировал, понравилось ли…" value={note} onChange={(e) => setNote(e.target.value)} rows={2} />
+              <div className="rx-label">Заметка для себя <span className="rx-opt-tag">необязательно</span></div>
+              <textarea className="rx-note" placeholder="Сколько съел, как реагировал, понравилось ли…" value={note} onChange={(e) => setNote(e.target.value)} rows={3} />
 
-              <div className="rx-label">Фото момента</div>
+              <div className="rx-label">Фото момента <span className="rx-opt-tag">необязательно</span></div>
               <input ref={fileRef} type="file" accept="image/*" capture="environment" style={{ display: 'none' }} onChange={onPhoto} />
               {photo ? (
                 <div className="rx-photo-wrap">
@@ -173,11 +184,15 @@ export function ProductSheet({ food, onClose }: { food: Food; onClose: () => voi
                   <button className="rx-photo-del" onClick={() => setPhoto(undefined)} aria-label="Удалить фото">✕</button>
                 </div>
               ) : (
-                <button className="rx-photo-add" onClick={() => fileRef.current?.click()}>📷 Добавить фото первой пробы</button>
+                <button className="rx-photo-add" onClick={() => fileRef.current?.click()}>📷 Сфотографировать первую пробу</button>
               )}
 
-              <button className="btn btn-primary" style={{ marginTop: 14 }} disabled={!selRx} onClick={saveEntry}>Сохранить в дневник</button>
-              <div className="rx-hint">Заметка и фото — только для вас. Реакция попадёт в PDF для аллерголога.</div>
+              <div className="rx-hint">Заметка и фото — только для вас. Реакция попадёт в дневник и PDF для аллерголога.</div>
+            </div>
+            <div className="rx-foot">
+              <button className="btn btn-primary" disabled={!selRx} onClick={saveEntry}>
+                {selRx ? 'Сохранить в дневник' : 'Выберите впечатление ↑'}
+              </button>
             </div>
           </div>
         )}
