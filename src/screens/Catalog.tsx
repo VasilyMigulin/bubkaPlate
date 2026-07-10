@@ -11,7 +11,7 @@ import './Catalog.css';
 const isDarkMode = () => window.matchMedia('(prefers-color-scheme: dark)').matches;
 
 const CAT_EMOJI: Record<FoodCategory, string> = {
-  'Овощи': '🥦', 'Фрукты': '🍎', 'Ягоды': '🫐', 'Каши': '🌾', 'Белок': '🥩', 'Молочное': '🥛',
+  'Овощи': '🥦', 'Фрукты': '🍎', 'Ягоды': '🫐', 'Каши': '🌾', 'Белок': '🥩', 'Молочное': '🥛', 'Напитки и добавки': '🥤',
 };
 
 type Filter = 'all' | FoodCategory | 'allergens';

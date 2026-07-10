@@ -7,7 +7,7 @@ export type FoodStatus = 'loved' | 'liked' | 'trying' | 'disliked' | null;
 export type ShapeKey =
   | 'puree' | 'porridge' | 'stick' | 'halfmoon' | 'wedge' | 'floret'
   | 'cubes' | 'dice' | 'grated' | 'spread' | 'flakes' | 'ball'
-  | 'coin' | 'scramble' | 'whole' | 'wait';
+  | 'coin' | 'scramble' | 'whole' | 'wait' | 'drink' | 'oil';
 
 /** Подача: ключ — ступень (6/8/10/12), значение — [форма, текст, необязательная подпись возраста].
  *  Подпись возраста нужна там, где по документу способ доступен раньше/с условием (напр. у яблока все способы с 6 мес). */
@@ -33,7 +33,7 @@ export interface Food {
   serve: ServeMap;
 }
 
-export type FoodCategory = 'Овощи' | 'Фрукты' | 'Ягоды' | 'Каши' | 'Белок' | 'Молочное';
+export type FoodCategory = 'Овощи' | 'Фрукты' | 'Ягоды' | 'Каши' | 'Белок' | 'Молочное' | 'Напитки и добавки';
 
 export interface LogEntry {
   id: string;       // id продукта

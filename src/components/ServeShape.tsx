@@ -7,6 +7,7 @@ const LABEL: Record<ShapeKey, string> = {
   wedge: 'дольки', floret: 'соцветия', cubes: 'кубики', dice: 'мелкие кубики',
   grated: 'тёртое', spread: 'намазка', flakes: 'хлопья', ball: 'тефтельки',
   coin: 'кружочки', scramble: 'крошкой', whole: 'целиком с ручкой', wait: 'рано',
+  drink: 'напиток', oil: 'в блюда',
 };
 
 export function serveLabel(shape: ShapeKey) {
@@ -127,6 +128,23 @@ function renderShape(shape: ShapeKey, light: string, deep: string) {
         <>
           <circle cx="40" cy="40" r="14" fill="none" stroke={deep} strokeWidth="3" opacity="0.6" />
           <path d="M40 40 L40 31 M40 40 L47 43" stroke={deep} strokeWidth="3" strokeLinecap="round" opacity="0.6" />
+        </>
+      );
+    case 'drink':
+      return (
+        <>
+          <path d="M31 28 h18 l-2 26 a2 2 0 0 1 -2 2 h-10 a2 2 0 0 1 -2 -2 z" fill="none" stroke={deep} strokeWidth="2.5" />
+          <path d="M33 40 h14 l-1.4 14 a2 2 0 0 1 -2 2 h-7.2 a2 2 0 0 1 -2 -2 z" fill={light} opacity="0.75" />
+          <ellipse cx="40" cy="28" rx="9" ry="2.5" fill={deep} opacity="0.4" />
+        </>
+      );
+    case 'oil':
+      return (
+        <>
+          <path d="M40 26 C36 34 33 38 33 44 a7 7 0 0 0 14 0 c0 -6 -3 -10 -7 -18z" fill={deep} />
+          <path d="M40 26 C36 34 33 38 33 44 a7 7 0 0 0 14 0 c0 -6 -3 -10 -7 -18z" fill={`url(#oil-${deep.slice(1)})`} />
+          <ellipse cx="37" cy="42" rx="2.5" ry="4" fill="#fff" opacity="0.35" />
+          <defs><radialGradient id={`oil-${deep.slice(1)}`} cx="0.4" cy="0.5" r="0.7"><stop offset="0" stopColor={light} /><stop offset="1" stopColor={deep} /></radialGradient></defs>
         </>
       );
     default:
