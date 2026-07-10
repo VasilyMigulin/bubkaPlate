@@ -11,7 +11,7 @@ interface Store {
   toast: { icon: string; title: string; sub?: string } | null;
   ageMonths: number | null;      // возраст ребёнка в месяцах (или null без профиля)
   setProfile: (p: Profile) => void;
-  logFood: (id: string, rx: Reaction) => void;
+  logFood: (id: string, rx: Reaction, note?: string, photo?: string) => void;
   startAllergen: (id: string) => void;
   markAllergenDay: (id: string) => void;
   toggleReadiness: (key: string) => void;
@@ -79,8 +79,8 @@ export function StoreProvider({ children }: { children: ReactNode }) {
 
   const setProfile = useCallback((p: Profile) => setProfileState(p), []);
 
-  const logFood = useCallback((id: string, rx: Reaction) => {
-    setLog((l) => [{ id, date: 'сегодня', rx }, ...l]);
+  const logFood = useCallback((id: string, rx: Reaction, note?: string, photo?: string) => {
+    setLog((l) => [{ id, date: 'сегодня', rx, note: note?.trim() || undefined, photo, ts: Date.now() }, ...l]);
     setIntroduced((s) => new Set(s).add(id));
     setWindows((ws) => ws.map((w) => {
       if (w.id !== id) return w;

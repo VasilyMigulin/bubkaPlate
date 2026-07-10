@@ -141,10 +141,18 @@ export function MyPlate({ goCatalog }: { goCatalog: () => void }) {
         const f = FOODS.find((x) => x.id === l.id);
         const b = RX_BADGE[l.rx];
         return (
-          <div key={i} className="fl-row">
-            <div className="fl-e">{f?.e ?? '🥣'}</div>
-            <div className="grow"><div className="fl-n">{f?.n ?? l.id}</div><div className="fl-d">{l.date}</div></div>
-            <span className={`rx ${b.cls}`}>{b.label}</span>
+          <div key={i} className="fl-card">
+            <div className="fl-row">
+              <div className="fl-e">{f?.e ?? '🥣'}</div>
+              <div className="grow"><div className="fl-n">{f?.n ?? l.id}</div><div className="fl-d">{l.date}</div></div>
+              <span className={`rx ${b.cls}`}>{b.label}</span>
+            </div>
+            {(l.note || l.photo) && (
+              <div className="fl-extra">
+                {l.photo && <img className="fl-photo" src={l.photo} alt="момент" />}
+                {l.note && <div className="fl-note">{l.note}</div>}
+              </div>
+            )}
           </div>
         );
       })}

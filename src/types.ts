@@ -36,9 +36,12 @@ export interface Food {
 export type FoodCategory = 'Овощи' | 'Фрукты' | 'Ягоды' | 'Каши' | 'Белок' | 'Молочное';
 
 export interface LogEntry {
-  id: string;   // id продукта
-  date: string; // человекочитаемая дата
+  id: string;       // id продукта
+  date: string;     // человекочитаемая дата
   rx: Reaction;
+  note?: string;    // заметка мамы для себя
+  photo?: string;   // фото момента (сжатый data URL)
+  ts?: number;      // метка времени для группировки по месяцам («фильм месяца»)
 }
 
 export interface AllergenWindow {

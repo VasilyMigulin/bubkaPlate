@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import type { Food, Reaction } from '../types';
 import { CHOOSE, FOODS, RELATED } from '../data/foods';
 import { MAIN_PHOTOS } from '../data/mainPhotos';
@@ -11,17 +11,39 @@ import './ProductSheet.css';
 const AGE_LABEL: Record<string, string> = { '6': '6–7 мес', '8': '8–9 мес', '10': '10–11 мес', '12': '12+ мес' };
 
 const RX_OPTS: { rx: Reaction; e: string; label: string }[] = [
-  { rx: 'ok', e: '💚', label: 'Всё хорошо — реакции нет' },
-  { rx: 'wait', e: '👀', label: 'Пока наблюдаю' },
-  { rx: 'skin', e: '🌡', label: 'Кожа: сыпь, покраснение' },
-  { rx: 'tummy', e: '💩', label: 'Живот: стул, газики' },
+  { rx: 'ok', e: '💚', label: 'Всё хорошо' },
+  { rx: 'wait', e: '👀', label: 'Наблюдаю' },
+  { rx: 'skin', e: '🌡', label: 'Кожа' },
+  { rx: 'tummy', e: '💩', label: 'Живот' },
 ];
 
 const isDark = () => window.matchMedia('(prefers-color-scheme: dark)').matches;
 
+// Сжатие фото момента перед сохранением в localStorage.
+function compressImage(file: File, max = 380, q = 0.72): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.onload = () => {
+      const scale = Math.min(1, max / Math.max(img.width, img.height));
+      const canvas = document.createElement('canvas');
+      canvas.width = Math.round(img.width * scale);
+      canvas.height = Math.round(img.height * scale);
+      canvas.getContext('2d')!.drawImage(img, 0, 0, canvas.width, canvas.height);
+      URL.revokeObjectURL(img.src);
+      resolve(canvas.toDataURL('image/jpeg', q));
+    };
+    img.onerror = reject;
+    img.src = URL.createObjectURL(file);
+  });
+}
+
 export function ProductSheet({ food, onClose }: { food: Food; onClose: () => void }) {
   const { logFood, startAllergen, showToast, ageMonths } = useStore();
   const [rxOpen, setRxOpen] = useState(false);
+  const [selRx, setSelRx] = useState<Reaction | null>(null);
+  const [note, setNote] = useState('');
+  const [photo, setPhoto] = useState<string | undefined>();
+  const fileRef = useRef<HTMLInputElement>(null);
   const [related, setRelated] = useState<Food>(food);
   const f = related;
   const bg = isDark() ? f.dbg : f.bg;
@@ -39,11 +61,19 @@ export function ProductSheet({ food, onClose }: { food: Food; onClose: () => voi
 
   const openRelated = (r: Food) => { setRelated(r); document.querySelector('.prod-sheet')?.scrollTo({ top: 0 }); };
 
-  const pickReaction = (rx: Reaction) => {
-    logFood(f.id, rx);
+  const openRx = () => { setSelRx(null); setNote(''); setPhoto(undefined); setRxOpen(true); };
+
+  const onPhoto = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) setPhoto(await compressImage(file));
+  };
+
+  const saveEntry = () => {
+    if (!selRx) return;
+    logFood(f.id, selRx, note, photo);
     setRxOpen(false);
-    if (rx === 'skin' || rx === 'tummy') showToast('👀', 'Реакция записана', 'Отметили — покажите аллергологу');
-    else showToast('✓', 'Записано в дневник', `${f.n} · ${rx === 'ok' ? 'без реакции' : 'наблюдаем'}`);
+    if (selRx === 'skin' || selRx === 'tummy') showToast('👀', 'Реакция записана', 'Отметили — покажите аллергологу');
+    else showToast('✓', 'Записано в дневник', `${f.n}${photo ? ' · с фото 📷' : ''}`);
     onClose();
   };
 
@@ -109,7 +139,7 @@ export function ProductSheet({ food, onClose }: { food: Food; onClose: () => voi
             </>
           )}
 
-          <button className="btn btn-primary" style={{ marginTop: 12 }} onClick={() => setRxOpen(true)}>✓ Дали сегодня — в дневник</button>
+          <button className="btn btn-primary" style={{ marginTop: 12 }} onClick={openRx}>✓ Дали сегодня — в дневник</button>
           {canAllergen && (
             <button className="btn btn-soft" style={{ marginTop: 8 }} onClick={() => { startAllergen(f.id); showToast('🗓', `Ввод начат: ${f.n}`, 'Давайте утром 3 дня подряд'); onClose(); }}>
               🗓 Начать ввод по правилу 3 дней
@@ -121,13 +151,33 @@ export function ProductSheet({ food, onClose }: { food: Food; onClose: () => voi
           <div className="rx-scrim" onClick={() => setRxOpen(false)}>
             <div className="rx-sheet" onClick={(e) => e.stopPropagation()}>
               <div className="grab" />
-              <h3>{f.n}: как малыш перенёс?</h3>
-              {RX_OPTS.map((o) => (
-                <button key={o.rx} className="rx-opt" onClick={() => pickReaction(o.rx)}>
-                  <span className="rxe">{o.e}</span>{o.label}
-                </button>
-              ))}
-              <div className="rx-hint">Сохранится в дневник и в PDF для аллерголога.</div>
+              <h3>{f.n}: как прошло?</h3>
+
+              <div className="rx-label">Впечатление малыша</div>
+              <div className="rx-chips">
+                {RX_OPTS.map((o) => (
+                  <button key={o.rx} className={`rx-chip ${selRx === o.rx ? 'on' : ''}`} onClick={() => setSelRx(o.rx)}>
+                    <span className="rxe">{o.e}</span>{o.label}
+                  </button>
+                ))}
+              </div>
+
+              <div className="rx-label">Заметка для себя</div>
+              <textarea className="rx-note" placeholder="Сколько съел, как реагировал, понравилось ли…" value={note} onChange={(e) => setNote(e.target.value)} rows={2} />
+
+              <div className="rx-label">Фото момента</div>
+              <input ref={fileRef} type="file" accept="image/*" capture="environment" style={{ display: 'none' }} onChange={onPhoto} />
+              {photo ? (
+                <div className="rx-photo-wrap">
+                  <img className="rx-photo" src={photo} alt="момент" />
+                  <button className="rx-photo-del" onClick={() => setPhoto(undefined)} aria-label="Удалить фото">✕</button>
+                </div>
+              ) : (
+                <button className="rx-photo-add" onClick={() => fileRef.current?.click()}>📷 Добавить фото первой пробы</button>
+              )}
+
+              <button className="btn btn-primary" style={{ marginTop: 14 }} disabled={!selRx} onClick={saveEntry}>Сохранить в дневник</button>
+              <div className="rx-hint">Заметка и фото — только для вас. Реакция попадёт в PDF для аллерголога.</div>
             </div>
           </div>
         )}

@@ -51,7 +51,20 @@
   box-shadow:var(--shadow-lg); animation:slideup .34s cubic-bezier(.22,.9,.3,1) both; }
 .rx-sheet h3 { font-size:16px; font-weight:700; margin-bottom:14px; }
 .grab { width:38px; height:5px; border-radius:99px; background:var(--hairline); margin:4px auto 14px; }
-.rx-opt { display:flex; align-items:center; gap:12px; width:100%; background:var(--elev); border:none; font-size:14.5px; font-weight:600;
-  color:var(--text); padding:13px 15px; border-radius:14px; margin-bottom:9px; text-align:left; }
-.rxe { font-size:20px; }
-.rx-hint { text-align:center; font-size:12px; color:var(--text2); margin-top:6px; }
+.rxe { font-size:18px; }
+.rx-hint { text-align:center; font-size:12px; color:var(--text2); margin-top:10px; line-height:1.4; }
+.rx-label { font-size:11px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:var(--text2); margin:12px 2px 8px; }
+.rx-chips { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+.rx-chip { display:flex; align-items:center; gap:8px; background:var(--elev); border:1.5px solid transparent; font-family:inherit;
+  font-size:13.5px; font-weight:600; color:var(--text); padding:12px 14px; border-radius:14px; }
+.rx-chip.on { border-color:var(--accent); background:var(--accent-soft); color:var(--accent); }
+.rx-note { width:100%; border:1.5px solid var(--hairline); background:var(--bg); border-radius:14px; padding:12px 14px;
+  font-family:inherit; font-size:14px; color:var(--text); resize:none; outline:none; }
+.rx-note:focus { border-color:var(--accent); }
+.rx-note::placeholder { color:var(--text2); }
+.rx-photo-add { width:100%; background:var(--elev); border:1.5px dashed var(--hairline); font-family:inherit; font-size:14px;
+  font-weight:600; color:var(--text2); padding:14px; border-radius:14px; }
+.rx-photo-wrap { position:relative; width:100%; height:160px; border-radius:14px; overflow:hidden; }
+.rx-photo { width:100%; height:100%; object-fit:cover; }
+.rx-photo-del { position:absolute; top:8px; right:8px; width:30px; height:30px; border-radius:50%; border:none;
+  background:rgba(0,0,0,.5); color:#fff; font-size:15px; }
