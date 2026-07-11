@@ -5,9 +5,10 @@
 
 .prod-sheet {
   width:100%; max-width:440px; height:100dvh; background:var(--bg); position:relative;
-  display:flex; flex-direction:column; overflow-y:auto; animation:slidein .32s cubic-bezier(.22,.9,.3,1) both;
+  display:flex; flex-direction:column; overflow-y:auto; animation:pushin .3s cubic-bezier(.3,.7,.3,1) both;
+  box-shadow:-8px 0 24px rgba(0,0,0,.12);
 }
-@keyframes slidein { from { transform:translateX(24px); opacity:0; } to { transform:none; opacity:1; } }
+@keyframes pushin { from { transform:translateX(100%); } to { transform:none; } }
 .prod-sheet::-webkit-scrollbar { display:none; }
 @keyframes slideup { from { transform:translateY(100%); } to { transform:none; } }
 
