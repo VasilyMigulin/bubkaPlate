@@ -1,13 +1,13 @@
 .sheet-scrim {
-  position:fixed; inset:0; z-index:40; background:rgba(20,16,12,.4);
-  display:flex; justify-content:center; align-items:flex-start; animation:fade .2s both;
+  position:fixed; inset:0; z-index:40; background:var(--page);
+  display:flex; justify-content:center; align-items:flex-start;
 }
-@keyframes fade { from { opacity:0; } to { opacity:1; } }
 
 .prod-sheet {
-  width:100%; max-width:440px; max-height:100dvh; background:var(--bg); position:relative;
-  display:flex; flex-direction:column; overflow-y:auto; animation:slideup .38s cubic-bezier(.22,.9,.3,1) both;
+  width:100%; max-width:440px; height:100dvh; background:var(--bg); position:relative;
+  display:flex; flex-direction:column; overflow-y:auto; animation:slidein .32s cubic-bezier(.22,.9,.3,1) both;
 }
+@keyframes slidein { from { transform:translateX(24px); opacity:0; } to { transform:none; opacity:1; } }
 .prod-sheet::-webkit-scrollbar { display:none; }
 @keyframes slideup { from { transform:translateY(100%); } to { transform:none; } }
 

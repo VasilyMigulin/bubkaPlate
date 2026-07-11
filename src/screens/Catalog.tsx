@@ -32,23 +32,12 @@ export function Catalog() {
 
   const query = q.toLowerCase().trim();
 
-  // При поиске — плоский список по алфавиту. Иначе — по фильтру.
-  const searchResults = useMemo(
-    () => (query ? FOODS.filter((f) => f.n.toLowerCase().includes(query)).sort(byName) : []),
-    [query],
-  );
-
-  // Секции для отображения без поиска: [заголовок, эмодзи, продукты по алфавиту]
-  const sections = useMemo<{ title: string; emoji: string; note?: string; foods: Food[] }[]>(() => {
-    if (query) return [];
-    if (filter === 'allergens') {
-      const foods = FOODS.filter((f) => f.allergen).sort(byName);
-      return [{ title: 'Аллергены', emoji: '⚠️', note: 'Вводить до года по правилу 3 дней: утром, малой дозой, 3 дня подряд. Собраны из всех групп.', foods }];
-    }
-    const cats = filter === 'all' ? CATEGORIES : [filter];
-    return cats
-      .map((c) => ({ title: c, emoji: CAT_EMOJI[c], foods: FOODS.filter((f) => f.cat === c).sort(byName) }))
-      .filter((s) => s.foods.length > 0);
+  // Единый плоский список по алфавиту — по поиску или по выбранному фильтру.
+  const listed = useMemo(() => {
+    if (query) return FOODS.filter((f) => f.n.toLowerCase().includes(query)).sort(byName);
+    if (filter === 'all') return [...FOODS].sort(byName);
+    if (filter === 'allergens') return FOODS.filter((f) => f.allergen).sort(byName);
+    return FOODS.filter((f) => f.cat === filter).sort(byName);
   }, [query, filter]);
 
   const renderCard = (f: Food) => {
@@ -88,19 +77,20 @@ export function Catalog() {
         <button className={`chip chip-warn ${filter === 'allergens' ? 'on' : ''}`} onClick={() => setFilter('allergens')}>⚠️ Аллергены</button>
       </div>
 
-      {query ? (
-        <div className="food-grid">{searchResults.map(renderCard)}</div>
-      ) : (
-        sections.map((s) => (
-          <div key={s.title}>
-            <div className="cat-head"><span className="cat-emoji">{s.emoji}</span>{s.title}<span className="cat-count">{s.foods.length}</span></div>
-            {s.note && <div className="note" style={{ marginBottom: 12 }}><span className="ne">🗓</span><span>{s.note}</span></div>}
-            <div className="food-grid">{s.foods.map(renderCard)}</div>
-          </div>
-        ))
+      {!query && filter !== 'all' && (
+        <div className="cat-head">
+          <span className="cat-emoji">{filter === 'allergens' ? '⚠️' : CAT_EMOJI[filter]}</span>
+          {filter === 'allergens' ? 'Аллергены' : filter}
+          <span className="cat-count">{listed.length}</span>
+        </div>
+      )}
+      {!query && filter === 'allergens' && (
+        <div className="note" style={{ marginBottom: 12 }}><span className="ne">🗓</span><span>Вводить до года по правилу 3 дней: утром, малой дозой, 3 дня подряд. Собраны из всех групп.</span></div>
       )}
 
-      {query && searchResults.length === 0 && <div className="sub" style={{ textAlign: 'center', padding: 20 }}>Ничего не нашли — попробуйте другой запрос.</div>}
+      <div className="food-grid">{listed.map(renderCard)}</div>
+
+      {listed.length === 0 && <div className="sub" style={{ textAlign: 'center', padding: 20 }}>Ничего не нашли — попробуйте другой запрос.</div>}
 
       {open && <ProductSheet food={open} onClose={() => setOpen(null)} />}
     </>
