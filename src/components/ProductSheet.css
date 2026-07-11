@@ -1,11 +1,11 @@
 .sheet-scrim {
   position:fixed; inset:0; z-index:40; background:rgba(20,16,12,.4);
-  display:flex; justify-content:center; animation:fade .2s both;
+  display:flex; justify-content:center; align-items:flex-start; animation:fade .2s both;
 }
 @keyframes fade { from { opacity:0; } to { opacity:1; } }
 
 .prod-sheet {
-  width:100%; max-width:440px; background:var(--bg); position:relative;
+  width:100%; max-width:440px; max-height:100dvh; background:var(--bg); position:relative;
   display:flex; flex-direction:column; overflow-y:auto; animation:slideup .38s cubic-bezier(.22,.9,.3,1) both;
 }
 .prod-sheet::-webkit-scrollbar { display:none; }
@@ -47,8 +47,8 @@
 .related-e { font-size:16px; }
 
 /* Полноэкранная форма записи в дневник */
-.rx-screen { position:absolute; inset:0; z-index:42; background:var(--bg); display:flex; flex-direction:column;
-  animation:slideup .34s cubic-bezier(.22,.9,.3,1) both; }
+.rx-screen { position:fixed; inset:0; height:100dvh; z-index:44; background:var(--bg); display:flex; flex-direction:column;
+  max-width:440px; margin:0 auto; animation:slideup .34s cubic-bezier(.22,.9,.3,1) both; }
 .rx-top { display:flex; align-items:center; gap:6px; padding:14px 12px 10px; border-bottom:1px solid var(--hairline); }
 .rx-back { width:38px; height:38px; border-radius:50%; border:none; background:var(--elev); color:var(--text); font-size:20px; flex:none; }
 .rx-top-title { font-size:16px; font-weight:700; }
