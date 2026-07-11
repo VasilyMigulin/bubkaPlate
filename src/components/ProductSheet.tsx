@@ -1,4 +1,5 @@
 import { useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import type { Food, Reaction } from '../types';
 import { CHOOSE, FOODS, RELATED } from '../data/foods';
 import { MAIN_PHOTOS } from '../data/mainPhotos';
@@ -8,7 +9,7 @@ import { FoodIcon } from './FoodIcon';
 import { ServeShape, serveLabel } from './ServeShape';
 import './ProductSheet.css';
 
-const AGE_LABEL: Record<string, string> = { '6': '6–7 мес', '8': '8–9 мес', '10': '10–11 мес', '12': '12+ мес' };
+const AGE_LABEL: Record<string, string> = { '6': '6–7 мес', '8': '8–9 мес', '10': '10–11 мес', '12': '12+ мес', '18': '18+ мес' };
 
 const RX_OPTS: { rx: Reaction; e: string; label: string }[] = [
   { rx: 'ok', e: '💚', label: 'Всё хорошо' },
@@ -77,7 +78,7 @@ export function ProductSheet({ food, onClose }: { food: Food; onClose: () => voi
     onClose();
   };
 
-  return (
+  return createPortal(
     <div className="product-view">
         <button className="ps-back" onClick={onClose} aria-label="Назад">‹</button>
         <div className="ps-hero" style={{ background: MAIN_PHOTOS[f.id] ? undefined : `radial-gradient(circle at 30% 25%, ${bg[0]}, ${bg[1]})` }}>
@@ -146,7 +147,7 @@ export function ProductSheet({ food, onClose }: { food: Food; onClose: () => voi
           )}
         </div>
 
-        {rxOpen && (
+        {rxOpen && createPortal(
           <div className="rx-screen">
             <div className="rx-top">
               <button className="rx-back" onClick={() => setRxOpen(false)} aria-label="Закрыть">‹</button>
@@ -193,8 +194,10 @@ export function ProductSheet({ food, onClose }: { food: Food; onClose: () => voi
                 {selRx ? 'Сохранить в дневник' : 'Выберите впечатление ↑'}
               </button>
             </div>
-          </div>
+          </div>,
+          document.body,
         )}
-    </div>
+    </div>,
+    document.body,
   );
 }
