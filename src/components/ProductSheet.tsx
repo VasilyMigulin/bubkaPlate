@@ -78,8 +78,7 @@ export function ProductSheet({ food, onClose }: { food: Food; onClose: () => voi
   };
 
   return (
-    <div className="sheet-scrim" onClick={onClose}>
-      <div className="prod-sheet" onClick={(e) => e.stopPropagation()}>
+    <div className="product-view">
         <button className="ps-back" onClick={onClose} aria-label="Назад">‹</button>
         <div className="ps-hero" style={{ background: MAIN_PHOTOS[f.id] ? undefined : `radial-gradient(circle at 30% 25%, ${bg[0]}, ${bg[1]})` }}>
           {MAIN_PHOTOS[f.id] ? <img className="ps-photo-cover" src={MAIN_PHOTOS[f.id]} alt={f.n} /> : <FoodIcon food={f} size={130} />}
@@ -196,7 +195,6 @@ export function ProductSheet({ food, onClose }: { food: Food; onClose: () => voi
             </div>
           </div>
         )}
-      </div>
     </div>
   );
 }

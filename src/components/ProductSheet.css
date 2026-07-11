@@ -1,13 +1,11 @@
-.sheet-scrim {
-  position:fixed; inset:0; z-index:40; background:var(--page);
-  display:flex; justify-content:center; align-items:flex-start;
+/* Карточка продукта — отдельный полноэкранный экран поверх всего (каталог не виден) */
+.product-view {
+  position:fixed; inset:0; z-index:50; max-width:440px; margin:0 auto;
+  background:var(--bg); display:flex; flex-direction:column; overflow-y:auto;
+  box-shadow:0 0 0 100vw var(--page);
+  animation:pushin .3s cubic-bezier(.3,.7,.3,1) both;
 }
-
-.prod-sheet {
-  width:100%; max-width:440px; height:100dvh; background:var(--bg); position:relative;
-  display:flex; flex-direction:column; overflow-y:auto; animation:pushin .3s cubic-bezier(.3,.7,.3,1) both;
-  box-shadow:-8px 0 24px rgba(0,0,0,.12);
-}
+.product-view::-webkit-scrollbar { display:none; }
 @keyframes pushin { from { transform:translateX(100%); } to { transform:none; } }
 .prod-sheet::-webkit-scrollbar { display:none; }
 @keyframes slideup { from { transform:translateY(100%); } to { transform:none; } }
