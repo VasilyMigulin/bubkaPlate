@@ -9,7 +9,14 @@ import { FoodIcon } from './FoodIcon';
 import { ServeShape, serveLabel } from './ServeShape';
 import './ProductSheet.css';
 
-const AGE_LABEL: Record<string, string> = { '6': '6–7 мес', '8': '8–9 мес', '10': '10–11 мес', '12': '12+ мес', '18': '18+ мес', '48': 'после 4 лет' };
+const AGE_LABEL: Record<string, string> = {
+  '6': '6–7 мес · берёт кулачком',
+  '8': '8–9 мес · пинцетный захват',
+  '10': '10–11 мес',
+  '12': '12+ мес · жуёт, общий стол',
+  '18': '18+ мес · учится ложкой',
+  '48': 'после 4 лет',
+};
 
 const RX_OPTS: { rx: Reaction; e: string; label: string }[] = [
   { rx: 'ok', e: '💚', label: 'Всё хорошо' },
@@ -116,6 +123,15 @@ export function ProductSheet({ food, onClose }: { food: Food; onClose: () => voi
             <>
               <div className="section-t">Как выбрать</div>
               <div className="note"><span className="ne">🛒</span><span>{choose}</span></div>
+            </>
+          )}
+
+          {f.tips && f.tips.length > 0 && (
+            <>
+              <div className="section-t">Способы подачи</div>
+              <ul className="tips-list">
+                {f.tips.map((t, i) => <li key={i}>{t}</li>)}
+              </ul>
             </>
           )}
 

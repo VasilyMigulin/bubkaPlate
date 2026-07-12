@@ -30,6 +30,7 @@ export interface Food {
   store: string;
   caution: string;      // «когда нельзя»
   choose?: string;      // как выбрать / признак спелости
+  tips?: string[];      // исчерпывающие способы подачи (мять, резать, макать, в блюда)
   serve: ServeMap;
 }
 
