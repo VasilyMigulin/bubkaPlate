@@ -69,7 +69,7 @@ export function ProductSheet({ food, onClose }: { food: Food; onClose: () => voi
   const bg = isDark() ? f.dbg : f.bg;
   const ages = Object.keys(f.serve);
   const canAllergen = f.allergen && f.allergen !== 'глютен';
-  const choose = CHOOSE[f.id];
+  const choose = f.choose ?? CHOOSE[f.id];
   const relatedIds = (RELATED[f.id] || []).map((id) => FOODS.find((x) => x.id === id)).filter(Boolean) as Food[];
   const productRecipes = RECIPES.filter((r) => r.ing.includes(f.n.toLowerCase()));
   // возраст ребёнка → какую ступень подсветить
