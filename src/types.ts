@@ -31,6 +31,7 @@ export interface Food {
   caution: string;      // «когда нельзя»
   choose?: string;      // как выбрать / признак спелости
   tips?: string[];      // исчерпывающие способы подачи (мять, резать, макать, в блюда)
+  warnings?: string[];  // блок «⚠️ Важно» — ключевые предостережения по продукту
   serve: ServeMap;
 }
 

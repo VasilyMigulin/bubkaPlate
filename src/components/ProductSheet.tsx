@@ -6,16 +6,24 @@ import { MAIN_PHOTOS } from '../data/mainPhotos';
 import { SERVE_PHOTOS } from '../data/servePhotos';
 import { useStore } from '../state/store';
 import { FoodIcon } from './FoodIcon';
-import { ServeShape, serveLabel } from './ServeShape';
+import { ServeShape } from './ServeShape';
 import './ProductSheet.css';
 
 const AGE_LABEL: Record<string, string> = {
-  '6': '6–7 мес · берёт кулачком',
-  '8': '8–9 мес · пинцетный захват',
+  '6': '6–7 мес',
+  '8': '8–9 мес',
   '10': '10–11 мес',
-  '12': '12+ мес · жуёт, общий стол',
-  '18': '18+ мес · учится ложкой',
+  '12': '12+ мес',
+  '18': '18+ мес',
   '48': 'после 4 лет',
+};
+
+// Пояснение навыка малыша по возрасту — доступно по тапу на значок ⓘ. Хранится один раз.
+const SKILL_INFO: Record<string, string> = {
+  '6': 'В этом возрасте малыш берёт еду всей ладошкой и грызёт дёснами. Поэтому кусок делают длинным, «с палец» — чтобы торчал из кулачка.',
+  '8': 'Появляется пинцетный захват — малыш берёт мелкие кусочки двумя пальчиками. Поэтому подходят кубики около 1 см.',
+  '12': 'Малыш уверенно жуёт и откусывает — можно кусочки с общего стола.',
+  '18': 'Малыш осваивает ложку и вилку, ест самостоятельно.',
 };
 
 const RX_OPTS: { rx: Reaction; e: string; label: string }[] = [
@@ -51,6 +59,7 @@ export function ProductSheet({ food, onClose }: { food: Food; onClose: () => voi
   const [selRx, setSelRx] = useState<Reaction | null>(null);
   const [note, setNote] = useState('');
   const [photo, setPhoto] = useState<string | undefined>();
+  const [skillInfo, setSkillInfo] = useState<string | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
   const [related, setRelated] = useState<Food>(food);
   const f = related;
@@ -104,14 +113,21 @@ export function ProductSheet({ food, onClose }: { food: Food; onClose: () => voi
               const [shape, text, ageOverride] = f.serve[a];
               const isNow = !ageOverride && a === currentStep;
               const ageText = ageOverride ?? AGE_LABEL[a];
+              const skill = SKILL_INFO[a];
+              const photo = SERVE_PHOTOS[f.id]?.[a];
               return (
-                <div key={a} className={`serve-row ${isNow ? 'now' : ''}`}>
-                  {SERVE_PHOTOS[f.id]?.[a]
-                    ? <img className="serve-photo" src={SERVE_PHOTOS[f.id][a]} alt={`${f.n}, ${ageText}`} loading="lazy" />
-                    : <ServeShape shape={shape} color={bg} size={104} />}
-                  <div className="serve-info">
-                    <div className="serve-age">{ageText}{isNow && <span className="serve-now-tag">сейчас</span>}</div>
-                    <div className="serve-shape-label">{serveLabel(shape)}</div>
+                <div key={a} className={`serve-card ${isNow ? 'now' : ''}`}>
+                  <div className="serve-media">
+                    {photo
+                      ? <img className="serve-photo-lg" src={photo} alt={`${f.n}, ${ageText}`} loading="lazy" />
+                      : <ServeShape shape={shape} color={bg} size={150} />}
+                    {isNow && <span className="serve-now-tag">сейчас</span>}
+                  </div>
+                  <div className="serve-cap">
+                    <div className="serve-age">
+                      {ageText}
+                      {skill && <button className="skill-i" onClick={() => setSkillInfo(skill)} aria-label="Что это значит">?</button>}
+                    </div>
                     <div className="serve-text">{text}</div>
                   </div>
                 </div>
@@ -131,6 +147,15 @@ export function ProductSheet({ food, onClose }: { food: Food; onClose: () => voi
               <div className="section-t">Способы подачи</div>
               <ul className="tips-list">
                 {f.tips.map((t, i) => <li key={i}>{t}</li>)}
+              </ul>
+            </>
+          )}
+
+          {f.warnings && f.warnings.length > 0 && (
+            <>
+              <div className="section-t">⚠️ Важно</div>
+              <ul className="warn-list">
+                {f.warnings.map((w, i) => <li key={i}>{w}</li>)}
               </ul>
             </>
           )}
@@ -162,6 +187,16 @@ export function ProductSheet({ food, onClose }: { food: Food; onClose: () => voi
             </button>
           )}
         </div>
+
+        {skillInfo && createPortal(
+          <div className="skill-pop-scrim" onClick={() => setSkillInfo(null)}>
+            <div className="skill-pop" onClick={(e) => e.stopPropagation()}>
+              <div className="skill-pop-text">{skillInfo}</div>
+              <button className="btn btn-soft" onClick={() => setSkillInfo(null)}>Понятно</button>
+            </div>
+          </div>,
+          document.body,
+        )}
 
         {rxOpen && createPortal(
           <div className="rx-screen">
