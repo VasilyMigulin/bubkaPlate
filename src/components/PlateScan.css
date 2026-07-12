@@ -1,7 +1,14 @@
+.sheet-scrim {
+  position:fixed; inset:0; z-index:58; background:rgba(20,16,12,.4);
+  display:flex; justify-content:center; animation:fade .2s both;
+}
+@keyframes fade { from { opacity:0; } to { opacity:1; } }
+
 .plate-sheet {
   width:100%; max-width:440px; background:var(--bg); position:relative; display:flex; flex-direction:column;
   overflow-y:auto; animation:slideup .38s cubic-bezier(.22,.9,.3,1) both;
 }
+@keyframes slideup { from { transform:translateY(100%); } to { transform:none; } }
 .plate-sheet::-webkit-scrollbar { display:none; }
 .plate-head { padding:64px 20px 4px; text-align:center; }
 .plate-emoji { font-size:40px; }

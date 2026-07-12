@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { createPortal } from 'react-dom';
 import './PlateScan.css';
 
 type Phase = 'start' | 'scanning' | 'result';
@@ -18,7 +19,7 @@ export function PlateScan({ onClose, goSafety }: { onClose: () => void; goSafety
     setTimeout(() => setPhase('result'), 1200);
   };
 
-  return (
+  return createPortal(
     <div className="sheet-scrim" onClick={onClose}>
       <div className="plate-sheet" onClick={(e) => e.stopPropagation()}>
         <button className="ps-back" onClick={onClose} aria-label="Назад">‹</button>
@@ -61,6 +62,7 @@ export function PlateScan({ onClose, goSafety }: { onClose: () => void; goSafety
           </div>
         )}
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 }

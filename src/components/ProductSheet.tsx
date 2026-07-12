@@ -4,8 +4,10 @@ import type { Food, Reaction } from '../types';
 import { CHOOSE, FOODS, RELATED } from '../data/foods';
 import { MAIN_PHOTOS } from '../data/mainPhotos';
 import { SERVE_PHOTOS } from '../data/servePhotos';
+import { RECIPES, type Recipe } from '../data/recipes';
 import { useStore } from '../state/store';
 import { FoodIcon } from './FoodIcon';
+import { RecipeSheet } from './RecipeSheet';
 import { ServeShape } from './ServeShape';
 import './ProductSheet.css';
 
@@ -60,6 +62,7 @@ export function ProductSheet({ food, onClose }: { food: Food; onClose: () => voi
   const [note, setNote] = useState('');
   const [photo, setPhoto] = useState<string | undefined>();
   const [skillInfo, setSkillInfo] = useState<string | null>(null);
+  const [recipeOpen, setRecipeOpen] = useState<Recipe | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
   const [related, setRelated] = useState<Food>(food);
   const f = related;
@@ -68,6 +71,7 @@ export function ProductSheet({ food, onClose }: { food: Food; onClose: () => voi
   const canAllergen = f.allergen && f.allergen !== 'глютен';
   const choose = CHOOSE[f.id];
   const relatedIds = (RELATED[f.id] || []).map((id) => FOODS.find((x) => x.id === id)).filter(Boolean) as Food[];
+  const productRecipes = RECIPES.filter((r) => r.ing.includes(f.n.toLowerCase()));
   // возраст ребёнка → какую ступень подсветить
   const currentStep = (() => {
     const keys = ages.map(Number).sort((a, b) => a - b);
@@ -165,6 +169,21 @@ export function ProductSheet({ food, onClose }: { food: Food; onClose: () => voi
           <div className="note alert"><span className="ne">⚠️</span><span><b>Когда нельзя:</b> {f.caution}</span></div>
           <div className="note"><span className="ne">🔁</span><span><b>Если не понравилось:</b> предлагайте снова через 3–4 дня, до 10–15 раз, без давления.</span></div>
 
+          {productRecipes.length > 0 && (
+            <>
+              <div className="section-t">🍲 Приготовить с этим продуктом</div>
+              {productRecipes.map((r) => (
+                <button key={r.n} className="recipe" onClick={() => setRecipeOpen(r)}>
+                  <div className="rp" style={{ background: r.bg }}>{r.e}</div>
+                  <div className="grow">
+                    <div className="rn">{r.n}</div>
+                    <div className="rm"><span className="tag green">{r.age} мес</span><span className="tag">{r.time}</span></div>
+                  </div>
+                </button>
+              ))}
+            </>
+          )}
+
           {relatedIds.length > 0 && (
             <>
               <div className="section-t">Смотрите также</div>
@@ -185,6 +204,8 @@ export function ProductSheet({ food, onClose }: { food: Food; onClose: () => voi
             </button>
           )}
         </div>
+
+        {recipeOpen && <RecipeSheet recipe={recipeOpen} onClose={() => setRecipeOpen(null)} />}
 
         {skillInfo && createPortal(
           <div className="skill-pop-scrim" onClick={() => setSkillInfo(null)}>

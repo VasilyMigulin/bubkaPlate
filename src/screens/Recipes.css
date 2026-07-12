@@ -7,8 +7,9 @@
 .rn { font-size:14.5px; font-weight:650; color:var(--text); }
 .rm { display:flex; gap:6px; margin-top:6px; flex-wrap:wrap; }
 
-.recipe-sheet { width:100%; max-width:440px; background:var(--bg); position:relative; overflow-y:auto;
-  animation:slideup .38s cubic-bezier(.22,.9,.3,1) both; }
+.recipe-view { position:fixed; inset:0; z-index:55; max-width:440px; margin:0 auto; background:var(--bg);
+  overflow-y:auto; box-shadow:0 0 0 100vw var(--page); animation:pushin .3s cubic-bezier(.3,.7,.3,1) both; }
+.recipe-view::-webkit-scrollbar { display:none; }
 .recipe-hero { height:170px; display:flex; align-items:center; justify-content:center; font-size:76px; flex:none; }
 .recipe-body { padding:20px 18px calc(30px + env(safe-area-inset-bottom)); }
 .recipe-body h2 { font-size:24px; font-weight:750; letter-spacing:-.02em; }
