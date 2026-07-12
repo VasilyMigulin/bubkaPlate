@@ -164,9 +164,9 @@ export function ProductSheet({ food, onClose }: { food: Food; onClose: () => voi
 
           <div className="section-t">О продукте</div>
           <div className="note"><span className="ne">💚</span><span><b>Польза:</b> {f.benefit}</span></div>
-          <div className="note"><span className="ne">👩‍🍳</span><span><b>Как приготовить:</b> {f.cook}</span></div>
+          {!f.tips?.length && <div className="note"><span className="ne">👩‍🍳</span><span><b>Как приготовить:</b> {f.cook}</span></div>}
           <div className="note"><span className="ne">🧊</span><span><b>Как хранить:</b> {f.store}</span></div>
-          <div className="note alert"><span className="ne">⚠️</span><span><b>Когда нельзя:</b> {f.caution}</span></div>
+          {!f.warnings?.length && <div className="note alert"><span className="ne">⚠️</span><span><b>Когда нельзя:</b> {f.caution}</span></div>}
           <div className="note"><span className="ne">🔁</span><span><b>Если не понравилось:</b> предлагайте снова через 3–4 дня, до 10–15 раз, без давления.</span></div>
 
           {productRecipes.length > 0 && (
