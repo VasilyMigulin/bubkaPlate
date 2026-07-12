@@ -107,7 +107,7 @@ export function ProductSheet({ food, onClose }: { food: Food; onClose: () => voi
         <div className="ps-body">
           <h2>{f.n}</h2>
           <span className="pill-note">
-            👶 с {f.fromMonth} мес · аллерген: {f.allergen || 'нет'} · подавиться: {f.choke}
+            👶 с {f.fromMonth} мес · частый аллерген: {f.allergen || 'нет'} · риск удушья: {f.choke}
             {f.iron && ' · 🥩 железо'}
           </span>
 
