@@ -9,7 +9,7 @@ import { FoodIcon } from './FoodIcon';
 import { ServeShape, serveLabel } from './ServeShape';
 import './ProductSheet.css';
 
-const AGE_LABEL: Record<string, string> = { '6': '6–7 мес', '8': '8–9 мес', '10': '10–11 мес', '12': '12+ мес', '18': '18+ мес' };
+const AGE_LABEL: Record<string, string> = { '6': '6–7 мес', '8': '8–9 мес', '10': '10–11 мес', '12': '12+ мес', '18': '18+ мес', '48': 'после 4 лет' };
 
 const RX_OPTS: { rx: Reaction; e: string; label: string }[] = [
   { rx: 'ok', e: '💚', label: 'Всё хорошо' },
