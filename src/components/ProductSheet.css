@@ -56,15 +56,19 @@
 @keyframes popIn { from { opacity:0; transform:scale(.9); } to { opacity:1; transform:none; } }
 .skill-pop-text { font-size:14px; line-height:1.5; color:var(--text); margin-bottom:14px; }
 
-/* способы подачи */
-.tips-list { list-style:none; display:flex; flex-direction:column; gap:8px; }
-.tips-list li { position:relative; padding:11px 14px 11px 36px; background:var(--card); border-radius:14px; box-shadow:var(--shadow);
-  font-size:13.5px; line-height:1.45; color:var(--text); }
-.tips-list li::before { content:'🍽'; position:absolute; left:12px; top:11px; font-size:14px; }
-.warn-list { list-style:none; display:flex; flex-direction:column; gap:8px; }
-.warn-list li { position:relative; padding:11px 14px 11px 32px; border-radius:14px; font-size:13.5px; line-height:1.45;
-  background:color-mix(in srgb, var(--danger) 9%, var(--card)); color:var(--text); }
-.warn-list li::before { content:'•'; position:absolute; left:14px; top:10px; color:var(--danger); font-weight:700; }
+/* способы подачи — один блок со списком */
+.tips-list { list-style:none; background:var(--card); border-radius:16px; box-shadow:var(--shadow); padding:8px 14px; }
+.tips-list li { position:relative; padding:9px 0 9px 24px; font-size:13.5px; line-height:1.5; color:var(--text);
+  border-bottom:1px solid var(--hairline); }
+.tips-list li:last-child { border-bottom:none; }
+.tips-list li::before { content:'•'; position:absolute; left:6px; top:8px; color:var(--accent); font-weight:700; }
+
+/* важно — один блок со списком */
+.warn-list { list-style:none; background:color-mix(in srgb, var(--danger) 9%, var(--card)); border-radius:16px; padding:8px 14px; }
+.warn-list li { position:relative; padding:9px 0 9px 24px; font-size:13.5px; line-height:1.5; color:var(--text);
+  border-bottom:1px solid color-mix(in srgb, var(--danger) 14%, transparent); }
+.warn-list li:last-child { border-bottom:none; }
+.warn-list li::before { content:'•'; position:absolute; left:6px; top:8px; color:var(--danger); font-weight:700; }
 
 /* смотрите также */
 .related-row { display:flex; flex-wrap:wrap; gap:8px; }
