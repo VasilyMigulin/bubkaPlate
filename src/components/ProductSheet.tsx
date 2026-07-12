@@ -116,17 +116,15 @@ export function ProductSheet({ food, onClose }: { food: Food; onClose: () => voi
               const skill = SKILL_INFO[a];
               const photo = SERVE_PHOTOS[f.id]?.[a];
               return (
-                <div key={a} className={`serve-card ${isNow ? 'now' : ''}`}>
-                  <div className="serve-media">
-                    {photo
-                      ? <img className="serve-photo-lg" src={photo} alt={`${f.n}, ${ageText}`} loading="lazy" />
-                      : <ServeShape shape={shape} color={bg} size={150} />}
-                    {isNow && <span className="serve-now-tag">сейчас</span>}
-                  </div>
-                  <div className="serve-cap">
+                <div key={a} className={`serve-row ${isNow ? 'now' : ''}`}>
+                  {photo
+                    ? <img className="serve-photo" src={photo} alt={`${f.n}, ${ageText}`} loading="lazy" />
+                    : <ServeShape shape={shape} color={bg} size={124} />}
+                  <div className="serve-info">
                     <div className="serve-age">
                       {ageText}
                       {skill && <button className="skill-i" onClick={() => setSkillInfo(skill)} aria-label="Что это значит">?</button>}
+                      {isNow && <span className="serve-now-tag">сейчас</span>}
                     </div>
                     <div className="serve-text">{text}</div>
                   </div>
