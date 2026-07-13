@@ -11,4 +11,8 @@ export const SERVE_PHOTOS: Record<string, Record<string, string>> = {
   grape: { '6': '/serve/grape-6.jpg', '48': '/serve/grape-48.jpg' },
   cherry: { '6': '/serve/cherry-6.jpg', '48': '/serve/cherry-48.jpg' },
   sweetcherry: { '6': '/serve/cherry-6.jpg', '48': '/serve/cherry-48.jpg' },
+  melon: { '6': '/serve/melon-6.jpg', '8': '/serve/melon-8.jpg', '12': '/serve/melon-12.jpg' },
+  watermelon: { '6': '/serve/watermelon-6.jpg', '8': '/serve/watermelon-8.jpg', '12': '/serve/watermelon-12.jpg' },
+  pear: { '6': '/serve/pear-6.jpg', '8': '/serve/pear-8.jpg', '12': '/serve/pear-12.jpg' },
+  mushroom: { '6': '/serve/mushroom-6.jpg', '8': '/serve/mushroom-8.jpg', '12': '/serve/mushroom-12.jpg' },
 };
