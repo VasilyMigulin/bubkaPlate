@@ -126,7 +126,7 @@ export function ProductSheet({ food, onClose }: { food: Food; onClose: () => voi
               <div className="fact-cap">Риск удушья</div>
               <div className="fact-val">
                 <span className={`risk-dot ${f.choke.startsWith('низк') ? 'ok' : f.choke.startsWith('средн') ? 'mid' : 'high'}`} />
-                {f.choke.split(' ')[0]}
+                {f.choke.replace(/\s*\(.*\)/, '')}
               </div>
               {f.choke.includes('(') && <div className="fact-sub">{f.choke.slice(f.choke.indexOf('(') + 1, -1)}</div>}
             </div>
