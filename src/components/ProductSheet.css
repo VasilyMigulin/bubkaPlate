@@ -24,6 +24,8 @@
 
 .pill-note { display:inline-flex; flex-wrap:wrap; gap:4px; align-items:center; background:var(--accent-soft); color:var(--accent);
   font-size:12px; font-weight:650; border-radius:999px; padding:7px 13px; margin-top:10px; line-height:1.4; }
+.intro-pill { display:inline-flex; align-items:center; gap:6px; margin:8px 0 0 6px; font-size:12px; font-weight:700;
+  color:#C77B2E; background:color-mix(in srgb, #E8963C 15%, transparent); border-radius:999px; padding:7px 13px; cursor:pointer; }
 
 /* подача — все возрасты в ряд, иллюстрация крупная (главное, ради чего приходят) */
 /* подача — горизонтальные карточки, фото слева покрупнее */

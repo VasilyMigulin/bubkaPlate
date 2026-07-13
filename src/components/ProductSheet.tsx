@@ -1,7 +1,7 @@
 import { useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import type { Food, Reaction } from '../types';
-import { CHOOSE, FOODS, RELATED } from '../data/foods';
+import { BIG_ALLERGENS, CHOOSE, FOODS, RELATED } from '../data/foods';
 import { MAIN_PHOTOS } from '../data/mainPhotos';
 import { SERVE_PHOTOS } from '../data/servePhotos';
 import { RECIPES, type Recipe } from '../data/recipes';
@@ -110,6 +110,11 @@ export function ProductSheet({ food, onClose }: { food: Food; onClose: () => voi
             👶 с {f.fromMonth} мес · частый аллерген: {f.allergen || 'нет'} · риск удушья: {f.choke}
             {f.iron && ' · 🥩 железо'}
           </span>
+          {f.allergen && BIG_ALLERGENS.has(f.allergen) && (
+            <span className="intro-pill" onClick={() => setSkillInfo('Современная рекомендация: основные аллергены не избегать, а своевременно знакомить с ними малыша — раннее введение снижает риск аллергии. Вводите по правилу 3 дней: утром, с малой дозы.')}>
+              🟠 Важно ввести до года <span className="skill-i" style={{ display: 'inline-flex' }}>?</span>
+            </span>
+          )}
 
           <div className="section-t">Подача по возрасту</div>
           <div className="serve-list">

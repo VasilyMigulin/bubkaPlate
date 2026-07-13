@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { CATEGORIES, FOODS } from '../data/foods';
+import { BIG_ALLERGENS, CATEGORIES, FOODS } from '../data/foods';
 import { MAIN_PHOTOS } from '../data/mainPhotos';
 import { FoodIcon } from '../components/FoodIcon';
 import { ProductSheet } from '../components/ProductSheet';
@@ -56,7 +56,7 @@ export function Catalog() {
           <div className="food-name">
             {f.n}
             {f.iron && <span className="food-iron">железо</span>}
-            {f.allergen && f.allergen !== 'глютен' && <span className="food-al">аллерген</span>}
+            {f.allergen && BIG_ALLERGENS.has(f.allergen) && <span className="food-intro">ввести до года</span>}
           </div>
           {tooEarly
             ? <div className="food-age"><span className="food-soon">рано · с {f.fromMonth} мес</span></div>
