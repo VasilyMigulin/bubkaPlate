@@ -8,4 +8,7 @@ export const SERVE_PHOTOS: Record<string, Record<string, string>> = {
   pineapple: { '6': '/serve/pineapple-6.jpg', '8': '/serve/pineapple-8.jpg', '12': '/serve/pineapple-12.jpg' },
   orange: { '6': '/serve/orange-6.jpg', '8': '/serve/orange-8.jpg', '12': '/serve/orange-12.jpg' },
   peanut: { '6': '/serve/peanut-paste.jpg', '8': '/serve/peanut-paste.jpg', '12': '/serve/peanut-paste.jpg', '48': '/serve/peanut-whole.jpg' },
+  grape: { '6': '/serve/grape-6.jpg', '48': '/serve/grape-48.jpg' },
+  cherry: { '6': '/serve/cherry-6.jpg', '48': '/serve/cherry-48.jpg' },
+  sweetcherry: { '6': '/serve/cherry-6.jpg', '48': '/serve/cherry-48.jpg' },
 };
