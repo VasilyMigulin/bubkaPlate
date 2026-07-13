@@ -113,14 +113,33 @@ export function ProductSheet({ food, onClose }: { food: Food; onClose: () => voi
         </div>
         <div className="ps-body">
           <h2>{f.n}</h2>
-          <span className="pill-note">
-            👶 с {f.fromMonth} мес · частый аллерген: {f.allergen || 'нет'} · риск удушья: {f.choke}
-            {f.iron && ' · 🥩 железо'}
-          </span>
-          {f.allergen && BIG_ALLERGENS.has(f.allergen) && (
-            <span className="intro-pill" onClick={() => setSkillInfo('Современная рекомендация: основные аллергены не избегать, а своевременно знакомить с ними малыша — раннее введение снижает риск аллергии. Вводите по правилу 3 дней: утром, с малой дозы.')}>
-              🟠 Важно ввести до года <span className="skill-i" style={{ display: 'inline-flex' }}>?</span>
-            </span>
+          <div className="facts">
+            <div className="fact">
+              <div className="fact-cap">Можно с</div>
+              <div className="fact-val">{f.fromMonth} мес</div>
+            </div>
+            <div className="fact">
+              <div className="fact-cap">Частый аллерген</div>
+              <div className="fact-val">{f.allergen ? <span className="fact-warn">{f.allergen}</span> : 'нет'}</div>
+            </div>
+            <div className="fact">
+              <div className="fact-cap">Риск удушья</div>
+              <div className="fact-val">
+                <span className={`risk-dot ${f.choke.startsWith('низк') ? 'ok' : f.choke.startsWith('средн') ? 'mid' : 'high'}`} />
+                {f.choke.split(' ')[0]}
+              </div>
+              {f.choke.includes('(') && <div className="fact-sub">{f.choke.slice(f.choke.indexOf('(') + 1, -1)}</div>}
+            </div>
+          </div>
+          {(f.iron || (f.allergen && BIG_ALLERGENS.has(f.allergen))) && (
+            <div className="badges-row">
+              {f.iron && <span className="badge-iron">🥩 источник железа</span>}
+              {f.allergen && BIG_ALLERGENS.has(f.allergen) && (
+                <span className="intro-pill" onClick={() => setSkillInfo('Современная рекомендация: основные аллергены не избегать, а своевременно знакомить с ними малыша — раннее введение снижает риск аллергии. Вводите по правилу 3 дней: утром, с малой дозы.')}>
+                  🟠 важно ввести до года <span className="skill-i" style={{ display: 'inline-flex' }}>?</span>
+                </span>
+              )}
+            </div>
           )}
 
           <div className="section-t">Подача по возрасту</div>
