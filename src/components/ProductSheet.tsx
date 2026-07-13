@@ -20,12 +20,19 @@ const AGE_LABEL: Record<string, string> = {
   '48': 'после 4 лет',
 };
 
-// Пояснение навыка малыша по возрасту — доступно по тапу на значок ⓘ. Хранится один раз.
+// Пояснение навыка малыша по возрасту — доступно по тапу на значок «?». Хранится один раз.
 const SKILL_INFO: Record<string, string> = {
   '6': 'В этом возрасте малыш берёт еду всей ладошкой и грызёт дёснами. Поэтому кусок делают длинным, «с палец» — чтобы торчал из кулачка.',
   '8': 'Появляется пинцетный захват — малыш берёт мелкие кусочки двумя пальчиками. Поэтому подходят кубики около 1 см.',
   '12': 'Малыш уверенно жуёт и откусывает — можно кусочки с общего стола.',
   '18': 'Малыш осваивает ложку и вилку, ест самостоятельно.',
+};
+
+// Если у ступени своя подпись возраста — пояснение подбирается по ней (а не по внутреннему ключу).
+const SKILL_BY_LABEL: Record<string, string> = {
+  '6–8 мес': '6',
+  '9–12 мес': '8',
+  '12–24 мес': '12',
 };
 
 const RX_OPTS: { rx: Reaction; e: string; label: string }[] = [
@@ -122,7 +129,8 @@ export function ProductSheet({ food, onClose }: { food: Food; onClose: () => voi
               const [shape, text, ageOverride] = f.serve[a];
               const isNow = !ageOverride && a === currentStep;
               const ageText = ageOverride ?? AGE_LABEL[a];
-              const skill = SKILL_INFO[a];
+              const skillKey = ageOverride ? SKILL_BY_LABEL[ageOverride] : a;
+              const skill = skillKey ? SKILL_INFO[skillKey] : undefined;
               const photo = SERVE_PHOTOS[f.id]?.[a];
               return (
                 <div key={a} className={`serve-row ${isNow ? 'now' : ''}`}>
