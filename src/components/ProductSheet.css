@@ -134,3 +134,8 @@
 .serve-toggle button { flex:1; border:none; background:none; font-family:inherit; font-size:13px; font-weight:650;
   color:var(--text2); padding:9px 0; border-radius:999px; transition:all .25s cubic-bezier(.22,.9,.3,1); }
 .serve-toggle button.on { background:var(--card); color:var(--text); box-shadow:var(--shadow); }
+
+/* термин-ссылка (правило 3 дней и др.) */
+.term-link { border:none; background:none; font-family:inherit; font-size:inherit; font-weight:650; color:var(--accent);
+  padding:0; cursor:pointer; text-decoration:underline dotted; text-underline-offset:3px; }
+.skill-pop-text { white-space:pre-line; }

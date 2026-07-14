@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react';
 import { BIG_ALLERGENS, CATEGORIES, FOODS } from '../data/foods';
+import { RULE3_TEXT } from '../data/glossary';
 import { MAIN_PHOTOS } from '../data/mainPhotos';
 import { FoodIcon } from '../components/FoodIcon';
 import { ProductSheet } from '../components/ProductSheet';
@@ -21,6 +22,7 @@ export function Catalog() {
   const [q, setQ] = useState('');
   const [filter, setFilter] = useState<Filter>('all');
   const [open, setOpen] = useState<Food | null>(null);
+  const [ruleOpen, setRuleOpen] = useState(false);
   const { introduced, ageMonths } = useStore();
 
   const query = q.toLowerCase().trim();
@@ -79,7 +81,7 @@ export function Catalog() {
         </div>
       )}
       {!query && filter === 'allergens' && (
-        <div className="note" style={{ marginBottom: 12 }}><span className="ne">🗓</span><span>Вводить до года по правилу 3 дней: утром, малой дозой, 3 дня подряд. Собраны из всех групп.</span></div>
+        <div className="note" style={{ marginBottom: 12 }}><span className="ne">🗓</span><span>Вводить до года по <button className="term-link" onClick={() => setRuleOpen(true)}>правилу 3 дней</button>: утром, малой дозой, 3 дня подряд. Собраны из всех групп.</span></div>
       )}
 
       <div className="food-grid">{listed.map(renderCard)}</div>
@@ -87,6 +89,15 @@ export function Catalog() {
       {listed.length === 0 && <div className="sub" style={{ textAlign: 'center', padding: 20 }}>Ничего не нашли — попробуйте другой запрос.</div>}
 
       {open && <ProductSheet food={open} onClose={() => setOpen(null)} />}
+
+      {ruleOpen && (
+        <div className="skill-pop-scrim" onClick={() => setRuleOpen(false)}>
+          <div className="skill-pop" onClick={(e) => e.stopPropagation()}>
+            <div className="skill-pop-text">{RULE3_TEXT}</div>
+            <button className="btn btn-soft" onClick={() => setRuleOpen(false)}>Понятно</button>
+          </div>
+        </div>
+      )}
     </>
   );
 }

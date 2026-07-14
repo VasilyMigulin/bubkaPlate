@@ -4,6 +4,7 @@ import type { Food, Reaction } from '../types';
 import { BIG_ALLERGENS, CHOOSE, FOODS, RELATED } from '../data/foods';
 import { MAIN_PHOTOS } from '../data/mainPhotos';
 import { SERVE_PHOTOS } from '../data/servePhotos';
+import { RULE3_TEXT } from '../data/glossary';
 import { RECIPES, type Recipe } from '../data/recipes';
 import { useStore } from '../state/store';
 import { FoodIcon } from './FoodIcon';
@@ -38,6 +39,19 @@ const SKILL_BY_LABEL: Record<string, string> = {
   '9–12 мес': '8',
   '12–24 мес': '12',
 };
+
+// Автолинковка терминов: любое упоминание «правила 3 дней» открывает пояснение.
+function TermText({ text, onTerm }: { text: string; onTerm: (t: string) => void }) {
+  const parts = text.split(/(правил[а-яё]*\s+3\s+дней)/i);
+  return (
+    <>
+      {parts.map((p, i) =>
+        /^правил[а-яё]*\s+3\s+дней$/i.test(p)
+          ? <button key={i} className="term-link" onClick={() => onTerm(RULE3_TEXT)}>{p}</button>
+          : p)}
+    </>
+  );
+}
 
 const RX_OPTS: { rx: Reaction; e: string; label: string }[] = [
   { rx: 'ok', e: '💚', label: 'Всё хорошо' },
@@ -188,7 +202,7 @@ export function ProductSheet({ food, onClose }: { food: Food; onClose: () => voi
                       {skill && <button className="skill-i" onClick={() => setSkillInfo(skill)} aria-label="Что это значит">?</button>}
                       {isNow && <span className="serve-now-tag">сейчас</span>}
                     </div>
-                    <div className="serve-text">{text}</div>
+                    <div className="serve-text"><TermText text={text} onTerm={setSkillInfo} /></div>
                   </div>
                 </div>
               );
@@ -206,7 +220,7 @@ export function ProductSheet({ food, onClose }: { food: Food; onClose: () => voi
             <>
               <div className="section-t">Способы подачи</div>
               <ul className="tips-list">
-                {f.tips.map((t, i) => <li key={i}>{t}</li>)}
+                {f.tips.map((t, i) => <li key={i}><TermText text={t} onTerm={setSkillInfo} /></li>)}
               </ul>
             </>
           )}
@@ -215,7 +229,7 @@ export function ProductSheet({ food, onClose }: { food: Food; onClose: () => voi
             <>
               <div className="section-t">⚠️ Важно</div>
               <ul className="warn-list">
-                {f.warnings.map((w, i) => <li key={i}>{w}</li>)}
+                {f.warnings.map((w, i) => <li key={i}><TermText text={w} onTerm={setSkillInfo} /></li>)}
               </ul>
             </>
           )}

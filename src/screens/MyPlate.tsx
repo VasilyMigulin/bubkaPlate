@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react';
 import { CATEGORIES, FOODS } from '../data/foods';
 import { PORTIONS, READINESS, SCHEDULE } from '../data/schedule';
 import { useStore } from '../state/store';
+import { RULE3_TEXT } from '../data/glossary';
 import { Lightbox } from '../components/Lightbox';
 import { PlateScan } from '../components/PlateScan';
 import './MyPlate.css';
@@ -20,6 +21,7 @@ export function MyPlate({ goCatalog }: { goCatalog: () => void }) {
   const [mapOpen, setMapOpen] = useState(false);
   const [schedOpen, setSchedOpen] = useState(false);
   const [lightbox, setLightbox] = useState<{ src: string; alt?: string } | null>(null);
+  const [ruleOpen, setRuleOpen] = useState(false);
 
   const notReady = ageMonths != null && ageMonths < 6;
   const readyCount = READINESS.filter((r) => readiness.has(r.key)).length;
@@ -114,7 +116,9 @@ export function MyPlate({ goCatalog }: { goCatalog: () => void }) {
         </div>
       )}
 
-      <div className="section-t">Ввод аллергенов · правило 3 дней</div>
+      <div className="section-t" style={{ display: 'flex', alignItems: 'center', gap: 7 }}>Ввод аллергенов · правило 3 дней
+        <button className="skill-i" onClick={() => setRuleOpen(true)} aria-label="Что это">?</button>
+      </div>
       {windows.length === 0 && (
         <div className="note"><span className="ne">🥜</span><span>Новый аллерген вводят утром, малой дозой, 3 дня подряд. Начните из карточки продукта.</span></div>
       )}
@@ -204,6 +208,15 @@ export function MyPlate({ goCatalog }: { goCatalog: () => void }) {
       {scanOpen && <PlateScan onClose={() => setScanOpen(false)} goSafety={goCatalog} />}
 
       {lightbox && <Lightbox src={lightbox.src} alt={lightbox.alt} onClose={() => setLightbox(null)} />}
+
+      {ruleOpen && (
+        <div className="skill-pop-scrim" onClick={() => setRuleOpen(false)}>
+          <div className="skill-pop" onClick={(e) => e.stopPropagation()}>
+            <div className="skill-pop-text">{RULE3_TEXT}</div>
+            <button className="btn btn-soft" onClick={() => setRuleOpen(false)}>Понятно</button>
+          </div>
+        </div>
+      )}
     </>
   );
 }
