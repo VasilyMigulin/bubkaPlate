@@ -3,7 +3,6 @@ import { BIG_ALLERGENS, CATEGORIES, FOODS } from '../data/foods';
 import { MAIN_PHOTOS } from '../data/mainPhotos';
 import { FoodIcon } from '../components/FoodIcon';
 import { ProductSheet } from '../components/ProductSheet';
-import { ServeShape, serveLabel } from '../components/ServeShape';
 import { useStore } from '../state/store';
 import type { Food, FoodCategory } from '../types';
 import './Catalog.css';
@@ -15,12 +14,6 @@ const CAT_EMOJI: Record<FoodCategory, string> = {
 };
 
 type Filter = 'all' | FoodCategory | 'allergens';
-
-function serveForAge(f: Food, ageMonths: number | null) {
-  const keys = Object.keys(f.serve).map(Number).sort((a, b) => a - b);
-  const target = ageMonths == null ? keys[0] : (keys.filter((k) => k <= ageMonths).pop() ?? keys[0]);
-  return f.serve[String(target)];
-}
 
 const byName = (a: Food, b: Food) => a.n.localeCompare(b.n, 'ru');
 
@@ -44,7 +37,6 @@ export function Catalog() {
     const bg = isDarkMode() ? f.dbg : f.bg;
     const done = introduced.has(f.id);
     const tooEarly = ageMonths != null && f.fromMonth > ageMonths;
-    const [shape] = serveForAge(f, ageMonths);
     return (
       <button key={f.id} className={`food ${tooEarly ? 'early' : ''}`} onClick={() => setOpen(f)}>
         <div className="food-pic" style={{ background: MAIN_PHOTOS[f.id] ? undefined : `radial-gradient(circle at 32% 28%, ${bg[0]}, ${bg[1]})` }}>
@@ -60,7 +52,9 @@ export function Catalog() {
           </div>
           {tooEarly
             ? <div className="food-age"><span className="food-soon">рано · с {f.fromMonth} мес</span></div>
-            : <div className="food-serve"><ServeShape shape={shape} color={bg} size={26} /><span>{serveLabel(shape)}</span></div>}
+            : done
+              ? <div className="food-status in">✓ в рационе</div>
+              : <div className="food-status">ещё не пробовали</div>}
         </div>
       </button>
     );
