@@ -92,7 +92,7 @@ export function ProductSheet({ food, onClose }: { food: Food; onClose: () => voi
     const keys = ages.map(Number).sort((a, b) => a - b);
     if (ageMonths == null) return null;
     const fit = keys.filter((k) => k <= ageMonths);
-    return String(fit.length ? fit[fit.length - 1] : keys[0]);
+    return fit.length ? String(fit[fit.length - 1]) : null; // малыш младше первой ступени — «сейчас» нет
   })();
 
   const openRelated = (r: Food) => { setRelated(r); document.querySelector('.prod-sheet')?.scrollTo({ top: 0 }); };
