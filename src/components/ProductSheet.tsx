@@ -79,7 +79,8 @@ export function ProductSheet({ food, onClose }: { food: Food; onClose: () => voi
   const [related, setRelated] = useState<Food>(food);
   const f = related;
   const bg = isDark() ? f.dbg : f.bg;
-  const usingPuree = profile?.approach === 'puree' && !!f.servePuree;
+  const [serveMode, setServeMode] = useState<'pieces' | 'puree'>(profile?.approach === 'puree' ? 'puree' : 'pieces');
+  const usingPuree = serveMode === 'puree' && !!f.servePuree;
   const serveMap = usingPuree ? f.servePuree! : f.serve;
   const ages = Object.keys(serveMap);
   const canAllergen = f.allergen && f.allergen !== 'глютен';
@@ -152,10 +153,16 @@ export function ProductSheet({ food, onClose }: { food: Food; onClose: () => voi
           )}
 
           <div className="section-t">Подача по возрасту</div>
-          {f.cat !== 'Напитки и добавки' && profile?.approach === 'puree' && usingPuree && (
+          {f.servePuree && f.cat !== 'Напитки и добавки' && (
+            <div className="serve-toggle">
+              <button className={serveMode === 'pieces' ? 'on' : ''} onClick={() => setServeMode('pieces')}>✋ Кусочки</button>
+              <button className={serveMode === 'puree' ? 'on' : ''} onClick={() => setServeMode('puree')}>🥄 Пюре</button>
+            </div>
+          )}
+          {f.cat !== 'Напитки и добавки' && usingPuree && (
             <div className="note"><span className="ne">🥄</span><span><b>Подача для кормления пюре.</b> К 8–9 месяцам важно знакомить малыша с комочками и мягкими кусочками — это окно принятия текстур, позже привыкать сложнее.</span></div>
           )}
-          {f.cat !== 'Напитки и добавки' && profile?.approach === 'puree' && !usingPuree && (
+          {f.cat !== 'Напитки и добавки' && profile?.approach === 'puree' && !f.servePuree && (
             <div className="note"><span className="ne">🥄</span><span><b>Вы кормите пюре:</b> начинайте с размятых вариантов из шагов ниже, кусочки подключайте к 8–9 месяцам — они учат жевать.</span></div>
           )}
           {f.cat !== 'Напитки и добавки' && profile?.approach === 'blw' && (
