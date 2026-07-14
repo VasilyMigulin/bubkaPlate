@@ -64,7 +64,7 @@ function compressImage(file: File, max = 380, q = 0.72): Promise<string> {
 }
 
 export function ProductSheet({ food, onClose }: { food: Food; onClose: () => void }) {
-  const { logFood, startAllergen, showToast, ageMonths } = useStore();
+  const { logFood, startAllergen, showToast, ageMonths, profile } = useStore();
   const [rxOpen, setRxOpen] = useState(false);
   const [selRx, setSelRx] = useState<Reaction | null>(null);
   const [note, setNote] = useState('');
