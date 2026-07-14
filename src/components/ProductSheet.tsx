@@ -76,7 +76,9 @@ export function ProductSheet({ food, onClose }: { food: Food; onClose: () => voi
   const [related, setRelated] = useState<Food>(food);
   const f = related;
   const bg = isDark() ? f.dbg : f.bg;
-  const ages = Object.keys(f.serve);
+  const usingPuree = profile?.approach === 'puree' && !!f.servePuree;
+  const serveMap = usingPuree ? f.servePuree! : f.serve;
+  const ages = Object.keys(serveMap);
   const canAllergen = f.allergen && f.allergen !== 'глютен';
   const choose = f.choose ?? CHOOSE[f.id];
   const relatedIds = (RELATED[f.id] || []).map((id) => FOODS.find((x) => x.id === id)).filter(Boolean) as Food[];
@@ -147,20 +149,23 @@ export function ProductSheet({ food, onClose }: { food: Food; onClose: () => voi
           )}
 
           <div className="section-t">Подача по возрасту</div>
-          {f.cat !== 'Напитки и добавки' && profile?.approach === 'puree' && (
-            <div className="note"><span className="ne">🥄</span><span><b>Вы кормите пюре:</b> начинайте с размятых и протёртых вариантов из шагов ниже, кусочки подключайте постепенно — они учат жевать.</span></div>
+          {f.cat !== 'Напитки и добавки' && profile?.approach === 'puree' && usingPuree && (
+            <div className="note"><span className="ne">🥄</span><span><b>Подача для кормления пюре.</b> К 8–9 месяцам важно знакомить малыша с комочками и мягкими кусочками — это окно принятия текстур, позже привыкать сложнее.</span></div>
+          )}
+          {f.cat !== 'Напитки и добавки' && profile?.approach === 'puree' && !usingPuree && (
+            <div className="note"><span className="ne">🥄</span><span><b>Вы кормите пюре:</b> начинайте с размятых вариантов из шагов ниже, кусочки подключайте к 8–9 месяцам — они учат жевать.</span></div>
           )}
           {f.cat !== 'Напитки и добавки' && profile?.approach === 'blw' && (
             <div className="note"><span className="ne">✋</span><span><b>Вы даёте кусочки:</b> выбирайте варианты-кусочки из шагов ниже. Кусок безопасен, когда он мягкий (разминается пальцами) и размером с палец взрослого.</span></div>
           )}
           <div className="serve-list">
             {ages.map((a) => {
-              const [shape, text, ageOverride] = f.serve[a];
+              const [shape, text, ageOverride] = serveMap[a];
               const isNow = !ageOverride && a === currentStep;
               const ageText = ageOverride ?? AGE_LABEL[a];
               const skillKey = ageOverride ? SKILL_BY_LABEL[ageOverride] : a;
               const skill = skillKey ? SKILL_INFO[skillKey] : undefined;
-              const photo = SERVE_PHOTOS[f.id]?.[a];
+              const photo = usingPuree ? undefined : SERVE_PHOTOS[f.id]?.[a];
               return (
                 <div key={a} className={`serve-row ${isNow ? 'now' : ''}`}>
                   {photo
