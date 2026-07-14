@@ -147,6 +147,12 @@ export function ProductSheet({ food, onClose }: { food: Food; onClose: () => voi
           )}
 
           <div className="section-t">Подача по возрасту</div>
+          {f.cat !== 'Напитки и добавки' && profile?.approach === 'puree' && (
+            <div className="note"><span className="ne">🥄</span><span><b>Вы кормите пюре:</b> начинайте с размятых и протёртых вариантов из шагов ниже, кусочки подключайте постепенно — они учат жевать.</span></div>
+          )}
+          {f.cat !== 'Напитки и добавки' && profile?.approach === 'blw' && (
+            <div className="note"><span className="ne">✋</span><span><b>Вы даёте кусочки:</b> выбирайте варианты-кусочки из шагов ниже. Кусок безопасен, когда он мягкий (разминается пальцами) и размером с палец взрослого.</span></div>
+          )}
           <div className="serve-list">
             {ages.map((a) => {
               const [shape, text, ageOverride] = f.serve[a];
