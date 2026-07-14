@@ -7,6 +7,7 @@ import { SERVE_PHOTOS } from '../data/servePhotos';
 import { RECIPES, type Recipe } from '../data/recipes';
 import { useStore } from '../state/store';
 import { FoodIcon } from './FoodIcon';
+import { Lightbox } from './Lightbox';
 import { RecipeSheet } from './RecipeSheet';
 import { ServeShape } from './ServeShape';
 import './ProductSheet.css';
@@ -70,6 +71,7 @@ export function ProductSheet({ food, onClose }: { food: Food; onClose: () => voi
   const [photo, setPhoto] = useState<string | undefined>();
   const [skillInfo, setSkillInfo] = useState<string | null>(null);
   const [recipeOpen, setRecipeOpen] = useState<Recipe | null>(null);
+  const [lightbox, setLightbox] = useState<{ src: string; alt?: string } | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
   const [related, setRelated] = useState<Food>(food);
   const f = related;
@@ -109,7 +111,9 @@ export function ProductSheet({ food, onClose }: { food: Food; onClose: () => voi
     <div className="product-view">
         <button className="ps-back" onClick={onClose} aria-label="Назад">‹</button>
         <div className="ps-hero" style={{ background: MAIN_PHOTOS[f.id] ? undefined : `radial-gradient(circle at 30% 25%, ${bg[0]}, ${bg[1]})` }}>
-          {MAIN_PHOTOS[f.id] ? <img className="ps-photo-cover" src={MAIN_PHOTOS[f.id]} alt={f.n} /> : <FoodIcon food={f} size={130} />}
+          {MAIN_PHOTOS[f.id]
+            ? <img className="ps-photo-cover tappable" src={MAIN_PHOTOS[f.id]} alt={f.n} onClick={() => setLightbox({ src: MAIN_PHOTOS[f.id], alt: f.n })} />
+            : <FoodIcon food={f} size={130} />}
         </div>
         <div className="ps-body">
           <h2>{f.n}</h2>
@@ -154,7 +158,8 @@ export function ProductSheet({ food, onClose }: { food: Food; onClose: () => voi
               return (
                 <div key={a} className={`serve-row ${isNow ? 'now' : ''}`}>
                   {photo
-                    ? <img className="serve-photo" src={photo} alt={`${f.n}, ${ageText}`} loading="lazy" />
+                    ? <img className="serve-photo tappable" src={photo} alt={`${f.n}, ${ageText}`} loading="lazy"
+                        onClick={() => setLightbox({ src: photo, alt: `${f.n} · ${ageText}` })} />
                     : <ServeShape shape={shape} color={bg} size={124} />}
                   <div className="serve-info">
                     <div className="serve-age">
@@ -238,6 +243,8 @@ export function ProductSheet({ food, onClose }: { food: Food; onClose: () => voi
         </div>
 
         {recipeOpen && <RecipeSheet recipe={recipeOpen} onClose={() => setRecipeOpen(null)} />}
+
+        {lightbox && <Lightbox src={lightbox.src} alt={lightbox.alt} onClose={() => setLightbox(null)} />}
 
         {skillInfo && createPortal(
           <div className="skill-pop-scrim" onClick={() => setSkillInfo(null)}>

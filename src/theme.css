@@ -102,3 +102,7 @@ img { max-width:100%; }
 .rise { animation:rise .5s cubic-bezier(.22,.9,.3,1) both; }
 @keyframes rise { from { opacity:0; transform:translateY(10px);} to { opacity:1; transform:none; } }
 @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration:.001s !important; transition-duration:.001s !important; } }
+
+/* фото, открывающиеся в полноэкранный просмотр */
+.tappable { cursor:pointer; transition:transform .18s cubic-bezier(.34,1.56,.64,1), filter .18s; }
+.tappable:active { transform:scale(.97); filter:brightness(.94); }

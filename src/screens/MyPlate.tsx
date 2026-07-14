@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react';
 import { CATEGORIES, FOODS } from '../data/foods';
 import { PORTIONS, READINESS, SCHEDULE } from '../data/schedule';
 import { useStore } from '../state/store';
+import { Lightbox } from '../components/Lightbox';
 import { PlateScan } from '../components/PlateScan';
 import './MyPlate.css';
 
@@ -18,6 +19,7 @@ export function MyPlate({ goCatalog }: { goCatalog: () => void }) {
   const [scanOpen, setScanOpen] = useState(false);
   const [mapOpen, setMapOpen] = useState(false);
   const [schedOpen, setSchedOpen] = useState(false);
+  const [lightbox, setLightbox] = useState<{ src: string; alt?: string } | null>(null);
 
   const notReady = ageMonths != null && ageMonths < 6;
   const readyCount = READINESS.filter((r) => readiness.has(r.key)).length;
@@ -149,7 +151,7 @@ export function MyPlate({ goCatalog }: { goCatalog: () => void }) {
             </div>
             {(l.note || l.photo) && (
               <div className="fl-extra">
-                {l.photo && <img className="fl-photo" src={l.photo} alt="момент" />}
+                {l.photo && <img className="fl-photo tappable" src={l.photo} alt="момент" onClick={() => setLightbox({ src: l.photo!, alt: (FOODS.find((x) => x.id === l.id)?.n ?? "") + " · первая проба" })} />}
                 {l.note && <div className="fl-note">{l.note}</div>}
               </div>
             )}
@@ -200,6 +202,8 @@ export function MyPlate({ goCatalog }: { goCatalog: () => void }) {
       </button>
 
       {scanOpen && <PlateScan onClose={() => setScanOpen(false)} goSafety={goCatalog} />}
+
+      {lightbox && <Lightbox src={lightbox.src} alt={lightbox.alt} onClose={() => setLightbox(null)} />}
     </>
   );
 }
