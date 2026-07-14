@@ -29,6 +29,9 @@ const SKILL_INFO: Record<string, string> = {
   '18': 'Малыш осваивает ложку и вилку, ест самостоятельно.',
 };
 
+// Сноска о навыке уместна только там, где еду берут руками (кусочки), — не для пюре, каш и напитков.
+const HANDHELD_SHAPES = new Set(['stick', 'halfmoon', 'wedge', 'floret', 'cubes', 'dice', 'coin', 'ball', 'whole', 'flakes']);
+
 // Если у ступени своя подпись возраста — пояснение подбирается по ней (а не по внутреннему ключу).
 const SKILL_BY_LABEL: Record<string, string> = {
   '6–8 мес': '6',
@@ -164,7 +167,7 @@ export function ProductSheet({ food, onClose }: { food: Food; onClose: () => voi
               const isNow = !ageOverride && a === currentStep;
               const ageText = ageOverride ?? AGE_LABEL[a];
               const skillKey = ageOverride ? SKILL_BY_LABEL[ageOverride] : a;
-              const skill = skillKey ? SKILL_INFO[skillKey] : undefined;
+              const skill = HANDHELD_SHAPES.has(shape) && skillKey ? SKILL_INFO[skillKey] : undefined;
               const photo = usingPuree ? undefined : SERVE_PHOTOS[f.id]?.[a];
               return (
                 <div key={a} className={`serve-row ${isNow ? 'now' : ''}`}>
