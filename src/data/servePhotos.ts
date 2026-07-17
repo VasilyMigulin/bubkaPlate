@@ -21,7 +21,7 @@ export const SERVE_PHOTOS: Record<string, Record<string, string>> = {
   banana: { '6': '/serve/banana-6.jpg', '8': '/serve/banana-8.jpg', '12': '/serve/banana-12.jpg' },
   eggplant: { '6': '/serve/eggplant-6.jpg', '8': '/serve/eggplant-8.jpg', '12': '/serve/eggplant-12.jpg' },
   gooseberry: { '6': '/serve/gooseberry-6.jpg', '48': '/serve/gooseberry-48.jpg' },
-  cabbage: { '6': '/serve/cabbage-6.jpg' },
+  cabbage: { '6': '/serve/cabbage-6.jpg', '12': '/serve/cabbage-12.jpg' },
   brussels: { '6': '/serve/brussels-6.jpg', '8': '/serve/brussels-8.jpg', '12': '/serve/brussels-12.jpg' },
   broccoli: { '6': '/serve/broccoli-6.jpg', '12': '/serve/broccoli-12.jpg' },
   bellpepper: { '6': '/serve/bellpepper-6.jpg', '8': '/serve/bellpepper-8.jpg', '12': '/serve/bellpepper-12.jpg' },

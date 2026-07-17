@@ -4,6 +4,7 @@ import type { Food, Reaction } from '../types';
 import { BIG_ALLERGENS, CHOOSE, FOODS, RELATED } from '../data/foods';
 import { MAIN_PHOTOS } from '../data/mainPhotos';
 import { SERVE_PHOTOS } from '../data/servePhotos';
+import { PUREE_PHOTOS } from '../data/pureePhotos';
 import { RULE3_TEXT } from '../data/glossary';
 import { RECIPES, type Recipe } from '../data/recipes';
 import { useStore } from '../state/store';
@@ -195,7 +196,7 @@ export function ProductSheet({ food, onClose }: { food: Food; onClose: () => voi
               const ageText = ageOverride ?? AGE_LABEL[a];
               const skillKey = ageOverride ? SKILL_BY_LABEL[ageOverride] : a;
               const skill = HANDHELD_SHAPES.has(shape) && skillKey ? SKILL_INFO[skillKey] : undefined;
-              const photo = usingPuree ? undefined : SERVE_PHOTOS[f.id]?.[a];
+              const photo = usingPuree ? PUREE_PHOTOS[f.id]?.[a] : SERVE_PHOTOS[f.id]?.[a];
               return (
                 <div key={a} className={`serve-row ${isNow ? 'now' : ''}`}>
                   {photo
