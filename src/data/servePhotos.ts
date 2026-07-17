@@ -20,4 +20,10 @@ export const SERVE_PHOTOS: Record<string, Record<string, string>> = {
   buckwheat: { '6': '/serve/buckwheat-6.jpg', '8': '/serve/buckwheat-8.jpg', '12': '/serve/buckwheat-12.jpg' },
   banana: { '6': '/serve/banana-6.jpg', '8': '/serve/banana-8.jpg', '12': '/serve/banana-12.jpg' },
   eggplant: { '6': '/serve/eggplant-6.jpg', '8': '/serve/eggplant-8.jpg', '12': '/serve/eggplant-12.jpg' },
+  gooseberry: { '6': '/serve/gooseberry-6.jpg', '48': '/serve/gooseberry-48.jpg' },
+  cabbage: { '6': '/serve/cabbage-6.jpg' },
+  brussels: { '6': '/serve/brussels-6.jpg', '8': '/serve/brussels-8.jpg', '12': '/serve/brussels-12.jpg' },
+  broccoli: { '6': '/serve/broccoli-6.jpg', '12': '/serve/broccoli-12.jpg' },
+  bellpepper: { '6': '/serve/bellpepper-6.jpg', '8': '/serve/bellpepper-8.jpg', '12': '/serve/bellpepper-12.jpg' },
+  sweetpotato: { '6': '/serve/sweetpotato-6.jpg', '8': '/serve/sweetpotato-8.jpg', '12': '/serve/sweetpotato-12.jpg' },
 };
