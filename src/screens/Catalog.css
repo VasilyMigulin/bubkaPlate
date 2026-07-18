@@ -14,7 +14,9 @@
 
 .food-grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:14px; }
 .food { background:var(--card); border-radius:20px; overflow:hidden; box-shadow:var(--shadow); border:none; text-align:left; padding:0;
+  display:flex; flex-direction:column; align-items:stretch;
   transition:transform .18s cubic-bezier(.34,1.56,.64,1); }
+.food-pic { flex:none; }
 .food:active { transform:scale(.96); }
 .food-pic { height:108px; display:flex; align-items:center; justify-content:center; font-size:44px; position:relative; overflow:hidden; }
 .food-photo { width:100%; height:100%; object-fit:contain; padding:8px; }
