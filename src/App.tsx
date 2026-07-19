@@ -26,7 +26,7 @@ const TABS: { key: Tab; icon: string; label: string }[] = [
 
 const HEAD: Record<Tab, { title: string; sub: string }> = {
   mine: { title: 'Мой прикорм', sub: 'Что уже введено, что дальше и как реагирует малыш' },
-  catalog: { title: 'Каталог', sub: 'Продукты по месяцам · подача, польза, безопасность' },
+  catalog: { title: 'Каталог', sub: 'Как безопасно подать каждый продукт — по возрасту малыша' },
   recipes: { title: 'Рецепты', sub: 'Из того, что есть дома · по возрасту' },
   safety: { title: 'Безопасность', sub: 'Удушье, аллергены и первая помощь' },
 };
