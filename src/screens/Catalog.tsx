@@ -18,22 +18,37 @@ type Filter = 'all' | FoodCategory | 'allergens';
 
 const byName = (a: Food, b: Food) => a.n.localeCompare(b.n, 'ru');
 
+type AgeF = 'all' | 'now' | 'early';
+type StatusF = 'all' | 'given' | 'not';
+
 export function Catalog() {
   const [q, setQ] = useState('');
   const [filter, setFilter] = useState<Filter>('all');
+  const [ageF, setAgeF] = useState<AgeF>('all');
+  const [statusF, setStatusF] = useState<StatusF>('all');
+  const [ironF, setIronF] = useState(false);
   const [open, setOpen] = useState<Food | null>(null);
   const [ruleOpen, setRuleOpen] = useState(false);
   const { introduced, ageMonths } = useStore();
 
   const query = q.toLowerCase().trim();
 
-  // Единый плоский список по алфавиту — по поиску или по выбранному фильтру.
+  // Единый плоский список по алфавиту — поиск/категория + фильтры возраста, статуса и железа.
   const listed = useMemo(() => {
-    if (query) return FOODS.filter((f) => f.n.toLowerCase().includes(query)).sort(byName);
-    if (filter === 'all') return [...FOODS].sort(byName);
-    if (filter === 'allergens') return FOODS.filter((f) => f.allergen).sort(byName);
-    return FOODS.filter((f) => f.cat === filter).sort(byName);
-  }, [query, filter]);
+    let base: Food[];
+    if (query) base = FOODS.filter((f) => f.n.toLowerCase().includes(query));
+    else if (filter === 'all') base = [...FOODS];
+    else if (filter === 'allergens') base = FOODS.filter((f) => f.allergen);
+    else base = FOODS.filter((f) => f.cat === filter);
+    if (ageMonths != null && ageF === 'now') base = base.filter((f) => f.fromMonth <= ageMonths);
+    if (ageMonths != null && ageF === 'early') base = base.filter((f) => f.fromMonth > ageMonths);
+    if (statusF === 'given') base = base.filter((f) => introduced.has(f.id));
+    if (statusF === 'not') base = base.filter((f) => !introduced.has(f.id));
+    if (ironF) base = base.filter((f) => f.iron);
+    return base.sort(byName);
+  }, [query, filter, ageF, statusF, ironF, ageMonths, introduced]);
+
+  const filtersActive = ageF !== 'all' || statusF !== 'all' || ironF;
 
   const renderCard = (f: Food) => {
     const bg = isDarkMode() ? f.dbg : f.bg;
@@ -72,6 +87,28 @@ export function Catalog() {
         ))}
         <button className={`chip chip-warn ${filter === 'allergens' ? 'on' : ''}`} onClick={() => setFilter('allergens')}>⚠️ Аллергены</button>
       </div>
+      <div className="segs filters-row">
+        {ageMonths != null && (
+          <>
+            <button className={`chip chip-mini ${ageF === 'now' ? 'on' : ''}`} onClick={() => setAgeF(ageF === 'now' ? 'all' : 'now')}>✅ можно сейчас</button>
+            <button className={`chip chip-mini ${ageF === 'early' ? 'on' : ''}`} onClick={() => setAgeF(ageF === 'early' ? 'all' : 'early')}>🕐 пока рано</button>
+            <span className="filter-sep" />
+          </>
+        )}
+        <button className={`chip chip-mini ${statusF === 'given' ? 'on' : ''}`} onClick={() => setStatusF(statusF === 'given' ? 'all' : 'given')}>✓ уже дали</button>
+        <button className={`chip chip-mini ${statusF === 'not' ? 'on' : ''}`} onClick={() => setStatusF(statusF === 'not' ? 'all' : 'not')}>ещё не дали</button>
+        <span className="filter-sep" />
+        <button className={`chip chip-mini ${ironF ? 'on' : ''}`} onClick={() => setIronF(!ironF)}>🩸 железо</button>
+      </div>
+
+      {filtersActive && (
+        <div className="filter-summary">
+          {ageF === 'now' && statusF === 'not'
+            ? <>Это можно пробовать уже сейчас — <b>{listed.length}</b></>
+            : <>Подходит: <b>{listed.length}</b></>}
+          <button className="term-link" onClick={() => { setAgeF('all'); setStatusF('all'); setIronF(false); }}>сбросить</button>
+        </div>
+      )}
 
       {!query && filter !== 'all' && (
         <div className="cat-head">
