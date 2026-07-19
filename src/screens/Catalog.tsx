@@ -50,12 +50,26 @@ export function Catalog() {
 
   const filtersActive = ageF !== 'all' || statusF !== 'all' || ironF;
 
-  const renderCard = (f: Food) => {
+  // Алфавитная линейка справа: буквы, с которых начинаются продукты в текущем списке.
+  const letters = useMemo(() => {
+    const set = new Set(listed.map((f) => f.n[0].toUpperCase()));
+    return [...set].sort((a, b) => a.localeCompare(b, 'ru'));
+  }, [listed]);
+  const showRail = !query && listed.length > 14;
+
+  const jumpTo = (letter: string) => {
+    const el = document.querySelector(`[data-letter="${letter}"]`);
+    el?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  };
+
+  const renderCard = (f: Food, i: number) => {
     const bg = isDarkMode() ? f.dbg : f.bg;
     const done = introduced.has(f.id);
     const tooEarly = ageMonths != null && f.fromMonth > ageMonths;
+    const letter = f.n[0].toUpperCase();
+    const firstOfLetter = i === 0 || listed[i - 1].n[0].toUpperCase() !== letter;
     return (
-      <button key={f.id} className={`food ${tooEarly ? 'early' : ''}`} onClick={() => setOpen(f)}>
+      <button key={f.id} className={`food ${tooEarly ? 'early' : ''}`} data-letter={firstOfLetter ? letter : undefined} onClick={() => setOpen(f)}>
         <div className="food-pic" style={{ background: MAIN_PHOTOS[f.id] ? undefined : `radial-gradient(circle at 32% 28%, ${bg[0]}, ${bg[1]})` }}>
           {MAIN_PHOTOS[f.id] ? <img className="food-photo-cover" src={MAIN_PHOTOS[f.id]} alt={f.n} loading="lazy" /> : <FoodIcon food={f} size={60} />}
           <span className="food-from">с {f.fromMonth}</span>
@@ -122,6 +136,14 @@ export function Catalog() {
       )}
 
       <div className="food-grid">{listed.map(renderCard)}</div>
+
+      {showRail && (
+        <div className="alpha-rail" aria-hidden>
+          {letters.map((l) => (
+            <button key={l} onClick={() => jumpTo(l)}>{l}</button>
+          ))}
+        </div>
+      )}
 
       {listed.length === 0 && <div className="sub" style={{ textAlign: 'center', padding: 20 }}>Ничего не нашли — попробуйте другой запрос.</div>}
 
