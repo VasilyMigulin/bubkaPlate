@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { BIG_ALLERGENS, CATEGORIES, FOODS } from '../data/foods';
 import { RULE3_TEXT } from '../data/glossary';
 import { MAIN_PHOTOS } from '../data/mainPhotos';
@@ -137,12 +138,13 @@ export function Catalog() {
 
       <div className="food-grid">{listed.map(renderCard)}</div>
 
-      {showRail && (
+      {showRail && createPortal(
         <div className="alpha-rail" aria-hidden>
           {letters.map((l) => (
             <button key={l} onClick={() => jumpTo(l)}>{l}</button>
           ))}
-        </div>
+        </div>,
+        document.body
       )}
 
       {listed.length === 0 && <div className="sub" style={{ textAlign: 'center', padding: 20 }}>Ничего не нашли — попробуйте другой запрос.</div>}
