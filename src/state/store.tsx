@@ -81,7 +81,8 @@ export function StoreProvider({ children }: { children: ReactNode }) {
 
   const logFood = useCallback((id: string, rx: Reaction, note?: string, photo?: string) => {
     setLog((l) => [{ id, date: 'сегодня', rx, note: note?.trim() || undefined, photo, ts: Date.now() }, ...l]);
-    setIntroduced((s) => new Set(s).add(id));
+    // составной id вида («nuts:walnut») отмечает и сам продукт — карточка считается «в рационе»
+    setIntroduced((s) => { const n = new Set(s).add(id); if (id.includes(':')) n.add(id.split(':')[0]); return n; });
     setWindows((ws) => ws.map((w) => {
       if (w.id !== id) return w;
       if (rx === 'skin' || rx === 'tummy') return { ...w, reaction: 'bad' };
