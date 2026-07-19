@@ -59,8 +59,11 @@ export function Catalog() {
   const showRail = !query && listed.length > 14;
 
   const jumpTo = (letter: string) => {
-    const el = document.querySelector(`[data-letter="${letter}"]`);
-    el?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    const el = document.querySelector<HTMLElement>(`[data-letter="${letter}"]`);
+    const scroller = document.querySelector<HTMLElement>('.app-scroll');
+    if (!el || !scroller) return;
+    const top = el.getBoundingClientRect().top - scroller.getBoundingClientRect().top + scroller.scrollTop - 10;
+    scroller.scrollTo({ top: Math.max(0, top), behavior: 'smooth' });
   };
 
   const renderCard = (f: Food, i: number) => {
