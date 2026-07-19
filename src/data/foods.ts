@@ -574,7 +574,7 @@ export const FOODS: Food[] = [
     serve: { '6': ['porridge', 'Хорошо разваренная пшеничная каша. Или ломтик мягкого хлеба без корки размером с указательный палец взрослого.', '6–8 мес'], '8': ['stick', 'Мягкий хлеб ломтиками с указательный палец, без корок; каша гуще.', '9–12 мес'], '12': ['dice', 'С общего стола: хлеб, каши, домашняя выпечка без сахара.', '12–24 мес'] },
   },
   {
-    id: 'cowmilk', e: '🥛', n: 'Коровье молоко', cat: 'Молочное', fromMonth: 6, allergen: 'молоко', choke: 'низкий', iron: false, status: null,
+    id: 'cowmilk', e: '🥛', n: 'Молоко (коровье)', cat: 'Молочное', fromMonth: 6, allergen: 'молоко', choke: 'низкий', iron: false, status: null,
     bg: ['#F2F1EC', '#E1DED2'], dbg: ['#35332C', '#2A2822'],
     benefit: 'Кальций, белок и жиры. До года — только как ингредиент блюд: как напиток оно мешает усвоению железа и перегружает почки.',
     cook: 'До года — только в приготовлении: каши, омлеты, запеканки.',
@@ -1075,6 +1075,12 @@ export const FOODS: Food[] = [
   },
   {
     id: 'nuts', e: '🌰', n: 'Орехи и семечки', cat: 'Белок', fromMonth: 6, allergen: 'орехи', choke: 'очень высокий (целые)', iron: true, status: null,
+    variants: [
+      { key: 'walnut', label: 'Грецкий орех' }, { key: 'almond', label: 'Миндаль' },
+      { key: 'hazelnut', label: 'Фундук' }, { key: 'cashew', label: 'Кешью' },
+      { key: 'pistachio', label: 'Фисташки' }, { key: 'pine', label: 'Кедровые орешки' },
+      { key: 'sunflower', label: 'Семечки подсолнечника' }, { key: 'pumpkinseed', label: 'Тыквенные семечки' },
+    ],
     bg: ['#EFDECC', '#D3B08A'], dbg: ['#362C20', '#2A2219'],
     benefit: 'Растительные жиры и белок для роста и мозга. Орехи — частые аллергены: знакомим в первый год.',
     cook: 'Только паста без сахара и соли или мелко молотая крошка в блюда.',
@@ -1209,6 +1215,14 @@ export const RELATED: Record<string, string[]> = {
   zucchini: ['cauliflower', 'broccoli'], broccoli: ['cauliflower', 'greenbeans'],
   apple: ['pear'], pear: ['apple'], banana: ['avocado', 'mango'],
 };
+
+/** «nuts:walnut» → карточка орехов + подпись вида. Обычный id вернётся как есть. */
+export function resolveFoodRef(id: string): { food: Food | undefined; label?: string } {
+  const [base, vkey] = id.split(':');
+  const food = FOODS.find((f) => f.id === base);
+  const label = vkey ? food?.variants?.find((v) => v.key === vkey)?.label : undefined;
+  return { food, label };
+}
 
 export const BIG_ALLERGENS = new Set(['арахис', 'орехи', 'яйцо', 'молоко', 'рыба', 'кунжут', 'глютен', 'соя', 'морепродукты']);
 export const IRON_IDS = FOODS.filter((f) => f.iron).map((f) => f.id);

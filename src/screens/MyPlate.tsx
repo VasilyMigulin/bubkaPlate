@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { CATEGORIES, FOODS } from '../data/foods';
+import { CATEGORIES, FOODS , resolveFoodRef } from '../data/foods';
 import { PORTIONS, READINESS, SCHEDULE } from '../data/schedule';
 import { useStore } from '../state/store';
 import { RULE3_TEXT } from '../data/glossary';
@@ -144,18 +144,20 @@ export function MyPlate({ goCatalog }: { goCatalog: () => void }) {
 
       <div className="section-t">Дневник прикорма</div>
       {log.map((l, i) => {
-        const f = FOODS.find((x) => x.id === l.id);
+        const ref = resolveFoodRef(l.id);
+        const f = ref.food;
+        const name = ref.label ?? f?.n ?? l.id;
         const b = RX_BADGE[l.rx];
         return (
           <div key={i} className="fl-card">
             <div className="fl-row">
               <div className="fl-e">{f?.e ?? '🥣'}</div>
-              <div className="grow"><div className="fl-n">{f?.n ?? l.id}</div><div className="fl-d">{l.date}</div></div>
+              <div className="grow"><div className="fl-n">{name}</div><div className="fl-d">{l.date}</div></div>
               <span className={`rx ${b.cls}`}>{b.label}</span>
             </div>
             {(l.note || l.photo) && (
               <div className="fl-extra">
-                {l.photo && <img className="fl-photo tappable" src={l.photo} alt="момент" onClick={() => setLightbox({ src: l.photo!, alt: (FOODS.find((x) => x.id === l.id)?.n ?? "") + " · первая проба" })} />}
+                {l.photo && <img className="fl-photo tappable" src={l.photo} alt="момент" onClick={() => setLightbox({ src: l.photo!, alt: name + " · первая проба" })} />}
                 {l.note && <div className="fl-note">{l.note}</div>}
               </div>
             )}

@@ -88,8 +88,9 @@ function compressImage(file: File, max = 380, q = 0.72): Promise<string> {
 }
 
 export function ProductSheet({ food, onClose }: { food: Food; onClose: () => void }) {
-  const { logFood, startAllergen, showToast, ageMonths, profile } = useStore();
+  const { logFood, startAllergen, showToast, ageMonths, profile, introduced, log } = useStore();
   const [rxOpen, setRxOpen] = useState(false);
+  const [rxVariant, setRxVariant] = useState<{ key: string; label: string } | null>(null);
   const [selRx, setSelRx] = useState<Reaction | null>(null);
   const [note, setNote] = useState('');
   const [photo, setPhoto] = useState<string | undefined>();
@@ -118,7 +119,16 @@ export function ProductSheet({ food, onClose }: { food: Food; onClose: () => voi
 
   const openRelated = (r: Food) => { setRelated(r); document.querySelector('.prod-sheet')?.scrollTo({ top: 0 }); };
 
-  const openRx = () => { setSelRx(null); setNote(''); setPhoto(undefined); setRxOpen(true); };
+  const openRx = () => { setRxVariant(null); setSelRx(null); setNote(''); setPhoto(undefined); setRxOpen(true); };
+  const openRxVariant = (v: { key: string; label: string }) => { setRxVariant(v); setSelRx(null); setNote(''); setPhoto(undefined); setRxOpen(true); };
+  // статус отдельного вида: была ли реакция, введён ли
+  const variantStatus = (key: string) => {
+    const vid = `${f.id}:${key}`;
+    const bad = log.some((l) => l.id === vid && (l.rx === 'skin' || l.rx === 'tummy'));
+    if (bad) return { cls: 'bad', text: '⚠️ была реакция' };
+    if (introduced.has(vid)) return { cls: 'in', text: '✓ введён' };
+    return { cls: '', text: 'ещё не пробовали' };
+  };
 
   const onPhoto = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -127,11 +137,14 @@ export function ProductSheet({ food, onClose }: { food: Food; onClose: () => voi
 
   const saveEntry = () => {
     if (!selRx) return;
-    logFood(f.id, selRx, note, photo);
+    const targetId = rxVariant ? `${f.id}:${rxVariant.key}` : f.id;
+    const targetName = rxVariant ? rxVariant.label : f.n;
+    logFood(targetId, selRx, note, photo);
     setRxOpen(false);
     if (selRx === 'skin' || selRx === 'tummy') showToast('👀', 'Реакция записана', 'Отметили — покажите аллергологу');
-    else showToast('✓', 'Записано в дневник', `${f.n}${photo ? ' · с фото 📷' : ''}`);
-    onClose();
+    else showToast('✓', 'Записано в дневник', `${targetName}${photo ? ' · с фото 📷' : ''}`);
+    if (!rxVariant) onClose();
+    setRxVariant(null);
   };
 
   return createPortal(
@@ -241,6 +254,29 @@ export function ProductSheet({ food, onClose }: { food: Food; onClose: () => voi
             </>
           )}
 
+          {f.variants && (
+            <>
+              <div className="section-t">Чек-лист: вводим по одному
+                <span className="var-progress">{f.variants.filter((v) => introduced.has(`${f.id}:${v.key}`)).length} из {f.variants.length}</span>
+              </div>
+              <div className="note" style={{ marginBottom: 10 }}><span className="ne">🗓</span><span>Каждый вид — отдельный аллерген: вводите по одному, по правилу 3 дней, и отмечайте здесь реакцию.</span></div>
+              <ul className="var-list">
+                {f.variants.map((v) => {
+                  const st = variantStatus(v.key);
+                  return (
+                    <li key={v.key}>
+                      <div className="grow">
+                        <div className="var-n">{v.label}</div>
+                        <div className={`var-status ${st.cls}`}>{st.text}</div>
+                      </div>
+                      <button className="var-add" onClick={() => openRxVariant(v)}>записать</button>
+                    </li>
+                  );
+                })}
+              </ul>
+            </>
+          )}
+
           <div className="section-t">О продукте</div>
           <div className="note"><span className="ne">💚</span><span><b>Польза:</b> {f.benefit}</span></div>
           {!f.tips?.length && <div className="note"><span className="ne">👩‍🍳</span><span><b>Как приготовить:</b> {f.cook}</span></div>}
@@ -276,7 +312,7 @@ export function ProductSheet({ food, onClose }: { food: Food; onClose: () => voi
             </>
           )}
 
-          <button className="btn btn-primary" style={{ marginTop: 12 }} onClick={openRx}>✓ Дали сегодня — в дневник</button>
+          {!f.variants && <button className="btn btn-primary" style={{ marginTop: 12 }} onClick={openRx}>✓ Дали сегодня — в дневник</button>}
           {canAllergen && (
             <button className="btn btn-soft" style={{ marginTop: 8 }} onClick={() => { startAllergen(f.id); showToast('🗓', `Ввод начат: ${f.n}`, 'Давайте утром 3 дня подряд'); onClose(); }}>
               🗓 Начать ввод по правилу 3 дней
@@ -310,7 +346,7 @@ export function ProductSheet({ food, onClose }: { food: Food; onClose: () => voi
                   {MAIN_PHOTOS[f.id] ? <img src={MAIN_PHOTOS[f.id]} alt={f.n} /> : <FoodIcon food={f} size={54} />}
                 </div>
                 <div>
-                  <div className="rx-hero-n">{f.n}</div>
+                  <div className="rx-hero-n">{rxVariant ? rxVariant.label : f.n}</div>
                   <div className="rx-hero-s">Как прошла проба?</div>
                 </div>
               </div>
