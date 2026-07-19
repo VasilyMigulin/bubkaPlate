@@ -11,6 +11,18 @@
   display:flex; flex-direction:column; align-items:center;
   background:color-mix(in srgb, var(--card) 72%, transparent); backdrop-filter:blur(8px);
   border-radius:999px; padding:6px 2px; box-shadow:var(--shadow);
+  opacity:0; pointer-events:none; transition:opacity .25s ease; touch-action:none;
+}
+.alpha-rail.show { opacity:1; pointer-events:auto; }
+.alpha-rail button.cur { color:#fff; background:var(--accent); border-radius:999px; }
+.alpha-bubble {
+  position:fixed; z-index:31; transform:translateY(-50%);
+  right:max(40px, calc((100vw - 440px) / 2 + 40px));
+  width:48px; height:48px; border-radius:50%;
+  background:var(--card); box-shadow:var(--shadow-lg);
+  display:flex; align-items:center; justify-content:center;
+  font-size:22px; font-weight:800; color:var(--accent);
+  animation:popIn .15s both;
 }
 .alpha-rail button {
   border:none; background:none; font-family:inherit; font-size:10px; font-weight:700;

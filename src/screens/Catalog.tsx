@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { BIG_ALLERGENS, CATEGORIES, FOODS } from '../data/foods';
 import { RULE3_TEXT } from '../data/glossary';
@@ -58,12 +58,42 @@ export function Catalog() {
   }, [listed]);
   const showRail = !query && listed.length > 14;
 
-  const jumpTo = (letter: string) => {
+  // Линейка видна только во время скролла (как скраббер в Google Docs) и прячется сама.
+  const [railOn, setRailOn] = useState(false);
+  const [scrub, setScrub] = useState<{ letter: string; y: number } | null>(null);
+  const hideTimer = useRef<number | undefined>(undefined);
+  const railRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const sc = document.querySelector('.app-scroll');
+    if (!sc) return;
+    const onScroll = () => {
+      setRailOn(true);
+      window.clearTimeout(hideTimer.current);
+      hideTimer.current = window.setTimeout(() => setRailOn(false), 1500);
+    };
+    sc.addEventListener('scroll', onScroll, { passive: true });
+    return () => { sc.removeEventListener('scroll', onScroll); window.clearTimeout(hideTimer.current); };
+  }, []);
+
+  const jumpTo = (letter: string, smooth = true) => {
     const el = document.querySelector<HTMLElement>(`[data-letter="${letter}"]`);
     const scroller = document.querySelector<HTMLElement>('.app-scroll');
     if (!el || !scroller) return;
     const top = el.getBoundingClientRect().top - scroller.getBoundingClientRect().top + scroller.scrollTop - 10;
-    scroller.scrollTo({ top: Math.max(0, top), behavior: 'smooth' });
+    scroller.scrollTo({ top: Math.max(0, top), behavior: smooth ? 'smooth' : 'auto' });
+  };
+
+  // Ведение пальцем по линейке: буква под пальцем + мгновенный переход.
+  const scrubTo = (clientY: number) => {
+    const rect = railRef.current?.getBoundingClientRect();
+    if (!rect || letters.length === 0) return;
+    const idx = Math.min(letters.length - 1, Math.max(0, Math.floor(((clientY - rect.top) / rect.height) * letters.length)));
+    const letter = letters[idx];
+    setScrub({ letter, y: clientY });
+    window.clearTimeout(hideTimer.current);
+    setRailOn(true);
+    jumpTo(letter, false);
   };
 
   const renderCard = (f: Food, i: number) => {
@@ -142,11 +172,21 @@ export function Catalog() {
       <div className="food-grid">{listed.map(renderCard)}</div>
 
       {showRail && createPortal(
-        <div className="alpha-rail" aria-hidden>
-          {letters.map((l) => (
-            <button key={l} onClick={() => jumpTo(l)}>{l}</button>
-          ))}
-        </div>,
+        <>
+          <div
+            ref={railRef}
+            className={`alpha-rail ${railOn || scrub ? 'show' : ''}`}
+            aria-hidden
+            onTouchStart={(e) => scrubTo(e.touches[0].clientY)}
+            onTouchMove={(e) => scrubTo(e.touches[0].clientY)}
+            onTouchEnd={() => { setScrub(null); hideTimer.current = window.setTimeout(() => setRailOn(false), 1200); }}
+          >
+            {letters.map((l) => (
+              <button key={l} className={scrub?.letter === l ? 'cur' : ''} onClick={() => jumpTo(l)}>{l}</button>
+            ))}
+          </div>
+          {scrub && <div className="alpha-bubble" style={{ top: scrub.y }}>{scrub.letter}</div>}
+        </>,
         document.body
       )}
 
