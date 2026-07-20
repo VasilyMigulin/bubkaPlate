@@ -16,11 +16,26 @@ export function RecipeSheet({ recipe, onClose }: { recipe: Recipe; onClose: () =
           <span className="tag">{recipe.time}</span>
           {recipe.ing.map((i) => <span key={i} className="tag">{i}</span>)}
         </div>
+        {recipe.allergens.length > 0 ? (
+          <div className="note alert" style={{ marginTop: 12 }}><span className="ne">⚠️</span><span><b>Аллергены в составе:</b> {recipe.allergens.join(', ')}. Каждый должен быть уже введён по отдельности — новые аллергены в составе блюд не вводим.</span></div>
+        ) : (
+          <div className="note" style={{ marginTop: 12 }}><span className="ne">✅</span><span>Частых аллергенов в составе нет.</span></div>
+        )}
+
         <div className="section-t">Шаги</div>
         {recipe.steps.map((s, i) => (
           <div key={i} className="step"><div className="step-n">{i + 1}</div><div className="step-t">{s}</div></div>
         ))}
         <div className="note" style={{ marginTop: 10 }}><span className="ne">💡</span><span>{recipe.note}</span></div>
+        <div className="note"><span className="ne">🧊</span><span><b>Хранение:</b> {recipe.storage}</span></div>
+        {recipe.gear && recipe.gear.length > 0 && (
+          <>
+            <div className="section-t">🛒 Полезные покупки</div>
+            <ul className="tips-list">
+              {recipe.gear.map((g, i) => <li key={i}>{g}</li>)}
+            </ul>
+          </>
+        )}
         <button className="btn btn-primary" style={{ marginTop: 8 }} onClick={() => { onClose(); showToast('🥣', 'Приготовили!', 'Записано в дневник прикорма'); }}>
           Приготовили ✓
         </button>

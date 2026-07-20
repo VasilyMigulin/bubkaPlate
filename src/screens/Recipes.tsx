@@ -4,8 +4,11 @@ import { RecipeSheet } from '../components/RecipeSheet';
 import { useStore } from '../state/store';
 import './Recipes.css';
 
+const AGES = ['6+', '9+', '12+'] as const;
+
 export function Recipes() {
   const [sel, setSel] = useState<Set<string>>(new Set(['банан', 'овсянка', 'яйцо']));
+  const [ageF, setAgeF] = useState<string>('all');
   const [open, setOpen] = useState<Recipe | null>(null);
   const { showToast } = useStore();
 
@@ -16,13 +19,20 @@ export function Recipes() {
   });
 
   const list = useMemo(() =>
-    RECIPES.map((r) => ({ r, hit: r.ing.filter((i) => sel.has(i)).length }))
+    RECIPES.filter((r) => ageF === 'all' || r.age === ageF)
+      .map((r) => ({ r, hit: r.ing.filter((i) => sel.has(i)).length }))
       .filter((x) => sel.size === 0 || x.hit > 0)
       .sort((a, b) => b.hit / b.r.ing.length - a.hit / a.r.ing.length)
-      .map((x) => x.r), [sel]);
+      .map((x) => x.r), [sel, ageF]);
 
   return (
     <>
+      <div className="segs" style={{ marginBottom: 10 }}>
+        <button className={`chip ${ageF === 'all' ? 'on' : ''}`} onClick={() => setAgeF('all')}>Все</button>
+        {AGES.map((a) => (
+          <button key={a} className={`chip ${ageF === a ? 'on' : ''}`} onClick={() => setAgeF(ageF === a ? 'all' : a)}>{a} мес</button>
+        ))}
+      </div>
       <div className="eyebrow" style={{ marginBottom: 8 }}>Что есть дома? Отметьте — подберём</div>
       <div className="pantry">
         {PANTRY.map((p) => (
