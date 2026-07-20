@@ -7,7 +7,7 @@ import './Recipes.css';
 const AGES = ['6+', '9+', '12+'] as const;
 
 export function Recipes() {
-  const [sel, setSel] = useState<Set<string>>(new Set(['банан', 'овсянка', 'яйцо']));
+  const [sel, setSel] = useState<Set<string>>(new Set());
   const [ageF, setAgeF] = useState<string>('all');
   const [open, setOpen] = useState<Recipe | null>(null);
   const { showToast } = useStore();
