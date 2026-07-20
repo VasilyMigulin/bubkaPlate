@@ -8,6 +8,7 @@ const AGES = ['6+', '9+', '12+'] as const;
 
 export function Recipes() {
   const [sel, setSel] = useState<Set<string>>(new Set());
+  const [pantryOpen, setPantryOpen] = useState(false);
   const [ageF, setAgeF] = useState<string>('all');
   const [open, setOpen] = useState<Recipe | null>(null);
   const { showToast } = useStore();
@@ -34,10 +35,16 @@ export function Recipes() {
         ))}
       </div>
       <div className="eyebrow" style={{ marginBottom: 8 }}>Что есть дома? Отметьте — подберём</div>
-      <div className="pantry">
-        {PANTRY.map((p) => (
+      <div className={`pantry ${pantryOpen ? 'open' : ''}`}>
+        {(pantryOpen ? PANTRY : PANTRY.slice(0, 8)).map((p) => (
           <button key={p} className={`chip ${sel.has(p) ? 'on' : ''}`} onClick={() => toggle(p)}>{p}</button>
         ))}
+        {!pantryOpen && [...sel].filter((p) => !PANTRY.slice(0, 8).includes(p)).map((p) => (
+          <button key={p} className="chip on" onClick={() => toggle(p)}>{p}</button>
+        ))}
+        <button className="chip chip-more" onClick={() => setPantryOpen(!pantryOpen)}>
+          {pantryOpen ? 'свернуть ↑' : `ещё ${PANTRY.length - 8} ↓`}
+        </button>
       </div>
 
       {list.map((r) => (
