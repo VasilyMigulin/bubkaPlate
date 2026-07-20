@@ -10,6 +10,7 @@ import { useStore } from '../state/store';
 export function RecipeSheet({ recipe, onClose }: { recipe: Recipe; onClose: () => void }) {
   const { showToast } = useStore();
   const [foodOpen, setFoodOpen] = useState<Food | null>(null);
+  const [inCart, setInCart] = useState(false);
   return createPortal(
     <div className="recipe-view">
       <button className="ps-back" onClick={onClose} aria-label="Назад">‹</button>
@@ -38,14 +39,16 @@ export function RecipeSheet({ recipe, onClose }: { recipe: Recipe; onClose: () =
             <ul className="tips-list">
               {recipe.items.map((it, i) => <li key={i}>{it}</li>)}
             </ul>
-            <button className="btn btn-soft" style={{ marginTop: 8 }} onClick={() => {
+            <button className={`btn ${inCart ? 'btn-done' : 'btn-soft'}`} style={{ marginTop: 8 }} onClick={() => {
+              if (inCart) return;
               try {
                 const cur = JSON.parse(localStorage.getItem('bubka-plate-shoplist') || '[]') as string[];
                 const added = recipe.items!.filter((it) => !cur.includes(it));
                 localStorage.setItem('bubka-plate-shoplist', JSON.stringify([...cur, ...added]));
-                showToast('🛒', 'В списке покупок', `${recipe.n}: +${added.length}`);
+                setInCart(true);
+                showToast('🛒', `+${added.length} в список покупок`, 'Список — под значком 🛒 вверху раздела «Рецепты»');
               } catch { /* ignore */ }
-            }}>🛒 В список покупок</button>
+            }}>{inCart ? '✓ Добавлено · список под 🛒 в «Рецептах»' : '🛒 В список покупок'}</button>
           </>
         )}
 

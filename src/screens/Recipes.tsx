@@ -84,7 +84,9 @@ export function Recipes() {
         <button className={`exc-btn ${activeFilters > 0 ? 'active-f' : ''}`} onClick={() => setFiltOpen(true)}>
           ⚙️ Фильтры{activeFilters > 0 ? ` · ${activeFilters}` : ''}
         </button>
-        <button className="exc-btn shop" onClick={openShop}>🛒</button>
+        <button className="exc-btn shop" onClick={openShop}>
+          🛒{(() => { try { const n = (JSON.parse(localStorage.getItem(SHOP_KEY) || '[]') as string[]).length; return n > 0 ? <span className="shop-badge">{n}</span> : null; } catch { return null; } })()}
+        </button>
       </div>
       {activeFilters > 0 && (
         <div className="filter-line">

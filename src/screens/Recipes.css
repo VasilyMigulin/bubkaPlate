@@ -53,3 +53,8 @@
 .bs-label { font-size:11px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:var(--text2); margin:14px 2px 8px; }
 .filter-line { display:flex; flex-wrap:wrap; gap:6px; align-items:center; margin-bottom:12px; }
 .warn-tag { color:var(--danger); background:color-mix(in srgb, var(--danger) 10%, transparent); }
+
+.exc-btn.shop { position:relative; }
+.shop-badge { position:absolute; top:2px; right:2px; min-width:17px; height:17px; border-radius:999px; background:var(--accent);
+  color:#fff; font-size:10px; font-weight:800; display:flex; align-items:center; justify-content:center; padding:0 4px; }
+.btn-done { background:var(--accent-soft); color:var(--accent); font-weight:700; }
