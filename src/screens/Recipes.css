@@ -21,3 +21,6 @@
 
 /* свёрнутая кладовка + кнопка-раскрывашка */
 .chip-more { color:var(--accent); background:var(--accent-soft); font-weight:700; }
+
+/* ингредиент-ссылка в карточке рецепта */
+.tag-link { border:none; font-family:inherit; cursor:pointer; color:var(--accent); background:var(--accent-soft); font-weight:700; }

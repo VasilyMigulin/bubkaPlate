@@ -1,10 +1,15 @@
+import { useState } from 'react';
 import { createPortal } from 'react-dom';
 import type { Recipe } from '../data/recipes';
+import { findFoodByIng } from '../data/foods';
+import type { Food } from '../types';
+import { ProductSheet } from './ProductSheet';
 import { useStore } from '../state/store';
 
 /** Полноэкранная карточка рецепта (портал — работает из каталога и из карточки продукта). */
 export function RecipeSheet({ recipe, onClose }: { recipe: Recipe; onClose: () => void }) {
   const { showToast } = useStore();
+  const [foodOpen, setFoodOpen] = useState<Food | null>(null);
   return createPortal(
     <div className="recipe-view">
       <button className="ps-back" onClick={onClose} aria-label="Назад">‹</button>
@@ -14,13 +19,20 @@ export function RecipeSheet({ recipe, onClose }: { recipe: Recipe; onClose: () =
         <div className="rm" style={{ marginTop: 8 }}>
           <span className="tag green">{recipe.age} мес</span>
           <span className="tag">{recipe.time}</span>
-          {recipe.ing.map((i) => <span key={i} className="tag">{i}</span>)}
+          {recipe.ing.map((i) => {
+            const food = findFoodByIng(i);
+            return food
+              ? <button key={i} className="tag tag-link" onClick={() => setFoodOpen(food)}>{food.e} {i}</button>
+              : <span key={i} className="tag">{i}</span>;
+          })}
         </div>
         {recipe.allergens.length > 0 ? (
           <div className="note alert" style={{ marginTop: 12 }}><span className="ne">⚠️</span><span><b>Аллергены в составе:</b> {recipe.allergens.join(', ')}. Каждый должен быть уже введён по отдельности — новые аллергены в составе блюд не вводим.</span></div>
         ) : (
           <div className="note" style={{ marginTop: 12 }}><span className="ne">✅</span><span>Частых аллергенов в составе нет.</span></div>
         )}
+
+        {recipe.out && <div className="note" style={{ marginTop: 10 }}><span className="ne">🍽</span><span><b>Выход:</b> {recipe.out}</span></div>}
 
         <div className="section-t">Шаги</div>
         {recipe.steps.map((s, i) => (
@@ -40,6 +52,8 @@ export function RecipeSheet({ recipe, onClose }: { recipe: Recipe; onClose: () =
           Приготовили ✓
         </button>
       </div>
+
+      {foodOpen && <ProductSheet food={foodOpen} elevated onClose={() => setFoodOpen(null)} />}
     </div>,
     document.body,
   );
