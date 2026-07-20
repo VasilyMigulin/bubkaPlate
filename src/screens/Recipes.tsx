@@ -1,4 +1,6 @@
 import { useMemo, useState } from 'react';
+import { createPortal } from 'react-dom';
+import { FOODS, findFoodByIng } from '../data/foods';
 import { PANTRY, RECIPES, type Recipe } from '../data/recipes';
 import { RecipeSheet } from '../components/RecipeSheet';
 import { useStore } from '../state/store';
@@ -10,24 +12,48 @@ const KINDS: { key: string; label: string }[] = [
   { key: 'мясо', label: '🍖 Мясо и рыба' }, { key: 'овощ', label: '🥦 Овощи и закуски' },
   { key: 'выпечка', label: '🧁 Выпечка' }, { key: 'десерт', label: '🍨 Десерты' }, { key: 'заготовки', label: '🧊 Заготовки' },
 ];
-const ALLERGENS = ['молоко', 'яйцо', 'глютен', 'рыба', 'морепродукты', 'арахис', 'орехи', 'соя', 'кунжут'];
-const NOAL_KEY = 'bubka-plate-noallergens';
+const EXC_KEY = 'bubka-plate-exclusions';
+// служебные карточки, которые бессмысленно «исключать» из рецептов
+const NOT_EXCLUDABLE = new Set(['water', 'juice', 'compote', 'spices', 'oil', 'honey', 'canned']);
+const SHOP_KEY = 'bubka-plate-shoplist';
 
 export function Recipes() {
   const [sel, setSel] = useState<Set<string>>(new Set());
   const [pantryOpen, setPantryOpen] = useState(false);
   const [ageF, setAgeF] = useState<string>('all');
   const [kindF, setKindF] = useState<string>('all');
-  const [alOpen, setAlOpen] = useState(false);
-  const [noAl, setNoAl] = useState<Set<string>>(() => {
-    try { return new Set(JSON.parse(localStorage.getItem(NOAL_KEY) || '[]') as string[]); } catch { return new Set(); }
+  const [filtOpen, setFiltOpen] = useState(false);
+  const [excOpen, setExcOpen] = useState(false);
+  const [excQ, setExcQ] = useState('');
+  const [exc, setExc] = useState<Set<string>>(() => {
+    try { return new Set(JSON.parse(localStorage.getItem(EXC_KEY) || '[]') as string[]); } catch { return new Set(); }
   });
-  const toggleAl = (a: string) => setNoAl((prev) => {
+  const toggleExc = (name: string) => setExc((prev) => {
     const n = new Set(prev);
-    n.has(a) ? n.delete(a) : n.add(a);
-    localStorage.setItem(NOAL_KEY, JSON.stringify([...n]));
+    n.has(name) ? n.delete(name) : n.add(name);
+    localStorage.setItem(EXC_KEY, JSON.stringify([...n]));
     return n;
   });
+  // аллергены исключённых продуктов: исключили «молоко (коровье)» → прячем и всё с аллергеном «молоко»
+  const excAllergens = useMemo(() => {
+    const set = new Set<string>();
+    exc.forEach((n) => { const f = findFoodByIng(n); if (f?.allergen) set.add(f.allergen); });
+    return set;
+  }, [exc]);
+  const isExcluded = (r: Recipe) =>
+    [...exc].some((x) => r.ing.some((i) => i.includes(x) || x.includes(i))) ||
+    r.allergens.some((a) => excAllergens.has(a));
+
+  const [shopOpen, setShopOpen] = useState(false);
+  const [shop, setShop] = useState<string[]>([]);
+  const openShop = () => {
+    try { setShop(JSON.parse(localStorage.getItem(SHOP_KEY) || '[]') as string[]); } catch { setShop([]); }
+    setShopOpen(true);
+  };
+  const rmShop = (it: string) => {
+    const n = shop.filter((x) => x !== it);
+    setShop(n); localStorage.setItem(SHOP_KEY, JSON.stringify(n));
+  };
   const [open, setOpen] = useState<Recipe | null>(null);
   const { showToast } = useStore();
 
@@ -40,50 +66,35 @@ export function Recipes() {
   const list = useMemo(() =>
     RECIPES.filter((r) => ageF === 'all' || r.age === ageF)
       .filter((r) => kindF === 'all' || r.kind === kindF)
-      .filter((r) => noAl.size === 0 || !r.allergens.some((a) => noAl.has(a)))
+      .filter((r) => exc.size === 0 || !isExcluded(r))
       .map((r) => ({ r, hit: r.ing.filter((i) => sel.has(i)).length }))
       .filter((x) => sel.size === 0 || x.hit > 0)
       .sort((a, b) => b.hit / b.r.ing.length - a.hit / a.r.ing.length)
-      .map((x) => x.r), [sel, ageF, kindF, noAl]);
+      .map((x) => x.r), [sel, ageF, kindF, exc, excAllergens]);
+
+  const activeFilters = (ageF !== 'all' ? 1 : 0) + (kindF !== 'all' ? 1 : 0) + (sel.size > 0 ? 1 : 0) + (exc.size > 0 ? 1 : 0);
+
+  const resetFilters = () => {
+    setAgeF('all'); setKindF('all'); setSel(new Set());
+  };
 
   return (
     <>
-      <div className="segs" style={{ marginBottom: 10 }}>
-        <button className={`chip ${ageF === 'all' ? 'on' : ''}`} onClick={() => setAgeF('all')}>Все</button>
-        {AGES.map((a) => (
-          <button key={a} className={`chip ${ageF === a ? 'on' : ''}`} onClick={() => setAgeF(ageF === a ? 'all' : a)}>{a} мес</button>
-        ))}
+      <div className="exc-row">
+        <button className={`exc-btn ${activeFilters > 0 ? 'active-f' : ''}`} onClick={() => setFiltOpen(true)}>
+          ⚙️ Фильтры{activeFilters > 0 ? ` · ${activeFilters}` : ''}
+        </button>
+        <button className="exc-btn shop" onClick={openShop}>🛒</button>
       </div>
-      <div className="segs" style={{ marginBottom: 10 }}>
-        <button className={`chip chip-mini ${kindF === 'all' ? 'on' : ''}`} onClick={() => setKindF('all')}>Все</button>
-        {KINDS.map((k) => (
-          <button key={k.key} className={`chip chip-mini ${kindF === k.key ? 'on' : ''}`} onClick={() => setKindF(kindF === k.key ? 'all' : k.key)}>{k.label}</button>
-        ))}
-      </div>
-
-      <button className={`al-toggle ${noAl.size > 0 ? 'active' : ''}`} onClick={() => setAlOpen(!alOpen)}>
-        ⚠️ Аллергия? Скроем рецепты {noAl.size > 0 ? `· скрыто: ${[...noAl].join(', ')}` : ''} {alOpen ? '↑' : '↓'}
-      </button>
-      {alOpen && (
-        <div className="segs" style={{ marginBottom: 10 }}>
-          {ALLERGENS.map((a) => (
-            <button key={a} className={`chip chip-mini ${noAl.has(a) ? 'on warn' : ''}`} onClick={() => toggleAl(a)}>{noAl.has(a) ? '✕ ' : ''}{a}</button>
-          ))}
+      {activeFilters > 0 && (
+        <div className="filter-line">
+          {ageF !== 'all' && <span className="tag green">{ageF} мес</span>}
+          {kindF !== 'all' && <span className="tag">{KINDS.find((k) => k.key === kindF)?.label}</span>}
+          {[...sel].map((p) => <span key={p} className="tag green">✓ {p}</span>)}
+          {exc.size > 0 && <span className="tag warn-tag">🚫 {[...exc].join(', ')}</span>}
+          <button className="term-link" onClick={() => { resetFilters(); }}>сбросить</button>
         </div>
       )}
-
-      <div className="eyebrow" style={{ marginBottom: 8 }}>Что есть дома? Отметьте — подберём</div>
-      <div className={`pantry ${pantryOpen ? 'open' : ''}`}>
-        {(pantryOpen ? PANTRY : PANTRY.slice(0, 8)).map((p) => (
-          <button key={p} className={`chip ${sel.has(p) ? 'on' : ''}`} onClick={() => toggle(p)}>{p}</button>
-        ))}
-        {!pantryOpen && [...sel].filter((p) => !PANTRY.slice(0, 8).includes(p)).map((p) => (
-          <button key={p} className="chip on" onClick={() => toggle(p)}>{p}</button>
-        ))}
-        <button className="chip chip-more" onClick={() => setPantryOpen(!pantryOpen)}>
-          {pantryOpen ? 'свернуть ↑' : `ещё ${PANTRY.length - 8} ↓`}
-        </button>
-      </div>
 
       {list.map((r) => (
         <button key={r.n} className="recipe" onClick={() => setOpen(r)}>
@@ -109,6 +120,102 @@ export function Recipes() {
 
       {open && (
         <RecipeSheet recipe={open} onClose={() => setOpen(null)} />
+      )}
+
+      {filtOpen && createPortal(
+        <div className="sheet-scrim" onClick={() => setFiltOpen(false)}>
+          <div className="bottom-sheet" onClick={(e) => e.stopPropagation()}>
+            <div className="grab" />
+            <div className="bs-title">Фильтры</div>
+
+            <div className="bs-label">Возраст</div>
+            <div className="exc-grid">
+              <button className={`chip ${ageF === 'all' ? 'on' : ''}`} onClick={() => setAgeF('all')}>Все</button>
+              {AGES.map((a) => (
+                <button key={a} className={`chip ${ageF === a ? 'on' : ''}`} onClick={() => setAgeF(ageF === a ? 'all' : a)}>{a} мес</button>
+              ))}
+            </div>
+
+            <div className="bs-label">Тип блюда</div>
+            <div className="exc-grid">
+              {KINDS.map((k) => (
+                <button key={k.key} className={`chip ${kindF === k.key ? 'on' : ''}`} onClick={() => setKindF(kindF === k.key ? 'all' : k.key)}>{k.label}</button>
+              ))}
+            </div>
+
+            <div className="bs-label">Что есть дома — подберём рецепты</div>
+            <div className="exc-grid">
+              {(pantryOpen ? PANTRY : PANTRY.slice(0, 10)).map((p) => (
+                <button key={p} className={`chip ${sel.has(p) ? 'on' : ''}`} onClick={() => toggle(p)}>{p}</button>
+              ))}
+              {!pantryOpen && [...sel].filter((p) => !PANTRY.slice(0, 10).includes(p)).map((p) => (
+                <button key={p} className="chip on" onClick={() => toggle(p)}>{p}</button>
+              ))}
+              <button className="chip chip-more" onClick={() => setPantryOpen(!pantryOpen)}>
+                {pantryOpen ? 'свернуть ↑' : `ещё ${PANTRY.length - 10} ↓`}
+              </button>
+            </div>
+
+            <div className="bs-label">Исключения</div>
+            <button className={`exc-btn ${exc.size > 0 ? 'active' : ''}`} style={{ width: '100%' }} onClick={() => { setExcQ(''); setExcOpen(true); }}>
+              🚫 {exc.size > 0 ? <>Исключено: <b>{[...exc].join(', ')}</b></> : 'Исключить продукты — аллергия или не любит'}
+            </button>
+
+            <button className="btn btn-primary" style={{ marginTop: 14 }} onClick={() => setFiltOpen(false)}>
+              Показать рецепты{activeFilters > 0 ? ` · фильтров: ${activeFilters}` : ''}
+            </button>
+            {activeFilters > 0 && <button className="btn btn-soft" style={{ marginTop: 8 }} onClick={resetFilters}>Сбросить всё</button>}
+          </div>
+        </div>,
+        document.body,
+      )}
+
+      {excOpen && createPortal(
+        <div className="sheet-scrim" onClick={() => setExcOpen(false)}>
+          <div className="bottom-sheet" onClick={(e) => e.stopPropagation()}>
+            <div className="grab" />
+            <div className="bs-title">Не показывать рецепты с:</div>
+            <div className="sub" style={{ marginBottom: 10 }}>Аллергия, «пока не вводим», не любит, не едите по убеждениям — любая причина.</div>
+            <input className="search" placeholder="Найти продукт…" value={excQ} onChange={(e) => setExcQ(e.target.value)} />
+            <div className="exc-grid">
+              {[...FOODS].filter((f) => !NOT_EXCLUDABLE.has(f.id)).sort((a, b) => (exc.has(a.n.toLowerCase()) === exc.has(b.n.toLowerCase()) ? a.n.localeCompare(b.n, 'ru') : exc.has(a.n.toLowerCase()) ? -1 : 1))
+                .filter((f) => !excQ || f.n.toLowerCase().includes(excQ.toLowerCase()))
+                .map((f) => {
+                  const key = f.n.toLowerCase();
+                  return (
+                    <button key={f.id} className={`chip ${exc.has(key) ? 'on warn' : ''}`} onClick={() => toggleExc(key)}>
+                      {exc.has(key) ? '✕ ' : ''}{f.e} {f.n}
+                    </button>
+                  );
+                })}
+            </div>
+            <button className="btn btn-primary" style={{ marginTop: 12 }} onClick={() => setExcOpen(false)}>Готово{exc.size > 0 ? ` · скрыто из ${exc.size}` : ''}</button>
+          </div>
+        </div>,
+        document.body,
+      )}
+
+      {shopOpen && createPortal(
+        <div className="sheet-scrim" onClick={() => setShopOpen(false)}>
+          <div className="bottom-sheet" onClick={(e) => e.stopPropagation()}>
+            <div className="grab" />
+            <div className="bs-title">🛒 Список покупок</div>
+            {shop.length === 0 && <div className="sub" style={{ padding: '10px 0 16px' }}>Пока пусто. Откройте рецепт и нажмите «В список покупок».</div>}
+            <ul className="shop-list">
+              {shop.map((it) => (
+                <li key={it}>
+                  <span>{it}</span>
+                  <button onClick={() => rmShop(it)} aria-label="Убрать">✕</button>
+                </li>
+              ))}
+            </ul>
+            {shop.length > 0 && (
+              <button className="btn btn-soft" style={{ marginTop: 10 }} onClick={() => { setShop([]); localStorage.setItem(SHOP_KEY, '[]'); }}>Очистить список</button>
+            )}
+            <button className="btn btn-primary" style={{ marginTop: 8 }} onClick={() => setShopOpen(false)}>Готово</button>
+          </div>
+        </div>,
+        document.body,
       )}
     </>
   );

@@ -32,6 +32,23 @@ export function RecipeSheet({ recipe, onClose }: { recipe: Recipe; onClose: () =
           <div className="note" style={{ marginTop: 12 }}><span className="ne">✅</span><span>Частых аллергенов в составе нет.</span></div>
         )}
 
+        {recipe.items && recipe.items.length > 0 && (
+          <>
+            <div className="section-t">Ингредиенты</div>
+            <ul className="tips-list">
+              {recipe.items.map((it, i) => <li key={i}>{it}</li>)}
+            </ul>
+            <button className="btn btn-soft" style={{ marginTop: 8 }} onClick={() => {
+              try {
+                const cur = JSON.parse(localStorage.getItem('bubka-plate-shoplist') || '[]') as string[];
+                const added = recipe.items!.filter((it) => !cur.includes(it));
+                localStorage.setItem('bubka-plate-shoplist', JSON.stringify([...cur, ...added]));
+                showToast('🛒', 'В списке покупок', `${recipe.n}: +${added.length}`);
+              } catch { /* ignore */ }
+            }}>🛒 В список покупок</button>
+          </>
+        )}
+
         {recipe.out && <div className="note" style={{ marginTop: 10 }}><span className="ne">🍽</span><span><b>Выход:</b> {recipe.out}</span></div>}
 
         <div className="section-t">Шаги</div>

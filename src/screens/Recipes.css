@@ -28,6 +28,28 @@
 /* фильтры рецептов */
 .chip-mini { font-size:12px; padding:7px 12px; }
 .chip.on.warn { background:var(--danger); border-color:var(--danger); color:#fff; }
-.al-toggle { display:block; width:100%; text-align:left; border:none; background:none; font-family:inherit;
-  font-size:12.5px; font-weight:650; color:var(--text2); padding:2px 2px 10px; cursor:pointer; }
-.al-toggle.active { color:var(--danger); }
+
+/* исключения + список покупок */
+.exc-row { display:flex; gap:8px; margin-bottom:12px; }
+.exc-btn { flex:1; text-align:left; border:none; font-family:inherit; font-size:12.5px; font-weight:600;
+  color:var(--text2); background:var(--card); border-radius:14px; padding:11px 14px; box-shadow:var(--shadow); cursor:pointer; }
+.exc-btn.active { color:var(--danger); }
+.exc-btn.active b { font-weight:700; }
+.exc-btn.shop { flex:none; font-size:16px; padding:11px 14px; }
+
+.sheet-scrim { position:fixed; inset:0; z-index:70; background:rgba(20,16,12,.45); display:flex; align-items:flex-end; animation:fade .2s both; }
+.bottom-sheet { width:100%; max-width:440px; margin:0 auto; max-height:80dvh; overflow-y:auto; background:var(--bg);
+  border-radius:24px 24px 0 0; padding:10px 18px calc(20px + env(safe-area-inset-bottom));
+  animation:slideup .3s cubic-bezier(.22,.9,.3,1) both; }
+.bs-title { font-size:17px; font-weight:750; margin-bottom:4px; }
+.exc-grid { display:flex; flex-wrap:wrap; gap:8px; margin-top:12px; }
+.shop-list { list-style:none; }
+.shop-list li { display:flex; align-items:center; gap:10px; padding:10px 0; border-bottom:1px solid var(--hairline); font-size:14px; }
+.shop-list li span { flex:1; }
+.shop-list li button { border:none; background:var(--elev); color:var(--text2); width:26px; height:26px; border-radius:50%; font-size:12px; }
+
+/* единая кнопка фильтров */
+.exc-btn.active-f { color:var(--accent); font-weight:700; }
+.bs-label { font-size:11px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:var(--text2); margin:14px 2px 8px; }
+.filter-line { display:flex; flex-wrap:wrap; gap:6px; align-items:center; margin-bottom:12px; }
+.warn-tag { color:var(--danger); background:color-mix(in srgb, var(--danger) 10%, transparent); }
