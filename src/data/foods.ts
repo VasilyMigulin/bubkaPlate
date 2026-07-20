@@ -1224,6 +1224,16 @@ export function resolveFoodRef(id: string): { food: Food | undefined; label?: st
   return { food, label };
 }
 
+/** Ингредиент рецепта («батат», «кунжут (тахини)») → карточка продукта. */
+export function findFoodByIng(name: string): Food | undefined {
+  const q = name.toLowerCase().trim();
+  return FOODS.find((f) => {
+    const n = f.n.toLowerCase();
+    const base = n.split(' (')[0];
+    return n === q || base === q || n.includes(q) || q.includes(base);
+  });
+}
+
 export const BIG_ALLERGENS = new Set(['арахис', 'орехи', 'яйцо', 'молоко', 'рыба', 'кунжут', 'глютен', 'соя', 'морепродукты']);
 export const IRON_IDS = FOODS.filter((f) => f.iron).map((f) => f.id);
 export const CATEGORIES: Food['cat'][] = ['Овощи', 'Фрукты', 'Ягоды', 'Каши', 'Белок', 'Молочное', 'Напитки и добавки'];
