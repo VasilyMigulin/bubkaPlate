@@ -5,11 +5,29 @@ import { useStore } from '../state/store';
 import './Recipes.css';
 
 const AGES = ['6+', '9+', '12+'] as const;
+const KINDS: { key: string; label: string }[] = [
+  { key: 'завтрак', label: '🍳 Завтраки' }, { key: 'каша', label: '🥣 Каши' }, { key: 'суп', label: '🍲 Супы' },
+  { key: 'мясо', label: '🍖 Мясо и рыба' }, { key: 'овощ', label: '🥦 Овощи и закуски' },
+  { key: 'выпечка', label: '🧁 Выпечка' }, { key: 'десерт', label: '🍨 Десерты' }, { key: 'заготовки', label: '🧊 Заготовки' },
+];
+const ALLERGENS = ['молоко', 'яйцо', 'глютен', 'рыба', 'морепродукты', 'арахис', 'орехи', 'соя', 'кунжут'];
+const NOAL_KEY = 'bubka-plate-noallergens';
 
 export function Recipes() {
   const [sel, setSel] = useState<Set<string>>(new Set());
   const [pantryOpen, setPantryOpen] = useState(false);
   const [ageF, setAgeF] = useState<string>('all');
+  const [kindF, setKindF] = useState<string>('all');
+  const [alOpen, setAlOpen] = useState(false);
+  const [noAl, setNoAl] = useState<Set<string>>(() => {
+    try { return new Set(JSON.parse(localStorage.getItem(NOAL_KEY) || '[]') as string[]); } catch { return new Set(); }
+  });
+  const toggleAl = (a: string) => setNoAl((prev) => {
+    const n = new Set(prev);
+    n.has(a) ? n.delete(a) : n.add(a);
+    localStorage.setItem(NOAL_KEY, JSON.stringify([...n]));
+    return n;
+  });
   const [open, setOpen] = useState<Recipe | null>(null);
   const { showToast } = useStore();
 
@@ -21,10 +39,12 @@ export function Recipes() {
 
   const list = useMemo(() =>
     RECIPES.filter((r) => ageF === 'all' || r.age === ageF)
+      .filter((r) => kindF === 'all' || r.kind === kindF)
+      .filter((r) => noAl.size === 0 || !r.allergens.some((a) => noAl.has(a)))
       .map((r) => ({ r, hit: r.ing.filter((i) => sel.has(i)).length }))
       .filter((x) => sel.size === 0 || x.hit > 0)
       .sort((a, b) => b.hit / b.r.ing.length - a.hit / a.r.ing.length)
-      .map((x) => x.r), [sel, ageF]);
+      .map((x) => x.r), [sel, ageF, kindF, noAl]);
 
   return (
     <>
@@ -34,6 +54,24 @@ export function Recipes() {
           <button key={a} className={`chip ${ageF === a ? 'on' : ''}`} onClick={() => setAgeF(ageF === a ? 'all' : a)}>{a} мес</button>
         ))}
       </div>
+      <div className="segs" style={{ marginBottom: 10 }}>
+        <button className={`chip chip-mini ${kindF === 'all' ? 'on' : ''}`} onClick={() => setKindF('all')}>Все</button>
+        {KINDS.map((k) => (
+          <button key={k.key} className={`chip chip-mini ${kindF === k.key ? 'on' : ''}`} onClick={() => setKindF(kindF === k.key ? 'all' : k.key)}>{k.label}</button>
+        ))}
+      </div>
+
+      <button className={`al-toggle ${noAl.size > 0 ? 'active' : ''}`} onClick={() => setAlOpen(!alOpen)}>
+        ⚠️ Аллергия? Скроем рецепты {noAl.size > 0 ? `· скрыто: ${[...noAl].join(', ')}` : ''} {alOpen ? '↑' : '↓'}
+      </button>
+      {alOpen && (
+        <div className="segs" style={{ marginBottom: 10 }}>
+          {ALLERGENS.map((a) => (
+            <button key={a} className={`chip chip-mini ${noAl.has(a) ? 'on warn' : ''}`} onClick={() => toggleAl(a)}>{noAl.has(a) ? '✕ ' : ''}{a}</button>
+          ))}
+        </div>
+      )}
+
       <div className="eyebrow" style={{ marginBottom: 8 }}>Что есть дома? Отметьте — подберём</div>
       <div className={`pantry ${pantryOpen ? 'open' : ''}`}>
         {(pantryOpen ? PANTRY : PANTRY.slice(0, 8)).map((p) => (
