@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react';
 import { CATEGORIES, FOODS , resolveFoodRef } from '../data/foods';
 import { PORTIONS, READINESS, SCHEDULE } from '../data/schedule';
 import { useStore } from '../state/store';
+import { Plan30Sheet } from '../components/Plan30Sheet';
 import { RULE3_TEXT } from '../data/glossary';
 import { Lightbox } from '../components/Lightbox';
 import { PlateScan } from '../components/PlateScan';
@@ -15,6 +16,7 @@ const RX_BADGE: Record<string, { cls: string; label: string }> = {
 };
 
 export function MyPlate({ goCatalog }: { goCatalog: () => void }) {
+  const [plan30Open, setPlan30Open] = useState(false);
   const { introduced, log, windows, ironCovered, ironTotal, markAllergenDay, showToast,
     ageMonths, readiness, toggleReadiness, resetAll } = useStore();
   const [scanOpen, setScanOpen] = useState(false);
@@ -68,6 +70,17 @@ export function MyPlate({ goCatalog }: { goCatalog: () => void }) {
           <span>ИИ оценит нарезку, возраст и баланс за 5 секунд</span>
         </div>
         <span className="pc-arrow">›</span>
+      </button>
+
+      <button className="card p30-entry" onClick={() => setPlan30Open(true)}>
+        <div className="row">
+          <div className="next-e">🗓</div>
+          <div className="grow">
+            <div className="h-card" style={{ margin: 0 }}>Первые 30 дней прикорма</div>
+            <div className="sub">Пошаговый план: что и когда вводить</div>
+          </div>
+          <span style={{ color: 'var(--text2)' }}>›</span>
+        </div>
       </button>
 
       <button className="card next-card" onClick={goCatalog}>
@@ -219,6 +232,7 @@ export function MyPlate({ goCatalog }: { goCatalog: () => void }) {
           </div>
         </div>
       )}
+      {plan30Open && <Plan30Sheet onClose={() => setPlan30Open(false)} />}
     </>
   );
 }
