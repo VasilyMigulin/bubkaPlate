@@ -29,17 +29,33 @@ export function PlanSheet({ plan, onClose, onOpenRecipe }: {
   const isCustom = plan === null;
   const [my, setMy] = useState<Record<string, string>>(readMyPlan);
   const [pickSlot, setPickSlot] = useState<string | null>(null);
+  const [overrides, setOverrides] = useState<Record<string, string>>({});
 
   const slotRecipe = (slot: string): Recipe | undefined => {
-    const name = isCustom ? my[slot] : plan!.meals.find((m) => m.slot === slot)?.recipe;
+    const name = isCustom
+      ? my[slot]
+      : (overrides[slot] ?? plan!.meals.find((m) => m.slot === slot)?.recipe);
     return name ? RECIPES.find((r) => r.n === name) : undefined;
   };
 
   const pick = (slot: string, name: string) => {
-    const n = { ...my, [slot]: name };
+    if (isCustom) {
+      const n = { ...my, [slot]: name };
+      setMy(n);
+      localStorage.setItem(MYPLAN_KEY, JSON.stringify(n));
+    } else {
+      setOverrides((o) => ({ ...o, [slot]: name }));
+    }
+    setPickSlot(null);
+  };
+
+  // сохранить готовый план (с заменами) как «мой»
+  const saveAsMine = () => {
+    const n: Record<string, string> = {};
+    SLOTS.forEach((sl) => { const r = slotRecipe(sl); if (r) n[sl] = r.n; });
     setMy(n);
     localStorage.setItem(MYPLAN_KEY, JSON.stringify(n));
-    setPickSlot(null);
+    showToast('✨', 'Сохранено в «Мой план»', 'Полка планов → ✨ Мой план');
   };
 
   const allToShop = () => {
@@ -77,7 +93,7 @@ export function PlanSheet({ plan, onClose, onOpenRecipe }: {
               ) : (
                 <button className="plan-meal empty" onClick={() => setPickSlot(slot)}>+ выбрать блюдо</button>
               )}
-              {isCustom && r && (
+              {r && (
                 <button className="plan-swap" onClick={() => setPickSlot(slot)}>заменить</button>
               )}
             </div>
@@ -85,6 +101,9 @@ export function PlanSheet({ plan, onClose, onOpenRecipe }: {
         })}
 
         <button className="btn btn-primary" style={{ marginTop: 14 }} onClick={allToShop}>🛒 Все ингредиенты — в список покупок</button>
+        {!isCustom && Object.keys(overrides).length > 0 && (
+          <button className="btn btn-soft" style={{ marginTop: 8 }} onClick={saveAsMine}>✨ Сохранить как «Мой план»</button>
+        )}
         <button className="btn btn-soft" style={{ marginTop: 8 }} onClick={onClose}>Закрыть</button>
 
         {pickSlot && (

@@ -63,7 +63,11 @@ export function Recipes() {
     return s2;
   });
   const [open, setOpen] = useState<Recipe | null>(null);
-  const { showToast } = useStore();
+  const { showToast, ageMonths } = useStore();
+  // возраст малыша → его возрастная корзина планов
+  const myAge = ageMonths == null ? null : ageMonths >= 12 ? '12+' : ageMonths >= 9 ? '9+' : '6+';
+  const plansSorted = useMemo(() =>
+    [...DAYPLANS].sort((a, b) => (a.age === myAge ? -1 : 0) - (b.age === myAge ? -1 : 0)), [myAge]);
 
   const toggle = (p: string) => setSel((s) => {
     const n = new Set(s);
@@ -94,11 +98,11 @@ export function Recipes() {
   return (
     <>
       <div className="plans-row">
-        {DAYPLANS.map((pl) => (
+        {plansSorted.map((pl) => (
           <button key={pl.id} className="plan-card" onClick={() => { setPlanOpen(pl); setPlanShown(true); }}>
             <span className="plan-e">{pl.e}</span>
             <span className="plan-t">{pl.t}</span>
-            <span className="plan-a">{pl.age} мес · 4 блюда</span>
+            <span className="plan-a">{pl.age === myAge ? '⭐ ваш возраст' : `${pl.age} мес`} · 4 блюда</span>
           </button>
         ))}
         <button className="plan-card custom" onClick={() => { setPlanOpen(null); setPlanShown(true); }}>
