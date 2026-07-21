@@ -35,6 +35,20 @@ export function Safety() {
     return n;
   });
   const doneCount = ARTICLES.filter((a) => read.has(a.id)).length;
+  const [guided, setGuided] = useState(() => localStorage.getItem('bubka-plate-guided') === '1');
+  const [finale, setFinale] = useState(false);
+  const nextUnread = (exceptId?: string) => ARTICLES.find((a) => !read.has(a.id) && a.id !== exceptId) ?? null;
+  const guidedNext = (current: Article) => {
+    markRead(current.id);
+    const next = nextUnread(current.id);
+    if (next) { setArticle(next); }
+    else {
+      setArticle(null);
+      setFinale(true);
+      setGuided(false);
+      localStorage.removeItem('bubka-plate-guided');
+    }
+  };
   const [emNum, setEmNum] = useState<string>(() => localStorage.getItem(EMERGENCY_KEY) || '');
   const [emEdit, setEmEdit] = useState(false);
   const [emDraft, setEmDraft] = useState('');
@@ -74,6 +88,18 @@ export function Safety() {
           </>
         )}
       </div>
+
+      {/* Ведёмый курс основ — после онбординга */}
+      {guided && doneCount < ARTICLES.length && (
+        <button className="guided-banner" onClick={() => { const n = nextUnread(); if (n) setArticle(n); }}>
+          <span className="guided-e">🎓</span>
+          <span className="grow">
+            <b>Курс основ прикорма</b>
+            <span>{doneCount === 0 ? 'Начнём с первой статьи — 2 минуты' : `Продолжим: ${doneCount} из ${ARTICLES.length} позади`}</span>
+          </span>
+          <span className="guided-go">›</span>
+        </button>
+      )}
 
       {/* Отложенные статьи — сверху, чтобы «позже» наступило */}
       {marks.size > 0 && (
@@ -131,6 +157,27 @@ export function Safety() {
         <span>Собрано по справочнику безопасной подачи и рекомендациям ВОЗ, AAP, NHS и Solid Starts. Ориентир, а не замена консультации врача.</span>
       </div>
 
+      {/* Финал курса */}
+      {finale && createPortal(
+        <div className="sheet-scrim" style={{ zIndex: 76 }} onClick={() => setFinale(false)}>
+          <div className="bottom-sheet" onClick={(e) => e.stopPropagation()}>
+            <div className="grab" />
+            <div className="finale-hero">🎉</div>
+            <div className="bs-title" style={{ textAlign: 'center' }}>Основы освоены!</div>
+            <div className="sub" style={{ textAlign: 'center', lineHeight: 1.5, marginBottom: 14 }}>
+              Вы прочитали все {ARTICLES.length} статей — теперь вы готовы лучше большинства.
+              Мы регулярно добавляем новые статьи — заглядывайте в этот раздел.
+              А теперь — за дело!
+            </div>
+            <button className="btn btn-primary" onClick={() => { setFinale(false); window.dispatchEvent(new CustomEvent('bubka-tab', { detail: 'mine' })); }}>
+              Перейти к прикорму 🍽
+            </button>
+            <button className="btn btn-soft" style={{ marginTop: 8 }} onClick={() => setFinale(false)}>Остаться в Базе</button>
+          </div>
+        </div>,
+        document.body,
+      )}
+
       {/* Полноэкранная статья */}
       {article && createPortal(
         <div className="article-view">
@@ -156,7 +203,13 @@ export function Safety() {
               </div>
             ))}
             <div className="art-actions">
-              <button className="btn btn-primary" style={{ flex: 1 }} onClick={() => { markRead(article.id); setArticle(null); }}>Прочитано ✓</button>
+              {guided ? (
+                <button className="btn btn-primary" style={{ flex: 1 }} onClick={() => guidedNext(article)}>
+                  {nextUnread(article.id) ? `Дальше → (${ARTICLES.filter((a) => read.has(a.id) || a.id === article.id).length} из ${ARTICLES.length})` : 'Завершить курс 🎉'}
+                </button>
+              ) : (
+                <button className="btn btn-primary" style={{ flex: 1 }} onClick={() => { markRead(article.id); setArticle(null); }}>Прочитано ✓</button>
+              )}
               <button className={`art-bm ${marks.has(article.id) ? 'on' : ''}`} onClick={() => toggleMark(article.id)}>
                 {marks.has(article.id) ? '🔖 Отложено' : '🔖 Позже'}
               </button>
@@ -194,6 +247,14 @@ export function Safety() {
         .read-ring { flex:none; min-width:46px; height:46px; border-radius:50%; background:var(--accent-soft); color:var(--accent);
           font-size:12.5px; font-weight:800; display:flex; align-items:center; justify-content:center; padding:0 6px; }
         .art-actions { display:flex; gap:10px; margin-top:18px; }
+        .guided-banner { display:flex; align-items:center; gap:12px; width:100%; text-align:left; border:none; font-family:inherit;
+          background:linear-gradient(120deg, var(--accent-soft), var(--card)); border-radius:18px; padding:14px 16px;
+          box-shadow:var(--shadow); margin-bottom:12px; cursor:pointer; }
+        .guided-e { font-size:26px; }
+        .guided-banner b { font-size:14.5px; display:block; }
+        .guided-banner span span { font-size:12px; color:var(--text2); display:block; margin-top:2px; }
+        .guided-go { font-size:20px; color:var(--accent); font-weight:700; }
+        .finale-hero { font-size:52px; text-align:center; margin:6px 0; }
         .art-bm { flex:none; border:none; border-radius:14px; background:var(--elev); font-size:13px; font-weight:700;
           font-family:inherit; color:var(--text2); padding:0 14px; cursor:pointer; }
         .art-bm.on { background:var(--accent-soft); }

@@ -35,6 +35,7 @@ export function Onboarding() {
 
   const startWithBase = () => {
     localStorage.setItem('bubka-plate-start-tab', 'safety');
+    localStorage.setItem('bubka-plate-guided', '1');
     setProfile({ name: name.trim(), birthDate: birth, approach, started: true });
   };
 

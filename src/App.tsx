@@ -60,6 +60,11 @@ function Shell() {
       if (t) { localStorage.removeItem('bubka-plate-start-tab'); setTab(t); }
     }
   }, [profile]);
+  useEffect(() => {
+    const h = (e: Event) => setTab((e as CustomEvent).detail as Tab);
+    window.addEventListener('bubka-tab', h);
+    return () => window.removeEventListener('bubka-tab', h);
+  }, []);
   if (!profile) return <Onboarding />;
   const head = HEAD[tab];
   return (
