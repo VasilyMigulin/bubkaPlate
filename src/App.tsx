@@ -21,14 +21,14 @@ const TABS: { key: Tab; icon: string; label: string }[] = [
   { key: 'mine', icon: '📋', label: 'Мой прикорм' },
   { key: 'catalog', icon: '🥑', label: 'Каталог' },
   { key: 'recipes', icon: '🍲', label: 'Рецепты' },
-  { key: 'safety', icon: '🛡', label: 'Безопасность' },
+  { key: 'safety', icon: '🎓', label: 'База' },
 ];
 
 const HEAD: Record<Tab, { title: string; sub: string }> = {
   mine: { title: 'Мой прикорм', sub: 'Что уже введено, что дальше и как реагирует малыш' },
   catalog: { title: 'Каталог', sub: 'Как безопасно подать каждый продукт — по возрасту малыша' },
   recipes: { title: 'Рецепты', sub: 'Из того, что есть дома · по возрасту' },
-  safety: { title: 'Безопасность', sub: 'Удушье, аллергены и первая помощь' },
+  safety: { title: 'База', sub: 'Всё, что нужно знать родителю, — коротко и по делу' },
 };
 
 function Toast() {

@@ -3,6 +3,7 @@ import { createPortal } from 'react-dom';
 import { FOODS, findFoodByIng } from '../data/foods';
 import { PANTRY, RECIPES, type Recipe } from '../data/recipes';
 import { RecipeSheet } from '../components/RecipeSheet';
+import { ShopSheet } from '../components/ShopSheet';
 import { useStore } from '../state/store';
 import './Recipes.css';
 
@@ -45,15 +46,7 @@ export function Recipes() {
     r.allergens.some((a) => excAllergens.has(a));
 
   const [shopOpen, setShopOpen] = useState(false);
-  const [shop, setShop] = useState<string[]>([]);
-  const openShop = () => {
-    try { setShop(JSON.parse(localStorage.getItem(SHOP_KEY) || '[]') as string[]); } catch { setShop([]); }
-    setShopOpen(true);
-  };
-  const rmShop = (it: string) => {
-    const n = shop.filter((x) => x !== it);
-    setShop(n); localStorage.setItem(SHOP_KEY, JSON.stringify(n));
-  };
+  const openShop = () => setShopOpen(true);
   const [open, setOpen] = useState<Recipe | null>(null);
   const { showToast } = useStore();
 
@@ -116,7 +109,7 @@ export function Recipes() {
       ))}
       {list.length > shown && (
         <button className="btn btn-soft" style={{ marginTop: 4 }} onClick={() => setShown(shown + 20)}>
-          Показать ещё · осталось {list.length - shown}
+          Показать ещё
         </button>
       )}
 
@@ -207,28 +200,7 @@ export function Recipes() {
         document.body,
       )}
 
-      {shopOpen && createPortal(
-        <div className="sheet-scrim" onClick={() => setShopOpen(false)}>
-          <div className="bottom-sheet" onClick={(e) => e.stopPropagation()}>
-            <div className="grab" />
-            <div className="bs-title">🛒 Список покупок</div>
-            {shop.length === 0 && <div className="sub" style={{ padding: '10px 0 16px' }}>Пока пусто. Откройте рецепт и нажмите «В список покупок».</div>}
-            <ul className="shop-list">
-              {shop.map((it) => (
-                <li key={it}>
-                  <span>{it}</span>
-                  <button onClick={() => rmShop(it)} aria-label="Убрать">✕</button>
-                </li>
-              ))}
-            </ul>
-            {shop.length > 0 && (
-              <button className="btn btn-soft" style={{ marginTop: 10 }} onClick={() => { setShop([]); localStorage.setItem(SHOP_KEY, '[]'); }}>Очистить список</button>
-            )}
-            <button className="btn btn-primary" style={{ marginTop: 8 }} onClick={() => setShopOpen(false)}>Готово</button>
-          </div>
-        </div>,
-        document.body,
-      )}
+      <ShopSheet open={shopOpen} onClose={() => setShopOpen(false)} />
     </>
   );
 }

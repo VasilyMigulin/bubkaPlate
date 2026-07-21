@@ -4,6 +4,7 @@ import type { Recipe } from '../data/recipes';
 import { findFoodByIng } from '../data/foods';
 import type { Food } from '../types';
 import { ProductSheet } from './ProductSheet';
+import { ShopSheet } from './ShopSheet';
 import { useStore } from '../state/store';
 
 /** Полноэкранная карточка рецепта (портал — работает из каталога и из карточки продукта). */
@@ -11,6 +12,7 @@ export function RecipeSheet({ recipe, onClose }: { recipe: Recipe; onClose: () =
   const { showToast } = useStore();
   const [foodOpen, setFoodOpen] = useState<Food | null>(null);
   const [inCart, setInCart] = useState(false);
+  const [shopOpen, setShopOpen] = useState(false);
   return createPortal(
     <div className="recipe-view">
       <button className="ps-back" onClick={onClose} aria-label="Назад">‹</button>
@@ -39,16 +41,21 @@ export function RecipeSheet({ recipe, onClose }: { recipe: Recipe; onClose: () =
             <ul className="tips-list">
               {recipe.items.map((it, i) => <li key={i}>{it}</li>)}
             </ul>
-            <button className={`btn ${inCart ? 'btn-done' : 'btn-soft'}`} style={{ marginTop: 8 }} onClick={() => {
-              if (inCart) return;
-              try {
-                const cur = JSON.parse(localStorage.getItem('bubka-plate-shoplist') || '[]') as string[];
-                const added = recipe.items!.filter((it) => !cur.includes(it));
-                localStorage.setItem('bubka-plate-shoplist', JSON.stringify([...cur, ...added]));
-                setInCart(true);
-                showToast('🛒', `+${added.length} в список покупок`, 'Список — под значком 🛒 вверху раздела «Рецепты»');
-              } catch { /* ignore */ }
-            }}>{inCart ? '✓ Добавлено · список под 🛒 в «Рецептах»' : '🛒 В список покупок'}</button>
+            {!inCart ? (
+              <button className="btn btn-soft" style={{ marginTop: 8 }} onClick={() => {
+                try {
+                  const cur = JSON.parse(localStorage.getItem('bubka-plate-shoplist') || '[]') as string[];
+                  const added = recipe.items!.filter((it) => !cur.includes(it));
+                  localStorage.setItem('bubka-plate-shoplist', JSON.stringify([...cur, ...added]));
+                  setInCart(true);
+                  showToast('🛒', `+${added.length} в список покупок`);
+                } catch { /* ignore */ }
+              }}>🛒 В список покупок</button>
+            ) : (
+              <button className="btn btn-done" style={{ marginTop: 8 }} onClick={() => setShopOpen(true)}>
+                ✓ Добавлено · Открыть список →
+              </button>
+            )}
           </>
         )}
 
@@ -74,6 +81,7 @@ export function RecipeSheet({ recipe, onClose }: { recipe: Recipe; onClose: () =
       </div>
 
       {foodOpen && <ProductSheet food={foodOpen} elevated onClose={() => setFoodOpen(null)} />}
+      <ShopSheet open={shopOpen} onClose={() => setShopOpen(false)} />
     </div>,
     document.body,
   );
