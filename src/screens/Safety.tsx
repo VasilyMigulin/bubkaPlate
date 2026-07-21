@@ -65,6 +65,23 @@ export function Safety() {
         )}
       </div>
 
+      {/* Отложенные статьи — сверху, чтобы «позже» наступило */}
+      {marks.size > 0 && (
+        <>
+          <div className="section-t">🔖 Отложено на потом</div>
+          {[...ARTICLES, ...POSTS].filter((a) => marks.has(a.id)).map((a) => (
+            <button key={'bm' + a.id} className="art-card" onClick={() => setArticle(a)}>
+              <div className="art-pic" style={{ background: `radial-gradient(circle at 30% 25%, ${a.bg[0]}, ${a.bg[1]})` }}>{a.e}</div>
+              <div className="grow">
+                <div className="art-t">{a.t}</div>
+                <div className="art-s">{a.sub}</div>
+              </div>
+              <span className="art-chev">›</span>
+            </button>
+          ))}
+        </>
+      )}
+
       {/* База: прогресс чтения */}
       <div className="read-progress">
         <div className="grow">
@@ -130,7 +147,9 @@ export function Safety() {
             ))}
             <div className="art-actions">
               <button className="btn btn-primary" style={{ flex: 1 }} onClick={() => { markRead(article.id); setArticle(null); }}>Прочитано ✓</button>
-              <button className={`art-bm ${marks.has(article.id) ? 'on' : ''}`} onClick={() => toggleMark(article.id)} aria-label="Закладка">🔖</button>
+              <button className={`art-bm ${marks.has(article.id) ? 'on' : ''}`} onClick={() => toggleMark(article.id)}>
+                {marks.has(article.id) ? '🔖 Отложено' : '🔖 Позже'}
+              </button>
             </div>
           </div>
         </div>,
@@ -165,7 +184,8 @@ export function Safety() {
         .read-ring { flex:none; min-width:46px; height:46px; border-radius:50%; background:var(--accent-soft); color:var(--accent);
           font-size:12.5px; font-weight:800; display:flex; align-items:center; justify-content:center; padding:0 6px; }
         .art-actions { display:flex; gap:10px; margin-top:18px; }
-        .art-bm { flex:none; width:52px; border:none; border-radius:14px; background:var(--elev); font-size:19px; cursor:pointer; }
+        .art-bm { flex:none; border:none; border-radius:14px; background:var(--elev); font-size:13px; font-weight:700;
+          font-family:inherit; color:var(--text2); padding:0 14px; cursor:pointer; }
         .art-bm.on { background:var(--accent-soft); }
 
         .article-view { position:fixed; inset:0; z-index:50; max-width:440px; margin:0 auto; background:var(--bg);
