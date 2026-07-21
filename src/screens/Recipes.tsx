@@ -4,6 +4,8 @@ import { FOODS, findFoodByIng } from '../data/foods';
 import { PANTRY, RECIPES, type Recipe } from '../data/recipes';
 import { RecipeSheet } from '../components/RecipeSheet';
 import { PlanSheet } from '../components/PlanSheet';
+import { PlateSheet } from '../components/PlateSheet';
+import { PLATES, type Plate } from '../data/plates';
 import { DAYPLANS, type DayPlan } from '../data/plans';
 import { ShopSheet } from '../components/ShopSheet';
 import { Paywall, isPremium } from '../components/Paywall';
@@ -52,6 +54,8 @@ export function Recipes() {
   const [shopOpen, setShopOpen] = useState(false);
   const openShop = () => setShopOpen(true);
   const [planOpen, setPlanOpen] = useState<DayPlan | null | 'custom'>(undefined as unknown as null);
+  const [plateOpen, setPlateOpen] = useState<Plate | null>(null);
+  const [plateShown, setPlateShown] = useState(false);
   const [planShown, setPlanShown] = useState(false);
   const [fav, setFav] = useState<Set<string>>(() => {
     try { return new Set(JSON.parse(localStorage.getItem(FAV_KEY) || '[]') as string[]); } catch { return new Set(); }
@@ -73,6 +77,8 @@ export function Recipes() {
   const myAge = ageMonths == null ? null : ageMonths >= 12 ? '12+' : ageMonths >= 9 ? '9+' : '6+';
   const plansSorted = useMemo(() =>
     [...DAYPLANS].sort((a, b) => (a.age === myAge ? -1 : 0) - (b.age === myAge ? -1 : 0)), [myAge]);
+  const platesSorted = useMemo(() =>
+    [...PLATES].sort((a, b) => (a.age === myAge ? -1 : 0) - (b.age === myAge ? -1 : 0)), [myAge]);
 
   const toggle = (p: string) => setSel((s) => {
     const n = new Set(s);
@@ -102,6 +108,23 @@ export function Recipes() {
 
   return (
     <>
+      <div className="section-t" style={{ margin: '0 2px 8px' }}>🍽 Тарелочки — собрать за 5 минут</div>
+      <div className="plans-row">
+        <button className="plan-card custom" onClick={() => { setPlateOpen(null); setPlateShown(true); }}>
+          <span className="plan-e">✨</span>
+          <span className="plan-t">Из введённого</span>
+          <span className="plan-a">из того, что уже пробовали</span>
+        </button>
+        {platesSorted.map((pl) => (
+          <button key={pl.id} className="plan-card" onClick={() => { setPlateOpen(pl); setPlateShown(true); }}>
+            <span className="plan-e">{pl.e}</span>
+            <span className="plan-t">{pl.t}</span>
+            <span className="plan-a">{pl.age === myAge ? '⭐ ваш возраст' : `${pl.age} мес`} · {pl.parts.length} комп.</span>
+          </button>
+        ))}
+      </div>
+
+      <div className="section-t" style={{ margin: '4px 2px 8px' }}>📅 Планы на день</div>
       <div className="plans-row">
         {plansSorted.map((pl) => (
           <button key={pl.id} className="plan-card" onClick={() => { setPlanOpen(pl); setPlanShown(true); }}>
@@ -253,6 +276,7 @@ export function Recipes() {
       )}
 
       <ShopSheet open={shopOpen} onClose={() => setShopOpen(false)} />
+      {plateShown && <PlateSheet plate={plateOpen} onClose={() => setPlateShown(false)} />}
       {planShown && (
         <PlanSheet
           plan={planOpen === 'custom' ? null : (planOpen as DayPlan | null)}
