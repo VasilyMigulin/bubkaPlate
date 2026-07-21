@@ -17,6 +17,10 @@ export function Onboarding() {
   const [approach, setApproach] = useState<FeedingApproach>('both');
 
   const next = () => {
+    if (step === 3) {
+      setProfile({ name: name.trim(), birthDate: birth, approach, started: true });
+      return;
+    }
     if (step === 0) {
       if (!name.trim()) return;
       setStep(1);
@@ -24,8 +28,13 @@ export function Onboarding() {
       if (!birth) return;
       setStep(2);
     } else {
-      setProfile({ name: name.trim(), birthDate: birth, approach, started: true });
+      setStep(3);
     }
+  };
+
+  const startWithBase = () => {
+    localStorage.setItem('bubka-plate-start-tab', 'safety');
+    setProfile({ name: name.trim(), birthDate: birth, approach, started: true });
   };
 
   return (
@@ -51,6 +60,17 @@ export function Onboarding() {
             <input className="onb-input" type="date" value={birth} onChange={(e) => setBirth(e.target.value)} />
           </div>
         )}
+        {step === 3 && (
+          <div className="onb-step">
+            <h1>Прежде чем начнём 🎓</h1>
+            <p>Мы собрали самую базу к старту прикорма: 11 коротких статей — признаки готовности, безопасность, аллергены, «сколько он должен есть».</p>
+            <div className="onb-base-card">
+              <span className="onb-base-e">📚</span>
+              <span className="grow"><b>База базированная</b><span className="onb-opt-s">~15 минут чтения · прогресс сохраняется, можно по одной</span></span>
+            </div>
+            <button className="btn btn-primary" style={{ marginTop: 14 }} onClick={startWithBase}>Читать базу 🎓</button>
+          </div>
+        )}
         {step === 2 && (
           <div className="onb-step">
             <h1>Как вы кормите?</h1>
@@ -69,8 +89,8 @@ export function Onboarding() {
       </div>
 
       <div className="onb-foot">
-        <div className="onb-dots">{[0, 1, 2].map((i) => <span key={i} className={i === step ? 'on' : ''} />)}</div>
-        <button className="btn btn-primary" onClick={next}>{step === 2 ? 'Начать 🎉' : 'Дальше'}</button>
+        <div className="onb-dots">{[0, 1, 2, 3].map((i) => <span key={i} className={i === step ? 'on' : ''} />)}</div>
+        <button className="btn btn-primary" onClick={next}>{step === 3 ? 'Пропустить — начать 🎉' : 'Дальше'}</button>
         {step > 0 && <button className="onb-back" onClick={() => setStep((s) => s - 1)}>Назад</button>}
       </div>
     </div>

@@ -33,3 +33,7 @@
 .onb-dots span { width:7px; height:7px; border-radius:99px; background:var(--hairline); transition:all .3s; }
 .onb-dots span.on { background:var(--accent); width:18px; }
 .onb-back { background:none; border:none; font-family:inherit; font-size:13.5px; font-weight:600; color:var(--text2); padding:6px; }
+
+.onb-base-card { display:flex; align-items:center; gap:12px; background:var(--card); border-radius:16px; padding:14px; box-shadow:var(--shadow); margin-top:14px; text-align:left; }
+.onb-base-e { font-size:28px; }
+.onb-base-card b { font-size:14.5px; display:block; }

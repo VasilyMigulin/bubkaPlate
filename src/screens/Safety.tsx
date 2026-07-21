@@ -1,12 +1,30 @@
 import { useState } from 'react';
 import { createPortal } from 'react-dom';
-import { ARTICLES, type Article } from '../data/basics';
+import { ARTICLES, POSTS, type Article } from '../data/basics';
 
 const EMERGENCY_KEY = 'bubka-plate-emergency';
 
 /** «База» — мини-статьи об основах прикорма в стиле Apple Tips. */
 export function Safety() {
   const [article, setArticle] = useState<Article | null>(null);
+  const [read, setRead] = useState<Set<string>>(() => {
+    try { return new Set(JSON.parse(localStorage.getItem('bubka-plate-read') || '[]') as string[]); } catch { return new Set(); }
+  });
+  const [marks, setMarks] = useState<Set<string>>(() => {
+    try { return new Set(JSON.parse(localStorage.getItem('bubka-plate-bookmarks') || '[]') as string[]); } catch { return new Set(); }
+  });
+  const markRead = (id: string) => setRead((prev) => {
+    const n = new Set(prev).add(id);
+    localStorage.setItem('bubka-plate-read', JSON.stringify([...n]));
+    return n;
+  });
+  const toggleMark = (id: string) => setMarks((prev) => {
+    const n = new Set(prev);
+    n.has(id) ? n.delete(id) : n.add(id);
+    localStorage.setItem('bubka-plate-bookmarks', JSON.stringify([...n]));
+    return n;
+  });
+  const doneCount = ARTICLES.filter((a) => read.has(a.id)).length;
   const [emNum, setEmNum] = useState<string>(() => localStorage.getItem(EMERGENCY_KEY) || '');
   const [emEdit, setEmEdit] = useState(false);
   const [emDraft, setEmDraft] = useState('');
@@ -47,15 +65,37 @@ export function Safety() {
         )}
       </div>
 
+      {/* База: прогресс чтения */}
+      <div className="read-progress">
+        <div className="grow">
+          <b>База базированная</b>
+          <span>{doneCount === ARTICLES.length ? 'Вся база прочитана — вы великолепны 💛' : `Прочитано ${doneCount} из ${ARTICLES.length} · ~15 минут на всё`}</span>
+        </div>
+        <div className="read-ring">{doneCount}/{ARTICLES.length}</div>
+      </div>
+
       {/* Список статей — карточки в стиле Apple Tips */}
       {ARTICLES.map((a) => (
         <button key={a.id} className="art-card" onClick={() => setArticle(a)}>
           <div className="art-pic" style={{ background: `radial-gradient(circle at 30% 25%, ${a.bg[0]}, ${a.bg[1]})` }}>{a.e}</div>
           <div className="grow">
-            <div className="art-t">{a.t}</div>
+            <div className="art-t">{a.t}{marks.has(a.id) && <span className="art-mark"> 🔖</span>}</div>
             <div className="art-s">{a.sub}</div>
           </div>
-          <span className="art-chev">›</span>
+          {read.has(a.id) ? <span className="art-done">✓</span> : <span className="art-chev">›</span>}
+        </button>
+      ))}
+
+      <div className="section-t" style={{ marginTop: 18 }}>📰 Статьи</div>
+      <div className="sub" style={{ margin: '-4px 2px 10px' }}>Пополняем регулярно — заглядывайте.</div>
+      {POSTS.map((a) => (
+        <button key={a.id} className="art-card" onClick={() => setArticle(a)}>
+          <div className="art-pic" style={{ background: `radial-gradient(circle at 30% 25%, ${a.bg[0]}, ${a.bg[1]})` }}>{a.e}</div>
+          <div className="grow">
+            <div className="art-t">{a.t}{marks.has(a.id) && <span className="art-mark"> 🔖</span>}</div>
+            <div className="art-s">{a.sub}</div>
+          </div>
+          {read.has(a.id) ? <span className="art-done">✓</span> : <span className="art-chev">›</span>}
         </button>
       ))}
 
@@ -88,7 +128,10 @@ export function Safety() {
                 {b.tip && <div className="art-tip"><span>💡</span><span>{b.tip}</span></div>}
               </div>
             ))}
-            <button className="btn btn-primary" style={{ marginTop: 18 }} onClick={() => setArticle(null)}>Понятно</button>
+            <div className="art-actions">
+              <button className="btn btn-primary" style={{ flex: 1 }} onClick={() => { markRead(article.id); setArticle(null); }}>Прочитано ✓</button>
+              <button className={`art-bm ${marks.has(article.id) ? 'on' : ''}`} onClick={() => toggleMark(article.id)} aria-label="Закладка">🔖</button>
+            </div>
           </div>
         </div>,
         document.body,
@@ -112,6 +155,18 @@ export function Safety() {
         .art-t { font-size:14.5px; font-weight:700; color:var(--text); letter-spacing:-.01em; }
         .art-s { font-size:12px; color:var(--text2); margin-top:2px; line-height:1.35; }
         .art-chev { flex:none; color:var(--text2); font-size:18px; }
+        .art-done { flex:none; width:24px; height:24px; border-radius:50%; background:var(--accent); color:#fff; font-size:13px;
+          display:flex; align-items:center; justify-content:center; }
+        .art-mark { font-size:12px; }
+        .read-progress { display:flex; align-items:center; gap:12px; background:var(--card); border-radius:18px; padding:13px 16px;
+          box-shadow:var(--shadow); margin-bottom:12px; }
+        .read-progress b { font-size:14px; display:block; }
+        .read-progress span { font-size:12px; color:var(--text2); display:block; margin-top:2px; }
+        .read-ring { flex:none; min-width:46px; height:46px; border-radius:50%; background:var(--accent-soft); color:var(--accent);
+          font-size:12.5px; font-weight:800; display:flex; align-items:center; justify-content:center; padding:0 6px; }
+        .art-actions { display:flex; gap:10px; margin-top:18px; }
+        .art-bm { flex:none; width:52px; border:none; border-radius:14px; background:var(--elev); font-size:19px; cursor:pointer; }
+        .art-bm.on { background:var(--accent-soft); }
 
         .article-view { position:fixed; inset:0; z-index:50; max-width:440px; margin:0 auto; background:var(--bg);
           display:flex; flex-direction:column; overflow-y:auto; box-shadow:0 0 0 100vw var(--page);

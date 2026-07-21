@@ -5,6 +5,7 @@ import { Catalog } from './screens/Catalog';
 import { Recipes } from './screens/Recipes';
 import { Safety } from './screens/Safety';
 import { Onboarding } from './screens/Onboarding';
+import { Settings } from './components/Settings';
 
 type Tab = 'mine' | 'catalog' | 'recipes' | 'safety';
 
@@ -45,14 +46,20 @@ function Toast() {
 }
 
 function Shell() {
-  const [tab, setTab] = useState<Tab>('mine');
+  const [tab, setTab] = useState<Tab>(() => {
+    const t = localStorage.getItem('bubka-plate-start-tab') as Tab | null;
+    if (t) { localStorage.removeItem('bubka-plate-start-tab'); return t; }
+    return 'mine';
+  });
+  const [settingsOpen, setSettingsOpen] = useState(false);
   const { profile, ageMonths } = useStore();
   if (!profile) return <Onboarding />;
   const head = HEAD[tab];
   return (
     <div className="app">
       <div className="app-scroll" key={tab}>
-        <div className="screen-head rise">
+        <div className="screen-head rise" style={{ position: 'relative' }}>
+          <button className="gear-btn" onClick={() => setSettingsOpen(true)} aria-label="Настройки">⚙️</button>
           {tab === 'mine' ? (
             <>
               <div className="kid-row">
@@ -85,6 +92,8 @@ function Shell() {
           </button>
         ))}
       </nav>
+
+      <Settings open={settingsOpen} onClose={() => setSettingsOpen(false)} />
 
       <Toast />
       <style>{`

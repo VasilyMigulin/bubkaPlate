@@ -6,6 +6,7 @@ import { RecipeSheet } from '../components/RecipeSheet';
 import { PlanSheet } from '../components/PlanSheet';
 import { DAYPLANS, type DayPlan } from '../data/plans';
 import { ShopSheet } from '../components/ShopSheet';
+import { Paywall, isPremium } from '../components/Paywall';
 import { useStore } from '../state/store';
 import './Recipes.css';
 
@@ -63,7 +64,11 @@ export function Recipes() {
     return s2;
   });
   const [open, setOpen] = useState<Recipe | null>(null);
-  const { showToast, ageMonths } = useStore();
+  const [pwOpen, setPwOpen] = useState(false);
+  const [prem, setPrem] = useState(isPremium());
+  const FREE_COUNT = 30;
+  const isLocked = (r: Recipe) => !prem && RECIPES.indexOf(r) >= FREE_COUNT;
+  const { ageMonths } = useStore();
   // возраст малыша → его возрастная корзина планов
   const myAge = ageMonths == null ? null : ageMonths >= 12 ? '12+' : ageMonths >= 9 ? '9+' : '6+';
   const plansSorted = useMemo(() =>
@@ -132,12 +137,13 @@ export function Recipes() {
       )}
 
       {list.slice(0, shown).map((r) => (
-        <button key={r.n} className="recipe" onClick={() => setOpen(r)}>
+        <button key={r.n} className="recipe" onClick={() => (isLocked(r) ? setPwOpen(true) : setOpen(r))}>
           <span className={`fav-b ${fav.has(r.n) ? 'on' : ''}`} onClick={(e) => { e.stopPropagation(); toggleFav(r.n); }}>{fav.has(r.n) ? '♥' : '♡'}</span>
-          <div className="rp" style={{ background: r.bg }}>{r.e}</div>
+          <div className="rp" style={{ background: r.bg }}>{isLocked(r) ? '✨' : r.e}</div>
           <div className="grow">
             <div className="rn">{r.n}</div>
             <div className="rm">
+              {isLocked(r) && <span className="tag" style={{ color: 'var(--terra)' }}>bubka+</span>}
               <span className="tag green">{r.age} мес</span><span className="tag">{r.time}</span>
               {r.ing.map((i) => <span key={i} className={`tag ${sel.has(i) ? 'green' : ''}`}>{sel.has(i) ? '✓ ' : ''}{i}</span>)}
             </div>
@@ -152,13 +158,17 @@ export function Recipes() {
 
       {list.length === 0 && <div className="sub" style={{ textAlign: 'center', padding: 10 }}>Ничего не нашлось — ослабьте фильтры.</div>}
 
-      <div className="card" style={{ background: 'var(--accent-soft)', cursor: 'pointer', marginTop: 4 }} onClick={() => showToast('✨', 'bubka+', '150+ рецептов с фильтрами — скоро')}>
+      {!prem && (
+      <div className="card" style={{ background: 'var(--accent-soft)', cursor: 'pointer', marginTop: 4 }} onClick={() => setPwOpen(true)}>
         <div className="row">
           <div className="next-e">✨</div>
-          <div className="grow"><div className="h-card" style={{ margin: 0 }}>Ещё 150+ рецептов в bubka+</div><div className="sub">С фильтрами по аллергенам и списком покупок</div></div>
+          <div className="grow"><div className="h-card" style={{ margin: 0 }}>Ещё 190+ рецептов в bubka+</div><div className="sub">Планы дня, конструктор меню и новые рецепты каждую неделю</div></div>
           <span style={{ color: 'var(--text2)' }}>›</span>
         </div>
       </div>
+      )}
+
+      <Paywall open={pwOpen} onClose={() => setPwOpen(false)} onSuccess={() => setPrem(true)} />
 
       {open && (
         <RecipeSheet recipe={open} onClose={() => setOpen(null)} />
