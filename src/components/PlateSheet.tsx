@@ -78,6 +78,7 @@ export function PlateSheet({ plate, onClose }: { plate: Plate | null; onClose: (
   );
 
   return createPortal(
+    <>
     <div className="sheet-scrim" onClick={onClose}>
       <div className="bottom-sheet" onClick={(e) => e.stopPropagation()}>
         <div className="grab" />
@@ -109,8 +110,6 @@ export function PlateSheet({ plate, onClose }: { plate: Plate | null; onClose: (
         <button className="btn btn-soft" style={{ marginTop: 8 }} onClick={onClose}>Закрыть</button>
       </div>
 
-      {foodOpen && <ProductSheet food={foodOpen} elevated onClose={() => setFoodOpen(null)} />}
-
       <style>{`
         .plate-part { display:flex; align-items:center; gap:12px; width:100%; text-align:left; border:none; font-family:inherit;
           background:var(--card); border-radius:14px; padding:10px 12px; box-shadow:var(--shadow); cursor:pointer; margin-bottom:8px; }
@@ -123,7 +122,9 @@ export function PlateSheet({ plate, onClose }: { plate: Plate | null; onClose: (
         .plate-slot { margin-bottom:4px; }
         .plate-empty { font-size:12.5px; color:var(--text2); background:var(--elev); border-radius:12px; padding:12px; margin-bottom:8px; }
       `}</style>
-    </div>,
+    </div>
+    {foodOpen && <ProductSheet food={foodOpen} onClose={() => setFoodOpen(null)} />}
+    </>,
     document.body,
   );
 }

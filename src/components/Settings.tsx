@@ -30,6 +30,7 @@ export function Settings({ open, onClose }: { open: boolean; onClose: () => void
   };
 
   return createPortal(
+    <>
     <div className="sheet-scrim" onClick={onClose}>
       <div className="bottom-sheet" onClick={(e) => e.stopPropagation()}>
         <div className="grab" />
@@ -68,8 +69,6 @@ export function Settings({ open, onClose }: { open: boolean; onClose: () => void
           if (confirm('Точно сбросить все данные? Дневник, введённые продукты и настройки будут удалены.')) { resetAll(); onClose(); }
         }}>Сбросить все данные</button>
 
-        <Paywall open={pwOpen} onClose={() => setPwOpen(false)} onSuccess={() => setPrem(true)} />
-
         <style>{`
           .set-ava { width:64px; height:64px; border-radius:50%; background:var(--accent-soft); display:flex; align-items:center;
             justify-content:center; font-size:30px; margin:0 auto 10px; }
@@ -86,7 +85,9 @@ export function Settings({ open, onClose }: { open: boolean; onClose: () => void
             color:var(--danger); text-decoration:underline dotted; cursor:pointer; }
         `}</style>
       </div>
-    </div>,
+    </div>
+    <Paywall open={pwOpen} onClose={() => setPwOpen(false)} onSuccess={() => setPrem(true)} />
+    </>,
     document.body,
   );
 }
