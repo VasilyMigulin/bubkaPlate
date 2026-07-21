@@ -52,6 +52,7 @@ function Shell() {
     return 'mine';
   });
   const [settingsOpen, setSettingsOpen] = useState(false);
+  const { profile, ageMonths } = useStore();
   // онбординг завершился с «Читать базу» — переключаемся на неё
   useEffect(() => {
     if (profile) {
@@ -59,7 +60,6 @@ function Shell() {
       if (t) { localStorage.removeItem('bubka-plate-start-tab'); setTab(t); }
     }
   }, [profile]);
-  const { profile, ageMonths } = useStore();
   if (!profile) return <Onboarding />;
   const head = HEAD[tab];
   return (

@@ -68,8 +68,8 @@ export function Safety() {
       {/* База: прогресс чтения */}
       <div className="read-progress">
         <div className="grow">
-          <b>База базированная</b>
-          <span>{doneCount === ARTICLES.length ? 'Вся база прочитана — вы великолепны 💛' : `Прочитано ${doneCount} из ${ARTICLES.length} · ~15 минут на всё`}</span>
+          <b>Основы прикорма</b>
+          <span>{doneCount === ARTICLES.length ? 'Все основы прочитаны — отличный старт 💛' : `Прочитано ${doneCount} из ${ARTICLES.length} · ~15 минут на всё`}</span>
         </div>
         <div className="read-ring">{doneCount}/{ARTICLES.length}</div>
       </div>

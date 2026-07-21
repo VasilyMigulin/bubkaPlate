@@ -64,12 +64,12 @@ export function Onboarding() {
         {step === 3 && (
           <div className="onb-step">
             <h1>Прежде чем начнём 🎓</h1>
-            <p>Мы собрали самую базу к старту прикорма: 11 коротких статей — признаки готовности, безопасность, аллергены, «сколько он должен есть».</p>
+            <p>Мы собрали самое важное к старту прикорма: 11 коротких статей — признаки готовности, безопасность, аллергены и «сколько он должен есть».</p>
             <div className="onb-base-card">
               <span className="onb-base-e">📚</span>
-              <span className="grow"><b>База базированная</b><span className="onb-opt-s">~15 минут чтения · прогресс сохраняется, можно по одной</span></span>
+              <span className="grow"><b>Основы прикорма</b><span className="onb-opt-s">~15 минут чтения · прогресс сохраняется, можно по одной</span></span>
             </div>
-            <button className="btn btn-primary" style={{ marginTop: 14 }} onClick={startWithBase}>Читать базу 🎓</button>
+            <button className="btn btn-primary" style={{ marginTop: 14 }} onClick={startWithBase}>Читать основы 🎓</button>
           </div>
         )}
         {step === 2 && (
