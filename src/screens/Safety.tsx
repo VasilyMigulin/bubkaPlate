@@ -36,6 +36,7 @@ export function Safety() {
   });
   const doneCount = ARTICLES.filter((a) => read.has(a.id)).length;
   const [guided, setGuided] = useState(() => localStorage.getItem('bubka-plate-guided') === '1');
+  const [postsOpen, setPostsOpen] = useState(false);
   const [finale, setFinale] = useState(false);
   const nextUnread = (exceptId?: string) => ARTICLES.find((a) => !read.has(a.id) && a.id !== exceptId) ?? null;
   const guidedNext = (current: Article) => {
@@ -139,9 +140,12 @@ export function Safety() {
         </button>
       ))}
 
-      <div className="section-t" style={{ marginTop: 18 }}>📰 Статьи</div>
-      <div className="sub" style={{ margin: '-4px 2px 10px' }}>Пополняем регулярно — заглядывайте.</div>
-      {POSTS.map((a) => (
+      <button className="posts-head" onClick={() => setPostsOpen(true)}>
+        <span className="section-t" style={{ margin: 0 }}>📰 Статьи</span>
+        <span className="posts-all">Все ({POSTS.length}) ›</span>
+      </button>
+      <div className="sub" style={{ margin: '2px 2px 10px' }}>Пополняем регулярно — вот свежие.</div>
+      {POSTS.slice(0, 3).map((a) => (
         <button key={a.id} className="art-card" onClick={() => setArticle(a)}>
           <div className="art-pic" style={{ background: `radial-gradient(circle at 30% 25%, ${a.bg[0]}, ${a.bg[1]})` }}>{a.e}</div>
           <div className="grow">
@@ -156,6 +160,30 @@ export function Safety() {
         <span className="ne">📚</span>
         <span>Собрано по справочнику безопасной подачи и рекомендациям ВОЗ, AAP, NHS и Solid Starts. Ориентир, а не замена консультации врача.</span>
       </div>
+
+      {/* Все статьи — отдельный экран */}
+      {postsOpen && createPortal(
+        <div className="article-view">
+          <button className="ps-back" onClick={() => setPostsOpen(false)} aria-label="Назад">‹</button>
+          <div className="posts-view-head">
+            <h2>📰 Статьи</h2>
+            <div className="sub">Пополняем регулярно — заглядывайте.</div>
+          </div>
+          <div className="posts-view-body">
+            {POSTS.map((a) => (
+              <button key={'all' + a.id} className="art-card" onClick={() => setArticle(a)}>
+                <div className="art-pic" style={{ background: `radial-gradient(circle at 30% 25%, ${a.bg[0]}, ${a.bg[1]})` }}>{a.e}</div>
+                <div className="grow">
+                  <div className="art-t">{a.t}{marks.has(a.id) && <span className="art-mark"> 🔖</span>}</div>
+                  <div className="art-s">{a.sub}</div>
+                </div>
+                {read.has(a.id) ? <span className="art-done">✓</span> : <span className="art-chev">›</span>}
+              </button>
+            ))}
+          </div>
+        </div>,
+        document.body,
+      )}
 
       {/* Финал курса */}
       {finale && createPortal(
@@ -255,6 +283,12 @@ export function Safety() {
         .guided-banner span span { font-size:12px; color:var(--text2); display:block; margin-top:2px; }
         .guided-go { font-size:20px; color:var(--accent); font-weight:700; }
         .finale-hero { font-size:52px; text-align:center; margin:6px 0; }
+        .posts-head { display:flex; align-items:center; justify-content:space-between; width:100%; border:none; background:none;
+          font-family:inherit; padding:0 2px; margin-top:18px; cursor:pointer; }
+        .posts-all { font-size:12.5px; font-weight:700; color:var(--accent); }
+        .posts-view-head { padding:64px 20px 6px; }
+        .posts-view-head h2 { font-size:24px; font-weight:750; letter-spacing:-.02em; }
+        .posts-view-body { padding:12px 18px calc(30px + env(safe-area-inset-bottom)); }
         .art-bm { flex:none; border:none; border-radius:14px; background:var(--elev); font-size:13px; font-weight:700;
           font-family:inherit; color:var(--text2); padding:0 14px; cursor:pointer; }
         .art-bm.on { background:var(--accent-soft); }
