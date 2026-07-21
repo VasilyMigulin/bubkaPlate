@@ -76,7 +76,7 @@ export function ShopSheet({ open, onClose }: { open: boolean; onClose: () => voi
   };
 
   return createPortal(
-    <div className="sheet-scrim" style={{ zIndex: 75 }} onClick={onClose}>
+    <div className="sheet-scrim" onClick={onClose}>
       <div className="bottom-sheet" onClick={(e) => e.stopPropagation()}>
         <div className="grab" />
         <div className="bs-title">🛒 Список покупок</div>

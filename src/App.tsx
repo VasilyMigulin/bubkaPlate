@@ -65,6 +65,74 @@ function Shell() {
     window.addEventListener('bubka-tab', h);
     return () => window.removeEventListener('bubka-tab', h);
   }, []);
+
+  // Жесты как в iOS: тянем шторку вниз — закрывается; свайп от левого края полноэкранной карточки — назад.
+  useEffect(() => {
+    let sheet: HTMLElement | null = null;
+    let view: HTMLElement | null = null;
+    let startX = 0, startY = 0, dx = 0, dy = 0, mode: 'none' | 'sheet' | 'back' = 'none';
+
+    const onStart = (e: TouchEvent) => {
+      const t = e.touches[0];
+      startX = t.clientX; startY = t.clientY; dx = 0; dy = 0; mode = 'none';
+      const el = e.target as HTMLElement;
+      const sh = el.closest('.bottom-sheet') as HTMLElement | null;
+      if (sh && sh.scrollTop <= 0) { sheet = sh; mode = 'sheet'; return; }
+      if (startX < 28) {
+        const vw = el.closest('.product-view, .recipe-view, .article-view, .rx-screen') as HTMLElement | null;
+        if (vw) { view = vw; mode = 'back'; }
+      }
+    };
+    const onMove = (e: TouchEvent) => {
+      if (mode === 'none') return;
+      const t = e.touches[0];
+      dx = t.clientX - startX; dy = t.clientY - startY;
+      if (mode === 'sheet') {
+        if (dy > 6 && Math.abs(dy) > Math.abs(dx)) {
+          sheet!.style.transform = `translateY(${dy}px)`;
+          sheet!.style.transition = 'none';
+          e.preventDefault();
+        }
+      } else if (mode === 'back' && dx > 6) {
+        view!.style.transform = `translateX(${Math.max(0, dx)}px)`;
+        view!.style.transition = 'none';
+        e.preventDefault();
+      }
+    };
+    const onEnd = () => {
+      if (mode === 'sheet' && sheet) {
+        const el = sheet;
+        el.style.transition = 'transform .25s ease';
+        if (dy > 110) {
+          el.style.transform = 'translateY(100%)';
+          setTimeout(() => (el.parentElement as HTMLElement | null)?.click(), 180);
+        } else {
+          el.style.transform = '';
+        }
+      }
+      if (mode === 'back' && view) {
+        const el = view;
+        el.style.transition = 'transform .25s ease';
+        if (dx > 90) {
+          el.style.transform = 'translateX(100%)';
+          const back = el.querySelector('.ps-back, .rx-back') as HTMLElement | null;
+          setTimeout(() => back?.click(), 160);
+        } else {
+          el.style.transform = '';
+        }
+      }
+      sheet = null; view = null; mode = 'none';
+    };
+
+    document.addEventListener('touchstart', onStart, { passive: true });
+    document.addEventListener('touchmove', onMove, { passive: false });
+    document.addEventListener('touchend', onEnd, { passive: true });
+    return () => {
+      document.removeEventListener('touchstart', onStart);
+      document.removeEventListener('touchmove', onMove);
+      document.removeEventListener('touchend', onEnd);
+    };
+  }, []);
   if (!profile) return <Onboarding />;
   const head = HEAD[tab];
   return (

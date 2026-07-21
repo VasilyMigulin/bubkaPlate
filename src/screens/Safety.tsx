@@ -187,7 +187,7 @@ export function Safety() {
 
       {/* Финал курса */}
       {finale && createPortal(
-        <div className="sheet-scrim" style={{ zIndex: 76 }} onClick={() => setFinale(false)}>
+        <div className="sheet-scrim" onClick={() => setFinale(false)}>
           <div className="bottom-sheet" onClick={(e) => e.stopPropagation()}>
             <div className="grab" />
             <div className="finale-hero">🎉</div>
@@ -293,7 +293,7 @@ export function Safety() {
           font-family:inherit; color:var(--text2); padding:0 14px; cursor:pointer; }
         .art-bm.on { background:var(--accent-soft); }
 
-        .article-view { position:fixed; inset:0; z-index:50; max-width:440px; margin:0 auto; background:var(--bg);
+        .article-view { position:fixed; inset:0; z-index:60; max-width:440px; margin:0 auto; background:var(--bg);
           display:flex; flex-direction:column; overflow-y:auto; box-shadow:0 0 0 100vw var(--page);
           animation:pushin .3s cubic-bezier(.3,.7,.3,1) both; }
         .article-view::-webkit-scrollbar { display:none; }

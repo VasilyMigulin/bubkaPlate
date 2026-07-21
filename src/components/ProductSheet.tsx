@@ -87,7 +87,7 @@ function compressImage(file: File, max = 380, q = 0.72): Promise<string> {
   });
 }
 
-export function ProductSheet({ food, onClose, elevated }: { food: Food; onClose: () => void; elevated?: boolean }) {
+export function ProductSheet({ food, onClose }: { food: Food; onClose: () => void; elevated?: boolean }) {
   const { logFood, startAllergen, showToast, ageMonths, profile, introduced, log } = useStore();
   const [rxOpen, setRxOpen] = useState(false);
   const [rxVariant, setRxVariant] = useState<{ key: string; label: string } | null>(null);
@@ -148,7 +148,7 @@ export function ProductSheet({ food, onClose, elevated }: { food: Food; onClose:
   };
 
   return createPortal(
-    <div className="product-view" style={elevated ? { zIndex: 58 } : undefined}>
+    <div className="product-view">
         <button className="ps-back" onClick={onClose} aria-label="Назад">‹</button>
         <div className="ps-hero" style={{ background: MAIN_PHOTOS[f.id] ? undefined : `radial-gradient(circle at 30% 25%, ${bg[0]}, ${bg[1]})` }}>
           {MAIN_PHOTOS[f.id]

@@ -22,7 +22,7 @@ export function Paywall({ open, onClose, onSuccess }: { open: boolean; onClose: 
   };
 
   return createPortal(
-    <div className="sheet-scrim" style={{ zIndex: 80 }} onClick={onClose}>
+    <div className="sheet-scrim" onClick={onClose}>
       <div className="bottom-sheet" onClick={(e) => e.stopPropagation()}>
         <div className="grab" />
         <div className="pw-hero">✨</div>

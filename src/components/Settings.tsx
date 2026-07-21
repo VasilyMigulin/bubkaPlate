@@ -30,7 +30,7 @@ export function Settings({ open, onClose }: { open: boolean; onClose: () => void
   };
 
   return createPortal(
-    <div className="sheet-scrim" style={{ zIndex: 72 }} onClick={onClose}>
+    <div className="sheet-scrim" onClick={onClose}>
       <div className="bottom-sheet" onClick={(e) => e.stopPropagation()}>
         <div className="grab" />
         <div className="bs-title">⚙️ Настройки</div>

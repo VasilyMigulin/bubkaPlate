@@ -1,6 +1,6 @@
 /* Карточка продукта — отдельный полноэкранный экран поверх всего (каталог не виден) */
 .product-view {
-  position:fixed; inset:0; z-index:50; max-width:440px; margin:0 auto;
+  position:fixed; inset:0; z-index:60; max-width:440px; margin:0 auto;
   background:var(--bg); display:flex; flex-direction:column; overflow-y:auto;
   box-shadow:0 0 0 100vw var(--page);
   animation:pushin .3s cubic-bezier(.3,.7,.3,1) both;
@@ -67,7 +67,7 @@
   cursor:pointer; transition:transform .2s cubic-bezier(.34,1.56,.64,1); }
 .skill-i:active { transform:scale(.85); }
 
-.skill-pop-scrim { position:fixed; inset:0; z-index:70; background:rgba(20,16,12,.45); display:flex; align-items:center; justify-content:center;
+.skill-pop-scrim { position:fixed; inset:0; z-index:60; background:rgba(20,16,12,.45); display:flex; align-items:center; justify-content:center;
   padding:24px; animation:fade .2s both; }
 .skill-pop { background:var(--card); border-radius:20px; padding:20px; max-width:340px; box-shadow:var(--shadow-lg);
   animation:popIn .28s cubic-bezier(.34,1.4,.64,1) both; }
