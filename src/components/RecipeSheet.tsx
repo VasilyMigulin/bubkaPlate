@@ -18,7 +18,19 @@ export function RecipeSheet({ recipe, onClose }: { recipe: Recipe; onClose: () =
       <button className="ps-back" onClick={onClose} aria-label="Назад">‹</button>
       <div className="recipe-hero" style={{ background: recipe.bg }}>{recipe.e}</div>
       <div className="recipe-body">
-        <h2>{recipe.n}</h2>
+        <h2>
+          {recipe.n}
+          <button className={`fav-big ${(() => { try { return (JSON.parse(localStorage.getItem('bubka-plate-favs') || '[]') as string[]).includes(recipe.n); } catch { return false; } })() ? 'on' : ''}`}
+            onClick={(e) => {
+              try {
+                const cur = JSON.parse(localStorage.getItem('bubka-plate-favs') || '[]') as string[];
+                const has = cur.includes(recipe.n);
+                localStorage.setItem('bubka-plate-favs', JSON.stringify(has ? cur.filter((x) => x !== recipe.n) : [...cur, recipe.n]));
+                (e.currentTarget as HTMLButtonElement).classList.toggle('on');
+                (e.currentTarget as HTMLButtonElement).textContent = has ? '♡' : '♥';
+              } catch { /* ignore */ }
+            }}>{(() => { try { return (JSON.parse(localStorage.getItem('bubka-plate-favs') || '[]') as string[]).includes(recipe.n) ? '♥' : '♡'; } catch { return '♡'; } })()}</button>
+        </h2>
         <div className="rm" style={{ marginTop: 8 }}>
           <span className="tag green">{recipe.age} мес</span>
           <span className="tag">{recipe.time}</span>

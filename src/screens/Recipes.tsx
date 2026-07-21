@@ -3,6 +3,8 @@ import { createPortal } from 'react-dom';
 import { FOODS, findFoodByIng } from '../data/foods';
 import { PANTRY, RECIPES, type Recipe } from '../data/recipes';
 import { RecipeSheet } from '../components/RecipeSheet';
+import { PlanSheet } from '../components/PlanSheet';
+import { DAYPLANS, type DayPlan } from '../data/plans';
 import { ShopSheet } from '../components/ShopSheet';
 import { useStore } from '../state/store';
 import './Recipes.css';
@@ -17,6 +19,7 @@ const EXC_KEY = 'bubka-plate-exclusions';
 // служебные карточки, которые бессмысленно «исключать» из рецептов
 const NOT_EXCLUDABLE = new Set(['water', 'juice', 'compote', 'spices', 'oil', 'honey', 'canned']);
 const SHOP_KEY = 'bubka-plate-shoplist';
+const FAV_KEY = 'bubka-plate-favs';
 
 export function Recipes() {
   const [sel, setSel] = useState<Set<string>>(new Set());
@@ -47,6 +50,18 @@ export function Recipes() {
 
   const [shopOpen, setShopOpen] = useState(false);
   const openShop = () => setShopOpen(true);
+  const [planOpen, setPlanOpen] = useState<DayPlan | null | 'custom'>(undefined as unknown as null);
+  const [planShown, setPlanShown] = useState(false);
+  const [fav, setFav] = useState<Set<string>>(() => {
+    try { return new Set(JSON.parse(localStorage.getItem(FAV_KEY) || '[]') as string[]); } catch { return new Set(); }
+  });
+  const [favF, setFavF] = useState(false);
+  const toggleFav = (n: string) => setFav((prev) => {
+    const s2 = new Set(prev);
+    s2.has(n) ? s2.delete(n) : s2.add(n);
+    localStorage.setItem(FAV_KEY, JSON.stringify([...s2]));
+    return s2;
+  });
   const [open, setOpen] = useState<Recipe | null>(null);
   const { showToast } = useStore();
 
@@ -60,12 +75,13 @@ export function Recipes() {
     RECIPES.filter((r) => ageF === 'all' || r.age === ageF)
       .filter((r) => kindF === 'all' || r.kind === kindF)
       .filter((r) => exc.size === 0 || !isExcluded(r))
+      .filter((r) => !favF || fav.has(r.n))
       .map((r) => ({ r, hit: r.ing.filter((i) => sel.has(i)).length }))
       .filter((x) => sel.size === 0 || x.hit > 0)
       .sort((a, b) => b.hit / b.r.ing.length - a.hit / a.r.ing.length)
-      .map((x) => x.r), [sel, ageF, kindF, exc, excAllergens]);
+      .map((x) => x.r), [sel, ageF, kindF, exc, excAllergens, favF, fav]);
 
-  const activeFilters = (ageF !== 'all' ? 1 : 0) + (kindF !== 'all' ? 1 : 0) + (sel.size > 0 ? 1 : 0) + (exc.size > 0 ? 1 : 0);
+  const activeFilters = (ageF !== 'all' ? 1 : 0) + (kindF !== 'all' ? 1 : 0) + (sel.size > 0 ? 1 : 0) + (exc.size > 0 ? 1 : 0) + (favF ? 1 : 0);
 
   // пагинация: рендерим порциями, чтобы список не грузился «портянкой»
   const [shown, setShown] = useState(20);
@@ -77,6 +93,21 @@ export function Recipes() {
 
   return (
     <>
+      <div className="plans-row">
+        {DAYPLANS.map((pl) => (
+          <button key={pl.id} className="plan-card" onClick={() => { setPlanOpen(pl); setPlanShown(true); }}>
+            <span className="plan-e">{pl.e}</span>
+            <span className="plan-t">{pl.t}</span>
+            <span className="plan-a">{pl.age} мес · 4 блюда</span>
+          </button>
+        ))}
+        <button className="plan-card custom" onClick={() => { setPlanOpen(null); setPlanShown(true); }}>
+          <span className="plan-e">✨</span>
+          <span className="plan-t">Мой план</span>
+          <span className="plan-a">соберите сами</span>
+        </button>
+      </div>
+
       <div className="exc-row">
         <button className={`exc-btn ${activeFilters > 0 ? 'active-f' : ''}`} onClick={() => setFiltOpen(true)}>
           ⚙️ Фильтры{activeFilters > 0 ? ` · ${activeFilters}` : ''}
@@ -90,6 +121,7 @@ export function Recipes() {
           {ageF !== 'all' && <span className="tag green">{ageF} мес</span>}
           {kindF !== 'all' && <span className="tag">{KINDS.find((k) => k.key === kindF)?.label}</span>}
           {[...sel].map((p) => <span key={p} className="tag green">✓ {p}</span>)}
+          {favF && <span className="tag green">♥ избранное</span>}
           {exc.size > 0 && <span className="tag warn-tag">🚫 {[...exc].join(', ')}</span>}
           <button className="term-link" onClick={() => { resetFilters(); }}>сбросить</button>
         </div>
@@ -97,6 +129,7 @@ export function Recipes() {
 
       {list.slice(0, shown).map((r) => (
         <button key={r.n} className="recipe" onClick={() => setOpen(r)}>
+          <span className={`fav-b ${fav.has(r.n) ? 'on' : ''}`} onClick={(e) => { e.stopPropagation(); toggleFav(r.n); }}>{fav.has(r.n) ? '♥' : '♡'}</span>
           <div className="rp" style={{ background: r.bg }}>{r.e}</div>
           <div className="grow">
             <div className="rn">{r.n}</div>
@@ -139,6 +172,11 @@ export function Recipes() {
               {AGES.map((a) => (
                 <button key={a} className={`chip ${ageF === a ? 'on' : ''}`} onClick={() => setAgeF(ageF === a ? 'all' : a)}>{a} мес</button>
               ))}
+            </div>
+
+            <div className="bs-label">Избранное</div>
+            <div className="exc-grid">
+              <button className={`chip ${favF ? 'on' : ''}`} onClick={() => setFavF(!favF)}>{favF ? '✕ ' : ''}♥ Только избранные</button>
             </div>
 
             <div className="bs-label">Тип блюда</div>
@@ -201,6 +239,13 @@ export function Recipes() {
       )}
 
       <ShopSheet open={shopOpen} onClose={() => setShopOpen(false)} />
+      {planShown && (
+        <PlanSheet
+          plan={planOpen === 'custom' ? null : (planOpen as DayPlan | null)}
+          onClose={() => setPlanShown(false)}
+          onOpenRecipe={(r) => setOpen(r)}
+        />
+      )}
     </>
   );
 }
