@@ -72,12 +72,13 @@ export function MyPlate({ goCatalog }: { goCatalog: () => void }) {
         <span className="pc-arrow">›</span>
       </button>
 
-      <button className="card p30-entry" onClick={() => setPlan30Open(true)}>
+      <button className="card next-card" onClick={() => setPlan30Open(true)}>
         <div className="row">
           <div className="next-e">🗓</div>
           <div className="grow">
-            <div className="h-card" style={{ margin: 0 }}>Первые 30 дней прикорма</div>
-            <div className="sub">Пошаговый план: что и когда вводить</div>
+            <div className="eyebrow" style={{ color: 'var(--accent)' }}>План новичка</div>
+            <div className="h-card" style={{ margin: '2px 0 0' }}>Первые 30 дней прикорма</div>
+            <div className="sub">Что и когда вводить — по шагам</div>
           </div>
           <span style={{ color: 'var(--text2)' }}>›</span>
         </div>
