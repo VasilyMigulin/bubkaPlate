@@ -13,11 +13,21 @@ export function Safety() {
   const [marks, setMarks] = useState<Set<string>>(() => {
     try { return new Set(JSON.parse(localStorage.getItem('bubka-plate-bookmarks') || '[]') as string[]); } catch { return new Set(); }
   });
-  const markRead = (id: string) => setRead((prev) => {
-    const n = new Set(prev).add(id);
-    localStorage.setItem('bubka-plate-read', JSON.stringify([...n]));
-    return n;
-  });
+  const markRead = (id: string) => {
+    setRead((prev) => {
+      const n = new Set(prev).add(id);
+      localStorage.setItem('bubka-plate-read', JSON.stringify([...n]));
+      return n;
+    });
+    // прочитанное автоматически уходит из «отложенного»
+    setMarks((prev) => {
+      if (!prev.has(id)) return prev;
+      const n = new Set(prev);
+      n.delete(id);
+      localStorage.setItem('bubka-plate-bookmarks', JSON.stringify([...n]));
+      return n;
+    });
+  };
   const toggleMark = (id: string) => setMarks((prev) => {
     const n = new Set(prev);
     n.has(id) ? n.delete(id) : n.add(id);
