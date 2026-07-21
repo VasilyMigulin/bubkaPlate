@@ -3,6 +3,7 @@ import { CATEGORIES, FOODS , resolveFoodRef } from '../data/foods';
 import { PORTIONS, READINESS, SCHEDULE } from '../data/schedule';
 import { useStore } from '../state/store';
 import { Plan30Sheet } from '../components/Plan30Sheet';
+import { SearchSheet } from '../components/SearchSheet';
 import { RULE3_TEXT } from '../data/glossary';
 import { Lightbox } from '../components/Lightbox';
 import { PlateScan } from '../components/PlateScan';
@@ -17,6 +18,7 @@ const RX_BADGE: Record<string, { cls: string; label: string }> = {
 
 export function MyPlate({ goCatalog }: { goCatalog: () => void }) {
   const [plan30Open, setPlan30Open] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
   const { introduced, log, windows, ironCovered, ironTotal, markAllergenDay, showToast,
     ageMonths, readiness, toggleReadiness, resetAll } = useStore();
   const [scanOpen, setScanOpen] = useState(false);
@@ -40,6 +42,10 @@ export function MyPlate({ goCatalog }: { goCatalog: () => void }) {
 
   return (
     <>
+      <button className="ask-row" onClick={() => setSearchOpen(true)}>
+        🔍 <span>Спросите: давится, запор, мало ест…</span>
+      </button>
+
       {notReady && (
         <div className="card ready-card">
           <div className="eyebrow" style={{ color: 'var(--terra)' }}>Скоро прикорм · готовность</div>
@@ -234,6 +240,7 @@ export function MyPlate({ goCatalog }: { goCatalog: () => void }) {
         </div>
       )}
       {plan30Open && <Plan30Sheet onClose={() => setPlan30Open(false)} />}
+      {searchOpen && <SearchSheet onClose={() => setSearchOpen(false)} />}
     </>
   );
 }
