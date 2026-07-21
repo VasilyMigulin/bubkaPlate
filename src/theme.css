@@ -109,3 +109,10 @@ img { max-width:100%; }
 
 .gear-btn { position:absolute; top:16px; right:2px; width:38px; height:38px; border:none; border-radius:50%;
   background:var(--card); box-shadow:var(--shadow); font-size:17px; cursor:pointer; z-index:5; }
+
+/* Полноэкранная статья/план — глобально, используется из разных экранов */
+.article-view { position:fixed; inset:0; z-index:60; max-width:440px; margin:0 auto; background:var(--bg);
+  display:flex; flex-direction:column; overflow-y:auto; box-shadow:0 0 0 100vw var(--page);
+  animation:viewin .3s cubic-bezier(.3,.7,.3,1) both; }
+.article-view::-webkit-scrollbar { display:none; }
+@keyframes viewin { from { transform:translateX(100%); } to { transform:none; } }

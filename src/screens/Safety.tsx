@@ -293,10 +293,6 @@ export function Safety() {
           font-family:inherit; color:var(--text2); padding:0 14px; cursor:pointer; }
         .art-bm.on { background:var(--accent-soft); }
 
-        .article-view { position:fixed; inset:0; z-index:60; max-width:440px; margin:0 auto; background:var(--bg);
-          display:flex; flex-direction:column; overflow-y:auto; box-shadow:0 0 0 100vw var(--page);
-          animation:pushin .3s cubic-bezier(.3,.7,.3,1) both; }
-        .article-view::-webkit-scrollbar { display:none; }
         .art-hero { height:180px; flex:none; display:flex; align-items:center; justify-content:center; font-size:76px; }
         .art-hero span { filter:drop-shadow(0 14px 24px rgba(100,60,20,.25)); }
         .art-body { padding:22px 20px calc(30px + env(safe-area-inset-bottom)); }

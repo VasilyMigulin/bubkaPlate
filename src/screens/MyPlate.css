@@ -86,3 +86,7 @@
 
 .reset-link { display:block; margin:24px auto 8px; background:none; border:none; font-family:inherit; font-size:12px;
   font-weight:600; color:var(--text2); padding:6px 12px; }
+
+/* вход в план 30 дней */
+.p30-entry { background:linear-gradient(120deg, var(--accent-soft), var(--card)); border:1.5px solid color-mix(in srgb, var(--accent) 25%, transparent); }
+.p30-entry .next-e { font-size:26px; }
