@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { FOODS, findFoodByIng } from '../data/foods';
 import { PANTRY, RECIPES, type Recipe } from '../data/recipes';
@@ -74,6 +74,10 @@ export function Recipes() {
 
   const activeFilters = (ageF !== 'all' ? 1 : 0) + (kindF !== 'all' ? 1 : 0) + (sel.size > 0 ? 1 : 0) + (exc.size > 0 ? 1 : 0);
 
+  // пагинация: рендерим порциями, чтобы список не грузился «портянкой»
+  const [shown, setShown] = useState(20);
+  useEffect(() => { setShown(20); }, [ageF, kindF, sel, exc]);
+
   const resetFilters = () => {
     setAgeF('all'); setKindF('all'); setSel(new Set());
   };
@@ -98,7 +102,7 @@ export function Recipes() {
         </div>
       )}
 
-      {list.map((r) => (
+      {list.slice(0, shown).map((r) => (
         <button key={r.n} className="recipe" onClick={() => setOpen(r)}>
           <div className="rp" style={{ background: r.bg }}>{r.e}</div>
           <div className="grow">
@@ -110,7 +114,13 @@ export function Recipes() {
           </div>
         </button>
       ))}
-      {list.length === 0 && <div className="sub" style={{ textAlign: 'center', padding: 10 }}>Отметьте, что есть дома — подберём рецепты.</div>}
+      {list.length > shown && (
+        <button className="btn btn-soft" style={{ marginTop: 4 }} onClick={() => setShown(shown + 20)}>
+          Показать ещё · осталось {list.length - shown}
+        </button>
+      )}
+
+      {list.length === 0 && <div className="sub" style={{ textAlign: 'center', padding: 10 }}>Ничего не нашлось — ослабьте фильтры.</div>}
 
       <div className="card" style={{ background: 'var(--accent-soft)', cursor: 'pointer', marginTop: 4 }} onClick={() => showToast('✨', 'bubka+', '150+ рецептов с фильтрами — скоро')}>
         <div className="row">
