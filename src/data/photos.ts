@@ -1,4 +1,4 @@
-// Фото продуктов из справочника «Азбука безопасной подачи» (@kat.atlashova, с разрешения автора).
+// Референсные фото подачи продуктов.
 // Лежат в public/foods; путь резолвится по id продукта.
 export const FOOD_PHOTOS: Record<string, string> = {
   apple: '/foods/apple.png',

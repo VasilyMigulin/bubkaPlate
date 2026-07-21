@@ -61,7 +61,7 @@ export function Settings({ open, onClose }: { open: boolean; onClose: () => void
         <div className="bs-label">О приложении</div>
         <div className="set-about">
           <p><b>bubka plate</b> · прикорм с любовью · v1.0</p>
-          <p>Правила подачи — по справочнику «Азбука безопасной подачи» (спасибо @kat.atlashova за разрешение использовать материалы) и рекомендациям ВОЗ, AAP, NHS, Solid Starts.</p>
+          <p>Правила подачи основаны на современных рекомендациях ВОЗ, AAP, NHS и данных исследований.</p>
           <p>Приложение носит ознакомительный характер и не заменяет консультацию врача.</p>
         </div>
 
