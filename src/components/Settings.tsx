@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import { createPortal } from 'react-dom';
 import { useStore } from '../state/store';
-import { Paywall, isPremium } from './Paywall';
+import { isPremium } from './Paywall';
+import { SubscriptionSheet } from './SubscriptionSheet';
 import { DateWheel } from './DateWheel';
 import type { FeedingApproach } from '../types';
 
@@ -14,7 +15,7 @@ const APPROACHES: { key: FeedingApproach; label: string }[] = [
 /** Настройки: профиль малыша, подписка, о приложении. */
 export function Settings({ open, onClose }: { open: boolean; onClose: () => void }) {
   const { profile, setProfile, resetAll, showToast } = useStore();
-  const [pwOpen, setPwOpen] = useState(false);
+  const [subOpen, setSubOpen] = useState(false);
   const [prem, setPrem] = useState(isPremium());
   const [name, setName] = useState(profile?.name ?? '');
   const [birth, setBirth] = useState(profile?.birthDate ?? '');
@@ -49,7 +50,7 @@ export function Settings({ open, onClose }: { open: boolean; onClose: () => void
         <button className="btn btn-primary" style={{ marginTop: 10 }} onClick={save}>Сохранить</button>
 
         <div className="bs-label">Подписка</div>
-        <button className="set-row" onClick={() => setPwOpen(true)}>
+        <button className="set-row" onClick={() => { setPrem(isPremium()); setSubOpen(true); }}>
           <span className="set-e">✨</span>
           <span className="grow">
             <b>bubka+</b>
@@ -86,7 +87,7 @@ export function Settings({ open, onClose }: { open: boolean; onClose: () => void
         `}</style>
       </div>
     </div>
-    <Paywall open={pwOpen} onClose={() => setPwOpen(false)} onSuccess={() => setPrem(true)} />
+    <SubscriptionSheet open={subOpen} onClose={() => { setSubOpen(false); setPrem(isPremium()); }} />
     </>,
     document.body,
   );

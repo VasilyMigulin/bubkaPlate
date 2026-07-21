@@ -110,10 +110,10 @@ export function Recipes() {
     <>
       <div className="section-t" style={{ margin: '0 2px 8px' }}>🍽 Тарелочки — собрать за 5 минут</div>
       <div className="plans-row">
-        <button className="plan-card custom" onClick={() => { setPlateOpen(null); setPlateShown(true); }}>
+        <button className="plan-card custom" onClick={() => { if (!prem) { setPwOpen(true); return; } setPlateOpen(null); setPlateShown(true); }}>
           <span className="plan-e">✨</span>
           <span className="plan-t">Из введённого</span>
-          <span className="plan-a">из того, что уже пробовали</span>
+          <span className="plan-a">{prem ? 'из того, что уже пробовали' : 'bubka+ · конструктор'}</span>
         </button>
         {platesSorted.map((pl) => (
           <button key={pl.id} className="plan-card" onClick={() => { setPlateOpen(pl); setPlateShown(true); }}>
@@ -126,17 +126,20 @@ export function Recipes() {
 
       <div className="section-t" style={{ margin: '4px 2px 8px' }}>📅 Планы на день</div>
       <div className="plans-row">
-        {plansSorted.map((pl) => (
-          <button key={pl.id} className="plan-card" onClick={() => { setPlanOpen(pl); setPlanShown(true); }}>
-            <span className="plan-e">{pl.e}</span>
-            <span className="plan-t">{pl.t}</span>
-            <span className="plan-a">{pl.age === myAge ? '⭐ ваш возраст' : `${pl.age} мес`} · 4 блюда</span>
-          </button>
-        ))}
-        <button className="plan-card custom" onClick={() => { setPlanOpen(null); setPlanShown(true); }}>
+        {plansSorted.map((pl, idx) => {
+          const locked = !prem && idx > 0;
+          return (
+            <button key={pl.id} className="plan-card" onClick={() => { if (locked) { setPwOpen(true); return; } setPlanOpen(pl); setPlanShown(true); }}>
+              <span className="plan-e">{locked ? '✨' : pl.e}</span>
+              <span className="plan-t">{pl.t}</span>
+              <span className="plan-a">{locked ? 'bubka+' : `${pl.age === myAge ? '⭐ ваш возраст' : `${pl.age} мес`} · 4 блюда`}</span>
+            </button>
+          );
+        })}
+        <button className="plan-card custom" onClick={() => { if (!prem) { setPwOpen(true); return; } setPlanOpen(null); setPlanShown(true); }}>
           <span className="plan-e">✨</span>
           <span className="plan-t">Мой план</span>
-          <span className="plan-a">соберите сами</span>
+          <span className="plan-a">{prem ? 'соберите сами' : 'bubka+ · конструктор'}</span>
         </button>
       </div>
 
