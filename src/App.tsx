@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { StoreProvider, useStore } from './state/store';
 import { MyPlate } from './screens/MyPlate';
 import { Catalog } from './screens/Catalog';
@@ -52,6 +52,13 @@ function Shell() {
     return 'mine';
   });
   const [settingsOpen, setSettingsOpen] = useState(false);
+  // онбординг завершился с «Читать базу» — переключаемся на неё
+  useEffect(() => {
+    if (profile) {
+      const t = localStorage.getItem('bubka-plate-start-tab') as Tab | null;
+      if (t) { localStorage.removeItem('bubka-plate-start-tab'); setTab(t); }
+    }
+  }, [profile]);
   const { profile, ageMonths } = useStore();
   if (!profile) return <Onboarding />;
   const head = HEAD[tab];

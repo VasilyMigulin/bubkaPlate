@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { createPortal } from 'react-dom';
 import { useStore } from '../state/store';
 import { Paywall, isPremium } from './Paywall';
+import { DateWheel } from './DateWheel';
 import type { FeedingApproach } from '../types';
 
 const APPROACHES: { key: FeedingApproach; label: string }[] = [
@@ -38,8 +39,7 @@ export function Settings({ open, onClose }: { open: boolean; onClose: () => void
         <div className="set-ava">👶</div>
         <input className="em-input" style={{ width: '100%', marginBottom: 8 }} placeholder="Имя малыша"
           value={name} onChange={(e) => setName(e.target.value)} />
-        <input className="em-input" style={{ width: '100%', marginBottom: 8 }} type="date"
-          value={birth} onChange={(e) => setBirth(e.target.value)} />
+        <div style={{ marginBottom: 8 }}><DateWheel value={birth} onChange={setBirth} /></div>
         <div className="exc-grid" style={{ marginTop: 2 }}>
           {APPROACHES.map((a) => (
             <button key={a.key} className={`chip ${approach === a.key ? 'on' : ''}`} onClick={() => setApproach(a.key)}>{a.label}</button>

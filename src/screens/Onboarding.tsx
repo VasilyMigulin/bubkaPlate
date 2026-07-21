@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useStore } from '../state/store';
+import { DateWheel } from '../components/DateWheel';
 import type { FeedingApproach } from '../types';
 import './Onboarding.css';
 
@@ -57,7 +58,7 @@ export function Onboarding() {
           <div className="onb-step">
             <h1>Когда {name.trim()} родился?</h1>
             <p>Возраст — главный фильтр: покажем только то, что подходит сейчас.</p>
-            <input className="onb-input" type="date" value={birth} onChange={(e) => setBirth(e.target.value)} />
+            <DateWheel value={birth} onChange={setBirth} />
           </div>
         )}
         {step === 3 && (
