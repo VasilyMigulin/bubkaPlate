@@ -4,6 +4,7 @@ import { PLAN30 } from '../data/plan30';
 import { FOODS } from '../data/foods';
 import { ProductSheet } from './ProductSheet';
 import { useStore } from '../state/store';
+import { Paywall, isPremium } from './Paywall';
 import type { Food } from '../types';
 
 const P30_KEY = 'bubka-plate-plan30';
@@ -17,6 +18,8 @@ export function Plan30Sheet({ onClose }: { onClose: () => void }) {
   const { introduced, showToast } = useStore();
   const [done, setDone] = useState<Set<number>>(readDone);
   const [foodOpen, setFoodOpen] = useState<Food | null>(null);
+  const [prem, setPrem] = useState(isPremium());
+  const [pwOpen, setPwOpen] = useState(false);
 
   const allDays = PLAN30.flatMap((w) => w.days);
   // день считается пройденным: отмечен вручную ИЛИ все его продукты уже введены
@@ -43,11 +46,20 @@ export function Plan30Sheet({ onClose }: { onClose: () => void }) {
         <div className="p30-count">{doneCount} из 30 · {doneCount === 0 ? 'начнём с кабачка!' : doneCount >= 30 ? 'месяц пройден 🎉' : `сейчас день ${current}`}</div>
       </div>
       <div className="p30-body">
-        {PLAN30.map((w) => (
+        {PLAN30.map((w, wi) => {
+          const weekLocked = !prem && wi > 0;
+          return (
           <div key={w.title}>
-            <div className="section-t">{w.title}</div>
+            <div className="section-t">{w.title}{weekLocked && <span className="p30-lock"> ✨ bubka+</span>}</div>
             <div className="sub" style={{ margin: '-4px 2px 10px' }}>{w.sub}</div>
-            {w.days.map((day) => {
+            {weekLocked ? (
+              <button className="p30-locked-week" onClick={() => setPwOpen(true)}>
+                {w.days.map((day) => (
+                  <span key={day.d} className="p30-locked-day">{day.d} · {day.t}</span>
+                ))}
+                <span className="p30-unlock">✨ Открыть полный план с bubka+</span>
+              </button>
+            ) : w.days.map((day) => {
               const dDone = isDone(day.d, day.pids);
               const isCur = day.d === current;
               return (
@@ -73,7 +85,8 @@ export function Plan30Sheet({ onClose }: { onClose: () => void }) {
               );
             })}
           </div>
-        ))}
+          );
+        })}
         <div className="note" style={{ marginTop: 8 }}>
           <span className="ne">🧭</span>
           <span>План — ориентир, а не экзамен. Пропустили день, поменяли порядок овощей, малыш болел — просто продолжайте со своего места. Дни отмечаются сами, когда продукт появляется в дневнике.</span>
@@ -101,9 +114,15 @@ export function Plan30Sheet({ onClose }: { onClose: () => void }) {
           background:var(--accent); border-radius:999px; padding:2px 8px; margin-left:6px; vertical-align:middle; }
         .p30-note { font-size:12.5px; color:var(--text2); line-height:1.45; margin-top:4px; }
         .p30-chips { display:flex; flex-wrap:wrap; gap:6px; margin-top:8px; }
+        .p30-lock { font-size:11px; font-weight:800; color:var(--terra); }
+        .p30-locked-week { display:flex; flex-direction:column; gap:7px; width:100%; text-align:left; border:none; font-family:inherit;
+          background:var(--card); border-radius:16px; padding:14px; box-shadow:var(--shadow); margin-bottom:8px; cursor:pointer; }
+        .p30-locked-day { font-size:12.5px; color:var(--text2); filter:blur(0px); opacity:.65; }
+        .p30-unlock { margin-top:6px; font-size:13px; font-weight:800; color:var(--accent); }
       `}</style>
     </div>
     {foodOpen && <ProductSheet food={foodOpen} onClose={() => setFoodOpen(null)} />}
+    <Paywall open={pwOpen} onClose={() => setPwOpen(false)} onSuccess={() => setPrem(true)} />
     </>,
     document.body,
   );
