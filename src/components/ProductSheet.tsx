@@ -93,6 +93,11 @@ export function ProductSheet({ food, onClose }: { food: Food; onClose: () => voi
   const [rxVariant, setRxVariant] = useState<{ key: string; label: string } | null>(null);
   const [selRx, setSelRx] = useState<Reaction | null>(null);
   const [note, setNote] = useState('');
+  const [when, setWhen] = useState(() => {
+    const d = new Date();
+    d.setMinutes(d.getMinutes() - d.getTimezoneOffset());
+    return d.toISOString().slice(0, 16);
+  });
   const [photo, setPhoto] = useState<string | undefined>();
   const [skillInfo, setSkillInfo] = useState<string | null>(null);
   const [recipeOpen, setRecipeOpen] = useState<Recipe | null>(null);
@@ -139,7 +144,7 @@ export function ProductSheet({ food, onClose }: { food: Food; onClose: () => voi
     if (!selRx) return;
     const targetId = rxVariant ? `${f.id}:${rxVariant.key}` : f.id;
     const targetName = rxVariant ? rxVariant.label : f.n;
-    logFood(targetId, selRx, note, photo);
+    logFood(targetId, selRx, note, photo, when ? new Date(when).getTime() : undefined);
     setRxOpen(false);
     if (selRx === 'skin' || selRx === 'tummy') showToast('👀', 'Реакция записана', 'Отметили — покажите аллергологу');
     else showToast('✓', 'Записано в дневник', `${targetName}${photo ? ' · с фото 📷' : ''}`);
@@ -359,6 +364,9 @@ export function ProductSheet({ food, onClose }: { food: Food; onClose: () => voi
                   </button>
                 ))}
               </div>
+
+              <div className="rx-label">Когда дали <span className="rx-opt-tag">можно задним числом</span></div>
+              <input type="datetime-local" className="rx-when" value={when} onChange={(e) => setWhen(e.target.value)} />
 
               <div className="rx-label">Заметка для себя <span className="rx-opt-tag">необязательно</span></div>
               <textarea className="rx-note" placeholder="Сколько съел, как реагировал, понравилось ли…" value={note} onChange={(e) => setNote(e.target.value)} rows={3} />

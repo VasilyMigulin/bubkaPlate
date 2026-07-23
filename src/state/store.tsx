@@ -17,7 +17,7 @@ interface Store {
   switchChild: (id: string) => void;
   removeChild: (id: string) => void;
   setProfile: (p: Profile) => void;
-  logFood: (id: string, rx: Reaction, note?: string, photo?: string) => void;
+  logFood: (id: string, rx: Reaction, note?: string, photo?: string, when?: number) => void;
   answerFollowUp: (idx: number, rx: Reaction) => void;
   startAllergen: (id: string) => void;
   markAllergenDay: (id: string) => void;
@@ -71,6 +71,18 @@ function loadState(): PersistedV2 | null {
   } catch {
     return null;
   }
+}
+
+/** «сегодня, 09:30» / «вчера, 14:00» / «21 июля, 09:30» — дата записи в дневнике. */
+function humanWhen(ts: number): string {
+  const d = new Date(ts);
+  const now = new Date();
+  const time = d.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' });
+  const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
+  const startOfDay = new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime();
+  const diff = Math.round((startOfToday - startOfDay) / 864e5);
+  const label = diff === 0 ? 'сегодня' : diff === 1 ? 'вчера' : d.toLocaleDateString('ru-RU', { day: 'numeric', month: 'long' });
+  return `${label}, ${time}`;
 }
 
 export function computeAgeMonths(birthDate: string): number {
@@ -133,13 +145,15 @@ export function StoreProvider({ children: kids }: { children: ReactNode }) {
     });
   }, []);
 
-  const logFood = useCallback((id: string, rx: Reaction, note?: string, photo?: string) => {
+  const logFood = useCallback((id: string, rx: Reaction, note?: string, photo?: string, when?: number) => {
     patch((c) => {
       const introduced = new Set(c.introduced).add(id);
       if (id.includes(':')) introduced.add(id.split(':')[0]);
+      const ts = when ?? Date.now();
+      const entry = { id, date: humanWhen(ts), rx, note: note?.trim() || undefined, photo, ts };
       return {
         ...c,
-        log: [{ id, date: 'сегодня', rx, note: note?.trim() || undefined, photo, ts: Date.now() }, ...c.log],
+        log: [entry, ...c.log].sort((a, b) => (b.ts ?? 0) - (a.ts ?? 0)),
         introduced: [...introduced],
         windows: c.windows.map((w) => {
           if (w.id !== id) return w;
