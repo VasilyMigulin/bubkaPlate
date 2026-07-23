@@ -91,3 +91,14 @@
 .ask-row { display:flex; align-items:center; gap:9px; width:100%; text-align:left; border:none; font-family:inherit;
   background:var(--card); border-radius:14px; padding:13px 16px; box-shadow:var(--shadow); margin-bottom:12px;
   font-size:14px; color:var(--text2); cursor:pointer; }
+
+/* «Вопрос после пробы» */
+.fu-card { border: 1.5px solid var(--accent-soft); }
+.fu-head { display: flex; gap: 10px; align-items: flex-start; }
+.fu-e { font-size: 26px; }
+.fu-btns { display: flex; gap: 7px; margin-top: 11px; }
+.fu-btn { flex: 1; border: 1.5px solid var(--hairline); background: var(--card); border-radius: 12px;
+  padding: 9px 4px; font-family: inherit; font-size: 12.5px; font-weight: 700; color: var(--text); cursor: pointer; }
+.fu-btn.ok { border-color: var(--accent); background: var(--accent-soft); }
+.fu-later { display: block; margin: 9px auto 0; border: none; background: none; font-family: inherit;
+  font-size: 12px; color: var(--text2); text-decoration: underline dotted; cursor: pointer; }

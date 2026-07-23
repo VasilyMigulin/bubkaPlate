@@ -18,6 +18,7 @@ interface Store {
   removeChild: (id: string) => void;
   setProfile: (p: Profile) => void;
   logFood: (id: string, rx: Reaction, note?: string, photo?: string) => void;
+  answerFollowUp: (idx: number, rx: Reaction) => void;
   startAllergen: (id: string) => void;
   markAllergenDay: (id: string) => void;
   toggleReadiness: (key: string) => void;
@@ -149,6 +150,19 @@ export function StoreProvider({ children: kids }: { children: ReactNode }) {
     });
   }, [patch]);
 
+  /** Ответ на «вопрос после пробы»: обновляет реакцию записи и, если продукт в окне аллергена, — окно. */
+  const answerFollowUp = useCallback((idx: number, rx: Reaction) => {
+    patch((c) => ({
+      ...c,
+      log: c.log.map((l, i) => (i === idx ? { ...l, rx, fu: true } : l)),
+      windows: c.windows.map((w) => {
+        if (w.id !== c.log[idx]?.id) return w;
+        if (rx === 'skin' || rx === 'tummy') return { ...w, reaction: 'bad' as const };
+        return w;
+      }),
+    }));
+  }, [patch]);
+
   const startAllergen = useCallback((id: string) => {
     patch((c) => (c.windows.some((w) => w.id === id) ? c : { ...c, windows: [{ id, day: 1, reaction: null }, ...c.windows] }));
   }, [patch]);
@@ -191,7 +205,7 @@ export function StoreProvider({ children: kids }: { children: ReactNode }) {
     children: childList.map((c) => ({ id: c.id, profile: c.profile })),
     activeId: child?.id ?? null,
     addChild, switchChild, removeChild,
-    setProfile, logFood, startAllergen, markAllergenDay, toggleReadiness, showToast, resetAll,
+    setProfile, logFood, answerFollowUp, startAllergen, markAllergenDay, toggleReadiness, showToast, resetAll,
     ironCovered, ironTotal: IRON_IDS.length,
   };
   return <Ctx.Provider value={value}>{kids}</Ctx.Provider>;

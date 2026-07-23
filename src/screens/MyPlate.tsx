@@ -21,13 +21,36 @@ export function MyPlate({ goCatalog }: { goCatalog: () => void }) {
   const [plan30Open, setPlan30Open] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const { introduced, log, windows, ironCovered, ironTotal, markAllergenDay, showToast,
-    ageMonths, readiness, toggleReadiness, resetAll } = useStore();
+    ageMonths, readiness, toggleReadiness, resetAll, answerFollowUp, activeId } = useStore();
   const [scanOpen, setScanOpen] = useState(false);
   const [mapOpen, setMapOpen] = useState(false);
   const [schedOpen, setSchedOpen] = useState(false);
   const [lightbox, setLightbox] = useState<{ src: string; alt?: string } | null>(null);
   const [ruleOpen, setRuleOpen] = useState(false);
   const [reportOpen, setReportOpen] = useState(false);
+
+  // «Вопрос после пробы»: последняя запись «наблюдаю», по которой ещё не спросили.
+  // Свежие записи (моложе 4 часов) не трогаем — рано; отложенный вопрос хранится в snooze-ключе.
+  const FU_SNOOZE = `bubka-plate-fu-snooze-${activeId ?? ''}`;
+  const [fuTick, setFuTick] = useState(0);
+  const fuIdx = useMemo(() => {
+    const snoozedTo = Number(localStorage.getItem(FU_SNOOZE) || 0);
+    if (Date.now() < snoozedTo) return -1;
+    return log.findIndex((l) => l.rx === 'wait' && !l.fu && (!l.ts || Date.now() - l.ts > 4 * 3600e3));
+  }, [log, FU_SNOOZE, fuTick]);
+  const fuEntry = fuIdx >= 0 ? log[fuIdx] : null;
+  const fuFood = fuEntry ? resolveFoodRef(fuEntry.id) : null;
+
+  const fuAnswer = (rx: 'ok' | 'skin' | 'tummy') => {
+    answerFollowUp(fuIdx, rx);
+    if (rx === 'ok') showToast('💚', 'Отлично!', 'Записали: без реакции');
+    else showToast('👀', 'Записали реакцию', 'Пауза с этим продуктом — и обсудите с врачом');
+  };
+  const fuSnooze = () => {
+    localStorage.setItem(FU_SNOOZE, String(Date.now() + 24 * 3600e3));
+    setFuTick((t) => t + 1);
+    showToast('🕊', 'Хорошо, спросим завтра');
+  };
 
   const notReady = ageMonths != null && ageMonths < 6;
   const readyCount = READINESS.filter((r) => readiness.has(r.key)).length;
@@ -47,6 +70,24 @@ export function MyPlate({ goCatalog }: { goCatalog: () => void }) {
       <button className="ask-row" onClick={() => setSearchOpen(true)}>
         🔍 <span>Спросите: давится, запор, мало ест…</span>
       </button>
+
+      {fuEntry && fuFood?.food && (
+        <div className="card fu-card">
+          <div className="fu-head">
+            <span className="fu-e">{fuFood.food.e}</span>
+            <div className="grow">
+              <div className="h-card" style={{ margin: 0 }}>Как прошло с «{fuFood.label ?? fuFood.food.n}»?</div>
+              <div className="sub" style={{ marginTop: 2 }}>Вы отметили «наблюдаю» ({fuEntry.date}). Если всё спокойно — закроем вопрос.</div>
+            </div>
+          </div>
+          <div className="fu-btns">
+            <button className="fu-btn ok" onClick={() => fuAnswer('ok')}>💚 Всё хорошо</button>
+            <button className="fu-btn" onClick={() => fuAnswer('skin')}>🌡 Кожа</button>
+            <button className="fu-btn" onClick={() => fuAnswer('tummy')}>💩 Живот</button>
+          </div>
+          <button className="fu-later" onClick={fuSnooze}>Ещё наблюдаю — спросите завтра</button>
+        </div>
+      )}
 
       {notReady && (
         <div className="card ready-card">

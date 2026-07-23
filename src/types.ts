@@ -47,6 +47,7 @@ export interface LogEntry {
   note?: string;    // заметка мамы для себя
   photo?: string;   // фото момента (сжатый data URL)
   ts?: number;      // метка времени для группировки по месяцам («фильм месяца»)
+  fu?: boolean;     // follow-up задан и закрыт («вопрос после пробы»)
 }
 
 export interface AllergenWindow {
