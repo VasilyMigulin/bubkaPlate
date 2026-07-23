@@ -223,3 +223,17 @@
 .allerg-win.tappable:active { transform: scale(.98); }
 .aw-open { font-size: 10.5px; font-weight: 800; color: var(--accent); margin-left: 4px; }
 .aw-hint { font-size: 11px; font-weight: 650; color: var(--terra, #C77B2E); margin-top: 5px; }
+
+/* Прогресс-бар в карточке плана */
+.plan-bar { height:6px; border-radius:999px; background:var(--elev); margin-top:9px; overflow:hidden; }
+.plan-bar i { display:block; height:100%; border-radius:999px; background:var(--accent); transition:width .4s ease; }
+
+/* Фото продукта в записях дневника */
+.fl-pic { flex:none; width:40px; height:40px; border-radius:13px; object-fit:cover; }
+
+/* Оранжевая кнопка: градиент и цветная тень */
+.act-main { background:linear-gradient(135deg, var(--accent), color-mix(in srgb, var(--accent) 72%, #E8963C));
+  box-shadow:0 6px 18px color-mix(in srgb, var(--accent) 35%, transparent); }
+
+/* Сканер: компактнее */
+.scan-row { padding:11px 14px; }

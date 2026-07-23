@@ -132,6 +132,9 @@ function Shell() {
       <div className="app-scroll" key={tab}>
         <div className="screen-head rise" style={{ position: 'relative' }}>
           <button className="gear-btn" onClick={() => setSettingsOpen(true)} aria-label="Настройки">⚙️</button>
+          {tab === 'mine' && (
+            <button className="search-btn" onClick={() => window.dispatchEvent(new CustomEvent('bubka-search'))} aria-label="Поиск">🔍</button>
+          )}
           {tab === 'mine' ? (
             <>
               <div className="kid-row">

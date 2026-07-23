@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { BIG_ALLERGENS, CATEGORIES, FOODS, IRON_IDS, resolveFoodRef } from '../data/foods';
 import { PORTIONS, READINESS } from '../data/schedule';
 import { PLAN30 } from '../data/plan30';
@@ -41,6 +41,12 @@ export function MyPlate({ goCatalog }: { goCatalog: () => void }) {
   const [todayFood, setTodayFood] = useState<Food | null>(null);
   const [ideaShift, setIdeaShift] = useState(0);
   const [searchInit, setSearchInit] = useState<string | undefined>(undefined);
+
+  useEffect(() => {
+    const h = () => { setSearchInit(undefined); setSearchOpen(true); };
+    window.addEventListener('bubka-search', h);
+    return () => window.removeEventListener('bubka-search', h);
+  }, []);
 
   const notReady = ageMonths != null && ageMonths < 6;
   const readyCount = READINESS.filter((r) => readiness.has(r.key)).length;
@@ -121,13 +127,9 @@ export function MyPlate({ goCatalog }: { goCatalog: () => void }) {
 
   return (
     <>
-      <button className="ask-row st0" onClick={() => { setSearchInit(undefined); setSearchOpen(true); }}>
-        🔍 <span>Спросите: давится, запор, мало ест…</span>
-      </button>
-
       {/* ═══ СЕГОДНЯ: hero-сцена ═══ */}
       {notReady ? (
-        <div className="hero-day st1">
+        <div className="hero-day st0">
           <div className="hd-eyebrow">Скоро прикорм · {todayStr}</div>
           <div className="hd-title">Готовность: {readyCount} из {READINESS.length}</div>
           <div className="sub" style={{ marginTop: 4 }}>Прикорм начинают около 6 месяцев и когда малыш готов. Отметьте, что уже есть:</div>
@@ -148,7 +150,7 @@ export function MyPlate({ goCatalog }: { goCatalog: () => void }) {
           )}
         </div>
       ) : (
-        <div className="hero-day st1">
+        <div className="hero-day st0">
           <div className="hd-eyebrow">Сегодня · {todayStr}</div>
           {todayCount > 0 && <div className="td-done">✓ Записано сегодня: {todayCount} {todayCount === 1 ? 'проба' : todayCount < 5 ? 'пробы' : 'проб'}</div>}
 
@@ -222,10 +224,10 @@ export function MyPlate({ goCatalog }: { goCatalog: () => void }) {
       {/* ═══ ДЕЙСТВИЯ ═══ */}
       {!notReady && (
         <>
-          <button className="act-main st2" onClick={() => setLogOpen(true)}>
+          <button className="act-main st1" onClick={() => setLogOpen(true)}>
             <span className="act-plus">+</span> Записать пробу
           </button>
-          <button className="scan-row st3" onClick={() => setScanOpen(true)}>
+          <button className="scan-row st2" onClick={() => setScanOpen(true)}>
             <span className="scan-e">📸</span>
             <span className="grow">
               <b>Проверить тарелку по фото</b>
@@ -238,19 +240,20 @@ export function MyPlate({ goCatalog }: { goCatalog: () => void }) {
 
       {/* ═══ ПЛАН: один умный вход ═══ */}
       {showP30 ? (
-        <button className="card next-card st4" onClick={() => setPlan30Open(true)}>
+        <button className="card next-card st3" onClick={() => setPlan30Open(true)}>
           <div className="row">
             <div className="next-e">🗓</div>
             <div className="grow">
               <div className="eyebrow" style={{ color: 'var(--accent)' }}>Мой план · день {p30.cur!.d} из 30</div>
               <div className="h-card" style={{ margin: '2px 0 0' }}>{p30.cur!.t}</div>
               <div className="sub">План новичка: что и когда вводить — по шагам</div>
+              <div className="plan-bar"><i style={{ width: `${Math.round((p30.doneCount / 30) * 100)}%` }} /></div>
             </div>
             <span style={{ color: 'var(--text2)' }}>›</span>
           </div>
         </button>
       ) : (
-        <button className="card next-card st4" onClick={goCatalog}>
+        <button className="card next-card st3" onClick={goCatalog}>
           <div className="row">
             <div className="next-e">🌟</div>
             <div className="grow">
@@ -265,7 +268,7 @@ export function MyPlate({ goCatalog }: { goCatalog: () => void }) {
 
       {/* ═══ ПРОГРЕСС: три сегмента, у каждого своя панель ═══ */}
       <div className="section-t">Прогресс малыша</div>
-      <div className="seg-row st5">
+      <div className="seg-row st4">
         <button className={`seg ${panel === 'iron' ? 'on' : ''}`} onClick={() => setPanel(panel === 'iron' ? null : 'iron')}>
           <span className={`seg-chev ${panel === 'iron' ? 'up' : ''}`}>▾</span>
           <span className="seg-e">🥩</span><b>{ironCovered}<i>/{ironTotal}</i></b><span>источники железа</span>
@@ -394,7 +397,9 @@ export function MyPlate({ goCatalog }: { goCatalog: () => void }) {
         return (
           <div key={i} className="fl-card">
             <div className="fl-row">
-              <div className="fl-e">{f?.e ?? '🥣'}</div>
+              {f && MAIN_PHOTOS[f.id]
+                ? <img className="fl-pic" src={MAIN_PHOTOS[f.id]} alt={name} />
+                : <div className="fl-e">{f?.e ?? '🥣'}</div>}
               <div className="grow"><div className="fl-n">{name}</div><div className="fl-d">{l.date}</div></div>
               <span className={`rx ${b.cls}`}>{b.label}</span>
             </div>

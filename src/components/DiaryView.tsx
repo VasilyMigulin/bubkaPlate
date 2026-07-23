@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { createPortal } from 'react-dom';
 import { resolveFoodRef } from '../data/foods';
+import { MAIN_PHOTOS } from '../data/mainPhotos';
 import { useStore } from '../state/store';
 import { Lightbox } from './Lightbox';
 import { DoctorReport } from './DoctorReport';
@@ -40,7 +41,9 @@ export function DiaryView({ onClose }: { onClose: () => void }) {
           return (
             <div key={i} className="fl-card">
               <div className="fl-row">
-                <div className="fl-e">{ref.food?.e ?? '🥣'}</div>
+                {ref.food && MAIN_PHOTOS[ref.food.id]
+                  ? <img className="fl-pic" src={MAIN_PHOTOS[ref.food.id]} alt={name} />
+                  : <div className="fl-e">{ref.food?.e ?? '🥣'}</div>}
                 <div className="grow"><div className="fl-n">{name}</div><div className="fl-d">{l.date}</div></div>
                 <span className={`rx ${b.cls}`}>{b.label}</span>
               </div>
