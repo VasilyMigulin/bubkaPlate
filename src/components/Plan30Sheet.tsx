@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { createPortal } from 'react-dom';
 import { PLAN30 } from '../data/plan30';
+import { SCHEDULE } from '../data/schedule';
 import { FOODS } from '../data/foods';
 import { ProductSheet } from './ProductSheet';
 import { useStore } from '../state/store';
@@ -20,6 +21,7 @@ export function Plan30Sheet({ onClose }: { onClose: () => void }) {
   const [foodOpen, setFoodOpen] = useState<Food | null>(null);
   const [prem, setPrem] = useState(isPremium());
   const [pwOpen, setPwOpen] = useState(false);
+  const [view, setView] = useState<'days' | 'weeks'>('days');
 
   const allDays = PLAN30.flatMap((w) => w.days);
   // день считается пройденным: отмечен вручную ИЛИ все его продукты уже введены
@@ -44,7 +46,33 @@ export function Plan30Sheet({ onClose }: { onClose: () => void }) {
         <div className="sub" style={{ marginTop: 4 }}>Пошаговый ориентир на самый волнительный месяц. Темп можно замедлять — это не гонка.</div>
         <div className="p30-bar"><div className="p30-fill" style={{ width: `${(doneCount / 30) * 100}%` }} /></div>
         <div className="p30-count">{doneCount} из 30 · {doneCount === 0 ? 'начнём с кабачка!' : doneCount >= 30 ? 'месяц пройден 🎉' : `сейчас день ${current}`}</div>
+        <div className="p30-tabs">
+          <button className={`chip ${view === 'days' ? 'on' : ''}`} onClick={() => setView('days')}>📅 По дням</button>
+          <button className={`chip ${view === 'weeks' ? 'on' : ''}`} onClick={() => setView('weeks')}>🗺 Схема по неделям</button>
+        </div>
       </div>
+      {view === 'weeks' ? (
+        <div className="p30-body">
+          <div className="sub" style={{ margin: '0 2px 10px' }}>Общая логика первого полугодия прикорма — куда всё движется после первых 30 дней.</div>
+          <div className="sched">
+            {SCHEDULE.map((w, i) => (
+              <div key={i} className="sched-week">
+                <div className="sched-line">
+                  <div className="sched-badge">{w.week}</div>
+                  <div className="sched-focus">{w.focus}</div>
+                </div>
+                <div className="sched-foods">
+                  {w.foods.map((id) => {
+                    const f = FOODS.find((x) => x.id === id);
+                    return f ? <button key={id} className="sched-chip" onClick={() => setFoodOpen(f)}>{f.e} {f.n}</button> : null;
+                  })}
+                </div>
+                <div className="sched-note">{w.note}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+      ) : (
       <div className="p30-body">
         {PLAN30.map((w, wi) => {
           const weekLocked = !prem && wi > 0;
@@ -92,8 +120,10 @@ export function Plan30Sheet({ onClose }: { onClose: () => void }) {
           <span>План — ориентир, а не экзамен. Пропустили день, поменяли порядок овощей, малыш болел — просто продолжайте со своего места. Дни отмечаются сами, когда продукт появляется в дневнике.</span>
         </div>
       </div>
+      )}
 
       <style>{`
+        .p30-tabs { display:flex; gap:7px; margin-top:12px; }
         .p30-head { padding:64px 20px 4px; }
         .p30-head h2 { font-size:24px; font-weight:750; letter-spacing:-.02em; }
         .p30-bar { height:8px; border-radius:999px; background:var(--elev); margin-top:12px; overflow:hidden; }

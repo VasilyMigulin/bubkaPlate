@@ -1,13 +1,17 @@
 import { useMemo, useState } from 'react';
-import { CATEGORIES, FOODS , resolveFoodRef } from '../data/foods';
-import { PORTIONS, READINESS, SCHEDULE } from '../data/schedule';
+import { BIG_ALLERGENS, CATEGORIES, FOODS, IRON_IDS, resolveFoodRef } from '../data/foods';
+import { PORTIONS, READINESS } from '../data/schedule';
+import { PLAN30 } from '../data/plan30';
 import { useStore } from '../state/store';
 import { Plan30Sheet } from '../components/Plan30Sheet';
 import { SearchSheet } from '../components/SearchSheet';
+import { LogPicker } from '../components/LogPicker';
+import { DiaryView } from '../components/DiaryView';
+import { ProductSheet } from '../components/ProductSheet';
 import { RULE3_TEXT } from '../data/glossary';
 import { Lightbox } from '../components/Lightbox';
 import { PlateScan } from '../components/PlateScan';
-import { DoctorReport } from '../components/DoctorReport';
+import type { Food } from '../types';
 import './MyPlate.css';
 
 const RX_BADGE: Record<string, { cls: string; label: string }> = {
@@ -17,20 +21,28 @@ const RX_BADGE: Record<string, { cls: string; label: string }> = {
   tummy: { cls: 'bad', label: '💩 живот' },
 };
 
+function readPlan30Done(): Set<number> {
+  try { return new Set(JSON.parse(localStorage.getItem('bubka-plate-plan30') || '[]') as number[]); } catch { return new Set(); }
+}
+
 export function MyPlate({ goCatalog }: { goCatalog: () => void }) {
   const [plan30Open, setPlan30Open] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const { introduced, log, windows, ironCovered, ironTotal, markAllergenDay, showToast,
-    ageMonths, readiness, toggleReadiness, resetAll, answerFollowUp, activeId } = useStore();
+    ageMonths, readiness, toggleReadiness, answerFollowUp, activeId } = useStore();
   const [scanOpen, setScanOpen] = useState(false);
+  const [logOpen, setLogOpen] = useState(false);
+  const [diaryOpen, setDiaryOpen] = useState(false);
   const [mapOpen, setMapOpen] = useState(false);
   const [schedOpen, setSchedOpen] = useState(false);
   const [lightbox, setLightbox] = useState<{ src: string; alt?: string } | null>(null);
   const [ruleOpen, setRuleOpen] = useState(false);
-  const [reportOpen, setReportOpen] = useState(false);
+  const [todayFood, setTodayFood] = useState<Food | null>(null);
 
-  // «Вопрос после пробы»: последняя запись «наблюдаю», по которой ещё не спросили.
-  // Свежие записи (моложе 4 часов) не трогаем — рано; отложенный вопрос хранится в snooze-ключе.
+  const notReady = ageMonths != null && ageMonths < 6;
+  const readyCount = READINESS.filter((r) => readiness.has(r.key)).length;
+
+  // ── «Вопрос после пробы»: последняя запись «наблюдаю», по которой ещё не спросили ──
   const FU_SNOOZE = `bubka-plate-fu-snooze-${activeId ?? ''}`;
   const [fuTick, setFuTick] = useState(0);
   const fuIdx = useMemo(() => {
@@ -52,17 +64,46 @@ export function MyPlate({ goCatalog }: { goCatalog: () => void }) {
     showToast('🕊', 'Хорошо, спросим завтра');
   };
 
-  const notReady = ageMonths != null && ageMonths < 6;
-  const readyCount = READINESS.filter((r) => readiness.has(r.key)).length;
-
+  // ── Покрытие групп и метрики ──
   const coverage = useMemo(() =>
     CATEGORIES.map((cat) => {
       const ids = FOODS.filter((f) => f.cat === cat);
       const done = ids.filter((f) => introduced.has(f.id)).length;
       return { cat, done, total: ids.length, pct: Math.round((done / ids.length) * 100) };
     }), [introduced]);
-
   const weakest = [...coverage].sort((a, b) => a.pct - b.pct)[0];
+  const allergensCovered = useMemo(() =>
+    new Set(FOODS.filter((f) => f.allergen && introduced.has(f.id)).map((f) => f.allergen)).size, [introduced]);
+
+  // ── Блок «Сегодня»: одно самое важное действие дня ──
+  const activeWin = windows.find((w) => w.day < 3 && w.reaction !== 'bad');
+  const winFood = activeWin ? FOODS.find((f) => f.id === activeWin.id) : null;
+  const age = Math.max(ageMonths ?? 6, 6);
+  const todayIdea = useMemo(() => {
+    // день в году — чтобы идея дня менялась сама, но не прыгала при каждом рендере
+    const seed = Math.floor((Date.now() - new Date(new Date().getFullYear(), 0, 0).getTime()) / 864e5);
+    if (ironCovered < Math.ceil(ironTotal / 2)) {
+      const opts = FOODS.filter((f) => IRON_IDS.includes(f.id) && !introduced.has(f.id) && f.fromMonth <= age);
+      if (opts.length) return { f: opts[seed % opts.length], why: 'Железо — фокус прикорма: запасы малыша тают после 6 месяцев.' };
+    }
+    const opts = FOODS.filter((f) => f.cat === weakest.cat && !introduced.has(f.id) && f.fromMonth <= age);
+    if (opts.length) return { f: opts[seed % opts.length], why: `Группа «${weakest.cat}» пока отстаёт — расширим вкусовой опыт.` };
+    return null;
+  }, [introduced, ironCovered, ironTotal, weakest, age]);
+
+  const todayStr = new Date().toLocaleDateString('ru-RU', { weekday: 'long', day: 'numeric', month: 'long' });
+
+  // ── План: один умный вход ──
+  const p30 = useMemo(() => {
+    const done = readPlan30Done();
+    const all = PLAN30.flatMap((w) => w.days);
+    const isD = (day: typeof all[number]) => done.has(day.d) || (day.pids.length > 0 && day.pids.every((p) => introduced.has(p)));
+    const doneCount = all.filter(isD).length;
+    const cur = all.find((day) => !isD(day));
+    return { doneCount, cur };
+  }, [introduced, plan30Open]);
+  const showP30 = !!p30.cur && p30.doneCount < 30 && (ageMonths == null || ageMonths <= 8);
+
   const introducedCount = introduced.size;
 
   return (
@@ -71,25 +112,8 @@ export function MyPlate({ goCatalog }: { goCatalog: () => void }) {
         🔍 <span>Спросите: давится, запор, мало ест…</span>
       </button>
 
-      {fuEntry && fuFood?.food && (
-        <div className="card fu-card">
-          <div className="fu-head">
-            <span className="fu-e">{fuFood.food.e}</span>
-            <div className="grow">
-              <div className="h-card" style={{ margin: 0 }}>Как прошло с «{fuFood.label ?? fuFood.food.n}»?</div>
-              <div className="sub" style={{ marginTop: 2 }}>Вы отметили «наблюдаю» ({fuEntry.date}). Если всё спокойно — закроем вопрос.</div>
-            </div>
-          </div>
-          <div className="fu-btns">
-            <button className="fu-btn ok" onClick={() => fuAnswer('ok')}>💚 Всё хорошо</button>
-            <button className="fu-btn" onClick={() => fuAnswer('skin')}>🌡 Кожа</button>
-            <button className="fu-btn" onClick={() => fuAnswer('tummy')}>💩 Живот</button>
-          </div>
-          <button className="fu-later" onClick={fuSnooze}>Ещё наблюдаю — спросите завтра</button>
-        </div>
-      )}
-
-      {notReady && (
+      {/* ═══ СЕГОДНЯ ═══ */}
+      {notReady ? (
         <div className="card ready-card">
           <div className="eyebrow" style={{ color: 'var(--terra)' }}>Скоро прикорм · готовность</div>
           <div className="h-card" style={{ marginTop: 2 }}>{readyCount} из {READINESS.length} признаков</div>
@@ -107,47 +131,103 @@ export function MyPlate({ goCatalog }: { goCatalog: () => void }) {
             })}
           </div>
           {readyCount === READINESS.length && (
-            <div className="note" style={{ marginTop: 10 }}><span className="ne">🎉</span><span>Все признаки есть — можно знакомиться с первым овощем. Загляните в «Схему введения» ниже.</span></div>
+            <div className="note" style={{ marginTop: 10 }}><span className="ne">🎉</span><span>Все признаки есть — можно знакомиться с первым овощем. Откройте план 30 дней ниже.</span></div>
           )}
+        </div>
+      ) : fuEntry && fuFood?.food ? (
+        <div className="card today-card">
+          <div className="td-eyebrow">Сегодня · {todayStr}</div>
+          <div className="fu-head">
+            <span className="fu-e">{fuFood.food.e}</span>
+            <div className="grow">
+              <div className="h-card" style={{ margin: 0 }}>Как прошло с «{fuFood.label ?? fuFood.food.n}»?</div>
+              <div className="sub" style={{ marginTop: 2 }}>Вы отметили «наблюдаю» ({fuEntry.date}). Если всё спокойно — закроем вопрос.</div>
+            </div>
+          </div>
+          <div className="fu-btns">
+            <button className="fu-btn ok" onClick={() => fuAnswer('ok')}>💚 Всё хорошо</button>
+            <button className="fu-btn" onClick={() => fuAnswer('skin')}>🌡 Кожа</button>
+            <button className="fu-btn" onClick={() => fuAnswer('tummy')}>💩 Живот</button>
+          </div>
+          <button className="fu-later" onClick={fuSnooze}>Ещё наблюдаю — спросите завтра</button>
+        </div>
+      ) : activeWin && winFood ? (
+        <div className="card today-card">
+          <div className="td-eyebrow">Сегодня · {todayStr}</div>
+          <div className="td-row">
+            <span className="td-e">{winFood.e}</span>
+            <div className="grow">
+              <div className="h-card" style={{ margin: 0 }}>{winFood.n}: день {activeWin.day} из 3</div>
+              <div className="sub" style={{ marginTop: 2 }}>Дайте утром привычную малую порцию и понаблюдайте. Реакции нет — вечером отметьте день.</div>
+            </div>
+          </div>
+          <div className="td-actions">
+            <button className="btn btn-primary td-btn" onClick={() => { markAllergenDay(activeWin.id); showToast('🗓', winFood.n, `День ${Math.min(activeWin.day + 1, 3)} из 3`); }}>
+              ✓ День прошёл спокойно
+            </button>
+            <button className="btn btn-soft td-btn" onClick={() => setTodayFood(winFood)}>Карточка</button>
+          </div>
+        </div>
+      ) : todayIdea ? (
+        <div className="card today-card">
+          <div className="td-eyebrow">Сегодня · {todayStr}</div>
+          <div className="td-row">
+            <span className="td-e">{todayIdea.f.e}</span>
+            <div className="grow">
+              <div className="h-card" style={{ margin: 0 }}>Идея дня: {todayIdea.f.n.toLowerCase()}</div>
+              <div className="sub" style={{ marginTop: 2 }}>{todayIdea.why}</div>
+            </div>
+          </div>
+          <div className="td-actions">
+            <button className="btn btn-primary td-btn" onClick={() => setTodayFood(todayIdea.f)}>Как подать →</button>
+          </div>
+        </div>
+      ) : null}
+
+      {/* ═══ ДЕЙСТВИЯ ═══ */}
+      {!notReady && (
+        <div className="act-row">
+          <button className="act-main" onClick={() => setLogOpen(true)}>
+            <span className="act-plus">+</span> Записать пробу
+          </button>
+          <button className="act-side" onClick={() => setScanOpen(true)} aria-label="Проверить тарелку по фото">
+            📸<span>тарелка</span>
+          </button>
         </div>
       )}
 
-      <button className="plate-cta" onClick={() => setScanOpen(true)}>
-        <div className="pc-ico">📸</div>
-        <div className="grow">
-          <b>Проверить тарелку по фото</b>
-          <span>ИИ оценит нарезку, возраст и баланс за 5 секунд</span>
-        </div>
-        <span className="pc-arrow">›</span>
-      </button>
-
-      <button className="card next-card" onClick={() => setPlan30Open(true)}>
-        <div className="row">
-          <div className="next-e">🗓</div>
-          <div className="grow">
-            <div className="eyebrow" style={{ color: 'var(--accent)' }}>План новичка</div>
-            <div className="h-card" style={{ margin: '2px 0 0' }}>Первые 30 дней прикорма</div>
-            <div className="sub">Что и когда вводить — по шагам</div>
+      {/* ═══ ПЛАН: один умный вход ═══ */}
+      {showP30 ? (
+        <button className="card next-card" onClick={() => setPlan30Open(true)}>
+          <div className="row">
+            <div className="next-e">🗓</div>
+            <div className="grow">
+              <div className="eyebrow" style={{ color: 'var(--accent)' }}>Мой план · день {p30.cur!.d} из 30</div>
+              <div className="h-card" style={{ margin: '2px 0 0' }}>{p30.cur!.t}</div>
+              <div className="sub">План новичка: что и когда вводить — по шагам</div>
+            </div>
+            <span style={{ color: 'var(--text2)' }}>›</span>
           </div>
-          <span style={{ color: 'var(--text2)' }}>›</span>
-        </div>
-      </button>
-
-      <button className="card next-card" onClick={goCatalog}>
-        <div className="row">
-          <div className="next-e">🌟</div>
-          <div className="grow">
-            <div className="eyebrow" style={{ color: 'var(--accent)' }}>Что ввести дальше</div>
-            <div className="h-card" style={{ margin: '2px 0 0' }}>{weakest.cat}</div>
-            <div className="sub">{ironCovered < ironTotal ? 'и добавьте железо — мясо, желток, чечевицу' : 'группа покрыта меньше всего'}</div>
+        </button>
+      ) : (
+        <button className="card next-card" onClick={goCatalog}>
+          <div className="row">
+            <div className="next-e">🌟</div>
+            <div className="grow">
+              <div className="eyebrow" style={{ color: 'var(--accent)' }}>Что ввести дальше</div>
+              <div className="h-card" style={{ margin: '2px 0 0' }}>{weakest.cat}</div>
+              <div className="sub">{ironCovered < ironTotal ? 'и добавьте железо — мясо, желток, чечевицу' : 'группа покрыта меньше всего'}</div>
+            </div>
+            <span style={{ color: 'var(--text2)' }}>›</span>
           </div>
-          <span style={{ color: 'var(--text2)' }}>›</span>
-        </div>
-      </button>
+        </button>
+      )}
 
+      {/* ═══ ПРОГРЕСС ═══ */}
       <button className="fmap-status" onClick={() => setMapOpen((v) => !v)}>
         <div className="fs-item"><span className="fs-e">🥩</span><b>{ironCovered}/{ironTotal}</b><span>железо</span></div>
         <div className="fs-item"><span className="fs-e">🌈</span><b>{introducedCount}/{FOODS.length}</b><span>продуктов</span></div>
+        <div className="fs-item"><span className="fs-e">🥜</span><b>{allergensCovered}/{BIG_ALLERGENS.size}</b><span>аллергенов</span></div>
         <span className="fs-chev" style={{ transform: mapOpen ? 'rotate(180deg)' : 'none' }}>▾</span>
       </button>
 
@@ -179,6 +259,7 @@ export function MyPlate({ goCatalog }: { goCatalog: () => void }) {
         </div>
       )}
 
+      {/* ═══ АЛЛЕРГЕНЫ ═══ */}
       <div className="section-t" style={{ display: 'flex', alignItems: 'center', gap: 7 }}>Ввод аллергенов · правило 3 дней
         <button className="skill-i" onClick={() => setRuleOpen(true)} aria-label="Что это">?</button>
       </div>
@@ -205,8 +286,12 @@ export function MyPlate({ goCatalog }: { goCatalog: () => void }) {
         );
       })}
 
+      {/* ═══ ДНЕВНИК: последние записи ═══ */}
       <div className="section-t">Дневник прикорма</div>
-      {log.map((l, i) => {
+      {log.length === 0 && (
+        <div className="note"><span className="ne">🥄</span><span>Здесь появятся пробы малыша. Начните с «+ Записать пробу».</span></div>
+      )}
+      {log.slice(0, 3).map((l, i) => {
         const ref = resolveFoodRef(l.id);
         const f = ref.food;
         const name = ref.label ?? f?.n ?? l.id;
@@ -220,36 +305,20 @@ export function MyPlate({ goCatalog }: { goCatalog: () => void }) {
             </div>
             {(l.note || l.photo) && (
               <div className="fl-extra">
-                {l.photo && <img className="fl-photo tappable" src={l.photo} alt="момент" onClick={() => setLightbox({ src: l.photo!, alt: name + " · первая проба" })} />}
+                {l.photo && <img className="fl-photo tappable" src={l.photo} alt="момент" onClick={() => setLightbox({ src: l.photo!, alt: name + ' · первая проба' })} />}
                 {l.note && <div className="fl-note">{l.note}</div>}
               </div>
             )}
           </div>
         );
       })}
-      <button className="btn btn-soft" style={{ marginTop: 4 }} onClick={() => setReportOpen(true)}>
-        📄 Выписка для врача
-      </button>
+      {log.length > 0 && (
+        <button className="diary-more" onClick={() => setDiaryOpen(true)}>
+          Все записи ({log.length}) и выписка для врача ›
+        </button>
+      )}
 
-      <div className="section-t">Схема введения по неделям</div>
-      <div className="sched">
-        {SCHEDULE.map((w, i) => (
-          <div key={i} className="sched-week">
-            <div className="sched-line">
-              <div className="sched-badge">{w.week}</div>
-              <div className="sched-focus">{w.focus}</div>
-            </div>
-            <div className="sched-foods">
-              {w.foods.map((id) => {
-                const f = FOODS.find((x) => x.id === id);
-                return f ? <button key={id} className="sched-chip" onClick={goCatalog}>{f.e} {f.n}</button> : null;
-              })}
-            </div>
-            <div className="sched-note">{w.note}</div>
-          </div>
-        ))}
-      </div>
-
+      {/* ═══ СПРАВОЧНОЕ ═══ */}
       <button className="fmap-status" onClick={() => setSchedOpen((v) => !v)}>
         <div className="fs-item"><span className="fs-e">⚖️</span><b>Объёмы порций</b><span>по возрасту</span></div>
         <span className="fs-chev" style={{ transform: schedOpen ? 'rotate(180deg)' : 'none' }}>▾</span>
@@ -266,12 +335,7 @@ export function MyPlate({ goCatalog }: { goCatalog: () => void }) {
         </div>
       )}
 
-      <button className="reset-link" onClick={() => { if (confirm('Сбросить профиль и данные? Пройдёте онбординг заново.')) resetAll(); }}>
-        Сбросить профиль (демо)
-      </button>
-
       {scanOpen && <PlateScan onClose={() => setScanOpen(false)} goSafety={goCatalog} />}
-
       {lightbox && <Lightbox src={lightbox.src} alt={lightbox.alt} onClose={() => setLightbox(null)} />}
 
       {ruleOpen && (
@@ -282,9 +346,11 @@ export function MyPlate({ goCatalog }: { goCatalog: () => void }) {
           </div>
         </div>
       )}
-      {reportOpen && <DoctorReport onClose={() => setReportOpen(false)} />}
       {plan30Open && <Plan30Sheet onClose={() => setPlan30Open(false)} />}
       {searchOpen && <SearchSheet onClose={() => setSearchOpen(false)} />}
+      {logOpen && <LogPicker onClose={() => setLogOpen(false)} />}
+      {diaryOpen && <DiaryView onClose={() => setDiaryOpen(false)} />}
+      {todayFood && <ProductSheet food={todayFood} onClose={() => setTodayFood(null)} />}
     </>
   );
 }
