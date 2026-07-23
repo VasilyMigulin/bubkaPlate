@@ -85,4 +85,11 @@ export const MAIN_PHOTOS: Record<string, string> = {
   canned: '/main/canned.jpg',
   semolina: '/main/semolina.jpg',
   honey: '/main/honey.jpg',
+  quinoa: '/main/quinoa.jpg',
+  lamb: '/main/lamb.jpg',
+  bread: '/main/bread.jpg',
+  beans: '/main/beans.jpg',
+  sourcream: '/main/sourcream.jpg',
+  pork: '/main/pork.jpg',
+  nuts: '/main/nuts.jpg',
 };
