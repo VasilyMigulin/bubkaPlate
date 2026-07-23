@@ -28,12 +28,12 @@ function readPlan30Done(): Set<number> {
 export function MyPlate({ goCatalog }: { goCatalog: () => void }) {
   const [plan30Open, setPlan30Open] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
-  const { introduced, log, windows, ironCovered, ironTotal, markAllergenDay, showToast,
+  const { profile, introduced, log, windows, ironCovered, ironTotal, markAllergenDay, showToast,
     ageMonths, readiness, toggleReadiness, answerFollowUp, activeId } = useStore();
   const [scanOpen, setScanOpen] = useState(false);
   const [logOpen, setLogOpen] = useState(false);
   const [diaryOpen, setDiaryOpen] = useState(false);
-  const [mapOpen, setMapOpen] = useState(false);
+  const [panel, setPanel] = useState<null | 'iron' | 'foods' | 'allerg'>(null);
   const [schedOpen, setSchedOpen] = useState(false);
   const [lightbox, setLightbox] = useState<{ src: string; alt?: string } | null>(null);
   const [ruleOpen, setRuleOpen] = useState(false);
@@ -93,6 +93,22 @@ export function MyPlate({ goCatalog }: { goCatalog: () => void }) {
 
   const todayStr = new Date().toLocaleDateString('ru-RU', { weekday: 'long', day: 'numeric', month: 'long' });
 
+  // ── Приветствие: время суток + точный возраст ──
+  const hello = useMemo(() => {
+    const h = new Date().getHours();
+    return h < 5 ? 'Тихой ночи 🌙' : h < 11 ? 'Доброе утро ☀️' : h < 17 ? 'Добрый день 🌤' : 'Добрый вечер 🌙';
+  }, []);
+  const ageText = useMemo(() => {
+    if (!profile || ageMonths == null) return '';
+    const bd = new Date(profile.birthDate);
+    const now = new Date();
+    let days = now.getDate() - bd.getDate();
+    if (days < 0) days += new Date(now.getFullYear(), now.getMonth(), 0).getDate();
+    if (ageMonths >= 24) return `${Math.floor(ageMonths / 12)} г ${ageMonths % 12} мес`;
+    if (ageMonths >= 12) return `${Math.floor(ageMonths / 12)} г ${ageMonths % 12} мес`;
+    return days > 0 ? `${ageMonths} мес ${days} дн` : `${ageMonths} мес`;
+  }, [profile, ageMonths]);
+
   // ── План: один умный вход ──
   const p30 = useMemo(() => {
     const done = readPlan30Done();
@@ -108,13 +124,20 @@ export function MyPlate({ goCatalog }: { goCatalog: () => void }) {
 
   return (
     <>
-      <button className="ask-row" onClick={() => setSearchOpen(true)}>
+      {profile && (
+        <div className="hello st0">
+          <div className="hello-t">{hello}</div>
+          <div className="hello-s">{profile.name} · {ageText}</div>
+        </div>
+      )}
+
+      <button className="ask-row st1" onClick={() => setSearchOpen(true)}>
         🔍 <span>Спросите: давится, запор, мало ест…</span>
       </button>
 
       {/* ═══ СЕГОДНЯ ═══ */}
       {notReady ? (
-        <div className="card ready-card">
+        <div className="card ready-card st2">
           <div className="eyebrow" style={{ color: 'var(--terra)' }}>Скоро прикорм · готовность</div>
           <div className="h-card" style={{ marginTop: 2 }}>{readyCount} из {READINESS.length} признаков</div>
           <div className="sub" style={{ marginTop: 4 }}>Прикорм начинают около 6 месяцев и когда малыш готов. Отметьте, что уже есть:</div>
@@ -135,7 +158,7 @@ export function MyPlate({ goCatalog }: { goCatalog: () => void }) {
           )}
         </div>
       ) : fuEntry && fuFood?.food ? (
-        <div className="card today-card">
+        <div className="card today-card st2">
           <div className="td-eyebrow">Сегодня · {todayStr}</div>
           <div className="fu-head">
             <span className="fu-e">{fuFood.food.e}</span>
@@ -152,7 +175,7 @@ export function MyPlate({ goCatalog }: { goCatalog: () => void }) {
           <button className="fu-later" onClick={fuSnooze}>Ещё наблюдаю — спросите завтра</button>
         </div>
       ) : activeWin && winFood ? (
-        <div className="card today-card">
+        <div className="card today-card st2">
           <div className="td-eyebrow">Сегодня · {todayStr}</div>
           <div className="td-row">
             <span className="td-e">{winFood.e}</span>
@@ -169,7 +192,7 @@ export function MyPlate({ goCatalog }: { goCatalog: () => void }) {
           </div>
         </div>
       ) : todayIdea ? (
-        <div className="card today-card">
+        <div className="card today-card st2">
           <div className="td-eyebrow">Сегодня · {todayStr}</div>
           <div className="td-row">
             <span className="td-e">{todayIdea.f.e}</span>
@@ -186,7 +209,7 @@ export function MyPlate({ goCatalog }: { goCatalog: () => void }) {
 
       {/* ═══ ДЕЙСТВИЯ ═══ */}
       {!notReady && (
-        <div className="act-row">
+        <div className="act-row st3">
           <button className="act-main" onClick={() => setLogOpen(true)}>
             <span className="act-plus">+</span> Записать пробу
           </button>
@@ -198,7 +221,7 @@ export function MyPlate({ goCatalog }: { goCatalog: () => void }) {
 
       {/* ═══ ПЛАН: один умный вход ═══ */}
       {showP30 ? (
-        <button className="card next-card" onClick={() => setPlan30Open(true)}>
+        <button className="card next-card st4" onClick={() => setPlan30Open(true)}>
           <div className="row">
             <div className="next-e">🗓</div>
             <div className="grow">
@@ -210,7 +233,7 @@ export function MyPlate({ goCatalog }: { goCatalog: () => void }) {
           </div>
         </button>
       ) : (
-        <button className="card next-card" onClick={goCatalog}>
+        <button className="card next-card st4" onClick={goCatalog}>
           <div className="row">
             <div className="next-e">🌟</div>
             <div className="grow">
@@ -223,15 +246,21 @@ export function MyPlate({ goCatalog }: { goCatalog: () => void }) {
         </button>
       )}
 
-      {/* ═══ ПРОГРЕСС ═══ */}
-      <button className="fmap-status" onClick={() => setMapOpen((v) => !v)}>
-        <div className="fs-item"><span className="fs-e">🥩</span><b>{ironCovered}/{ironTotal}</b><span>железо</span></div>
-        <div className="fs-item"><span className="fs-e">🌈</span><b>{introducedCount}/{FOODS.length}</b><span>продуктов</span></div>
-        <div className="fs-item"><span className="fs-e">🥜</span><b>{allergensCovered}/{BIG_ALLERGENS.size}</b><span>аллергенов</span></div>
-        <span className="fs-chev" style={{ transform: mapOpen ? 'rotate(180deg)' : 'none' }}>▾</span>
-      </button>
+      {/* ═══ ПРОГРЕСС: три сегмента, у каждого своя панель ═══ */}
+      <div className="section-t">Прогресс малыша</div>
+      <div className="seg-row st5">
+        <button className={`seg ${panel === 'iron' ? 'on' : ''}`} onClick={() => setPanel(panel === 'iron' ? null : 'iron')}>
+          <span className="seg-e">🥩</span><b>{ironCovered}<i>/{ironTotal}</i></b><span>железо</span>
+        </button>
+        <button className={`seg ${panel === 'foods' ? 'on' : ''}`} onClick={() => setPanel(panel === 'foods' ? null : 'foods')}>
+          <span className="seg-e">🌈</span><b>{introducedCount}<i>/{FOODS.length}</i></b><span>продукты</span>
+        </button>
+        <button className={`seg ${panel === 'allerg' ? 'on' : ''}`} onClick={() => setPanel(panel === 'allerg' ? null : 'allerg')}>
+          <span className="seg-e">🥜</span><b>{allergensCovered}<i>/{BIG_ALLERGENS.size}</i></b><span>аллергены</span>
+        </button>
+      </div>
 
-      {mapOpen && (
+      {panel === 'iron' && (
         <div className="rise">
           <div className="fmap-iron">
             <div className="eyebrow" style={{ color: 'var(--terra)' }}>Фокус после 6 месяцев</div>
@@ -242,8 +271,21 @@ export function MyPlate({ goCatalog }: { goCatalog: () => void }) {
               </div>
               <div style={{ fontSize: 34 }}>🥩</div>
             </div>
-            <div className="sub" style={{ marginTop: 8 }}>Запасы железа истощаются к 6 мес — ради этого и вводят прикорм. Добавьте мясо, желток или чечевицу.</div>
+            <div className="sub" style={{ marginTop: 8 }}>Запасы железа истощаются к 6 мес — ради этого и вводят прикорм.</div>
+            {(() => {
+              const todo = FOODS.filter((f) => IRON_IDS.includes(f.id) && !introduced.has(f.id) && f.fromMonth <= age).slice(0, 6);
+              return todo.length > 0 && (
+                <div className="p30-chips" style={{ marginTop: 10 }}>
+                  {todo.map((f) => <button key={f.id} className="tag tag-link" onClick={() => setTodayFood(f)}>{f.e} {f.n}</button>)}
+                </div>
+              );
+            })()}
           </div>
+        </div>
+      )}
+
+      {panel === 'foods' && (
+        <div className="rise">
           <div className="card">
             <div className="eyebrow" style={{ marginBottom: 4 }}>Покрытие групп</div>
             {coverage.map((c) => (
@@ -255,16 +297,45 @@ export function MyPlate({ goCatalog }: { goCatalog: () => void }) {
                 <div className="fm-cnt">{c.done}/{c.total}</div>
               </div>
             ))}
+            <div className="sub" style={{ marginTop: 6 }}>Задача первого года — попробовать всего понемногу. Идея дня наверху всегда подсказывает отстающую группу.</div>
           </div>
         </div>
       )}
 
-      {/* ═══ АЛЛЕРГЕНЫ ═══ */}
-      <div className="section-t" style={{ display: 'flex', alignItems: 'center', gap: 7 }}>Ввод аллергенов · правило 3 дней
-        <button className="skill-i" onClick={() => setRuleOpen(true)} aria-label="Что это">?</button>
-      </div>
-      {windows.length === 0 && (
-        <div className="note"><span className="ne">🥜</span><span>Новый аллерген вводят утром, малой дозой, 3 дня подряд. Начните из карточки продукта.</span></div>
+      {panel === 'allerg' && (
+        <div className="rise">
+          <div className="card">
+            <div className="eyebrow" style={{ marginBottom: 8, display: 'flex', alignItems: 'center', gap: 6 }}>
+              Большая девятка аллергенов
+              <button className="skill-i" onClick={() => setRuleOpen(true)} aria-label="Правило 3 дней">?</button>
+            </div>
+            <div className="al-grid">
+              {[...BIG_ALLERGENS].map((a) => {
+                const foods = FOODS.filter((f) => f.allergen === a);
+                const win = windows.find((w) => foods.some((f) => f.id === w.id));
+                const bad = win?.reaction === 'bad';
+                const done = !bad && foods.some((f) => introduced.has(f.id));
+                const inWork = !bad && !done && win && win.day < 3;
+                const openFood = foods.find((f) => win?.id === f.id) ?? foods.find((f) => !introduced.has(f.id)) ?? foods[0];
+                return (
+                  <button key={a} className={`al-tile ${bad ? 'bad' : done ? 'done' : ''}`} onClick={() => openFood && setTodayFood(openFood)}>
+                    <span className="al-e">{foods[0]?.e ?? '🥜'}</span>
+                    <span className="al-n">{a}</span>
+                    <span className="al-st">{bad ? '⚠️ пауза' : done ? '✓ введён' : inWork ? `день ${win!.day}/3` : 'не начат'}</span>
+                  </button>
+                );
+              })}
+            </div>
+            <div className="sub" style={{ marginTop: 10 }}>Новый аллерген — утром, с малой дозы, 3 дня подряд. Чем раньше девятка в рационе (до года), тем ниже риск аллергии.</div>
+          </div>
+        </div>
+      )}
+
+      {/* ═══ АКТИВНЫЕ ОКНА АЛЛЕРГЕНОВ ═══ */}
+      {windows.length > 0 && (
+        <div className="section-t" style={{ display: 'flex', alignItems: 'center', gap: 7 }}>Ввод аллергенов · правило 3 дней
+          <button className="skill-i" onClick={() => setRuleOpen(true)} aria-label="Что это">?</button>
+        </div>
       )}
       {windows.map((w) => {
         const f = FOODS.find((x) => x.id === w.id)!;
