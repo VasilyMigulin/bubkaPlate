@@ -81,4 +81,8 @@ export const MAIN_PHOTOS: Record<string, string> = {
   wheat: '/main/wheat.jpg',
   yogurt: '/main/yogurt.jpg',
   zucchini: '/main/zucchini.jpg',
+  kefir: '/main/kefir.jpg',
+  canned: '/main/canned.jpg',
+  semolina: '/main/semolina.jpg',
+  honey: '/main/honey.jpg',
 };

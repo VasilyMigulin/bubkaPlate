@@ -5,6 +5,8 @@ import { PANTRY, RECIPES, type Recipe } from '../data/recipes';
 import { RecipeSheet } from '../components/RecipeSheet';
 import { PlanSheet } from '../components/PlanSheet';
 import { PlateSheet } from '../components/PlateSheet';
+import { WeekPlanSheet } from '../components/WeekPlanSheet';
+import { WEEKPLANS, type WeekPlan } from '../data/weekplans';
 import { PLATES, type Plate } from '../data/plates';
 import { DAYPLANS, type DayPlan } from '../data/plans';
 import { ShopSheet } from '../components/ShopSheet';
@@ -56,6 +58,7 @@ export function Recipes() {
   const [planOpen, setPlanOpen] = useState<DayPlan | null | 'custom'>(undefined as unknown as null);
   const [plateOpen, setPlateOpen] = useState<Plate | null>(null);
   const [plateShown, setPlateShown] = useState(false);
+  const [weekOpen, setWeekOpen] = useState<WeekPlan | null>(null);
   const [planShown, setPlanShown] = useState(false);
   const [fav, setFav] = useState<Set<string>>(() => {
     try { return new Set(JSON.parse(localStorage.getItem(FAV_KEY) || '[]') as string[]); } catch { return new Set(); }
@@ -120,6 +123,17 @@ export function Recipes() {
             <span className="plan-e">{pl.e}</span>
             <span className="plan-t">{pl.t}</span>
             <span className="plan-a">{pl.age === myAge ? '⭐ ваш возраст' : `${pl.age} мес`} · {pl.parts.length} комп.</span>
+          </button>
+        ))}
+      </div>
+
+      <div className="section-t" style={{ margin: '4px 2px 8px' }}>🗓 Планы на неделю</div>
+      <div className="plans-row">
+        {[...WEEKPLANS].sort((a, b) => (a.age === myAge ? -1 : 0) - (b.age === myAge ? -1 : 0)).map((w) => (
+          <button key={w.id} className="plan-card" onClick={() => setWeekOpen(w)}>
+            <span className="plan-e">{w.e}</span>
+            <span className="plan-t">{w.t}</span>
+            <span className="plan-a">{w.age === myAge ? '⭐ ваш возраст' : `${w.age} мес`} · 28 блюд</span>
           </button>
         ))}
       </div>
@@ -280,6 +294,7 @@ export function Recipes() {
 
       <ShopSheet open={shopOpen} onClose={() => setShopOpen(false)} />
       {plateShown && <PlateSheet plate={plateOpen} onClose={() => setPlateShown(false)} />}
+      {weekOpen && <WeekPlanSheet plan={weekOpen} onClose={() => setWeekOpen(null)} />}
       {planShown && (
         <PlanSheet
           plan={planOpen === 'custom' ? null : (planOpen as DayPlan | null)}
