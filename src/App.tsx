@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { helloNow, ageTextOf } from './lib/day';
 import { StoreProvider, useStore } from './state/store';
 import { MyPlate } from './screens/MyPlate';
 import { Catalog } from './screens/Catalog';
@@ -8,15 +9,6 @@ import { Onboarding } from './screens/Onboarding';
 import { Settings } from './components/Settings';
 
 type Tab = 'mine' | 'catalog' | 'recipes' | 'safety';
-
-function ageLabel(months: number): string {
-  if (months < 1) return 'меньше месяца';
-  const y = Math.floor(months / 12), m = months % 12;
-  const mm = (n: number) => `${n} ${n % 10 === 1 && n % 100 !== 11 ? 'месяц' : n % 10 >= 2 && n % 10 <= 4 && (n % 100 < 10 || n % 100 >= 20) ? 'месяца' : 'месяцев'}`;
-  if (y === 0) return mm(m);
-  const yy = `${y} ${y === 1 ? 'год' : y >= 2 && y <= 4 ? 'года' : 'лет'}`;
-  return m ? `${yy} ${mm(m)}` : yy;
-}
 
 const TABS: { key: Tab; icon: string; label: string }[] = [
   { key: 'mine', icon: '📋', label: 'Мой прикорм' },
@@ -145,8 +137,9 @@ function Shell() {
               <div className="kid-row">
                 <div className="kid-ava">{profile.photo ? <img src={profile.photo} alt={profile.name} /> : '👶'}</div>
                 <div className="grow">
-                  <h1 className="h-screen" style={{ fontSize: 22 }}>{profile.name}</h1>
-                  <div className="sub">{ageMonths != null ? ageLabel(ageMonths) : ''} · {profile.approach === 'puree' ? 'пюре' : profile.approach === 'blw' ? 'кусочки' : 'пюре и кусочки'}</div>
+                  <div className="kid-hello">{helloNow()}</div>
+                  <h1 className="h-screen" style={{ fontSize: 26, lineHeight: 1.1 }}>{profile.name}</h1>
+                  <div className="sub" style={{ marginTop: 3 }}>{ageMonths != null ? ageTextOf(profile.birthDate, ageMonths) : ''} · {profile.approach === 'puree' ? 'пюре' : profile.approach === 'blw' ? 'кусочки' : 'пюре и кусочки'}</div>
                 </div>
               </div>
             </>

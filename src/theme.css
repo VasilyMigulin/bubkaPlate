@@ -123,3 +123,7 @@ img { max-width:100%; }
 /* Поле «когда дали» в записи пробы */
 .rx-when { width:100%; border:1.5px solid var(--hairline); background:var(--card); border-radius:12px;
   padding:11px 12px; font-family:inherit; font-size:14px; color:var(--text); -webkit-appearance:none; }
+
+/* Глобальный тактильный отклик: каждое нажатие отвечает */
+button { transition: transform .16s ease, opacity .16s ease; -webkit-tap-highlight-color: transparent; }
+button:active { transform: scale(.965); }

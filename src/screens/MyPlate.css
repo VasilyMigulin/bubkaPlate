@@ -185,3 +185,41 @@
 
 /* Футер доверия */
 .trust { text-align: center; font-size: 10.5px; line-height: 1.55; color: var(--text2); opacity: .8; margin: 22px 8px 4px; }
+
+/* ═══ Hero-сцена дня ═══ */
+.hero-day { position: relative; overflow: hidden; background: linear-gradient(150deg, color-mix(in srgb, var(--accent) 16%, var(--card)), var(--card) 72%);
+  border: 1.5px solid color-mix(in srgb, var(--accent) 22%, transparent); border-radius: 22px; padding: 16px 16px 15px; margin-bottom: 12px;
+  box-shadow: var(--shadow); }
+.hero-day::before { content: ''; position: absolute; width: 190px; height: 190px; border-radius: 50%; top: -70px; right: -50px;
+  background: color-mix(in srgb, var(--accent) 20%, transparent); filter: blur(46px); pointer-events: none; }
+.hero-day::after { content: ''; position: absolute; width: 120px; height: 120px; border-radius: 50%; bottom: -50px; left: -30px;
+  background: color-mix(in srgb, var(--terra, #E8963C) 14%, transparent); filter: blur(40px); pointer-events: none; }
+.hd-eyebrow { font-size: 10.5px; font-weight: 800; letter-spacing: .07em; text-transform: uppercase; color: var(--accent); margin-bottom: 9px; }
+.hd-row { display: flex; gap: 13px; align-items: center; position: relative; }
+.hd-pic { flex: none; width: 68px; height: 68px; border-radius: 50%; object-fit: cover;
+  box-shadow: 0 4px 14px rgba(0,0,0,.14), 0 0 0 3px var(--card); }
+.hd-pic-e { display: flex; align-items: center; justify-content: center; font-size: 34px; background: var(--card); }
+.hd-kicker { font-size: 11px; font-weight: 800; letter-spacing: .04em; text-transform: uppercase; color: var(--text2); }
+.hd-title { font-size: 18px; font-weight: 780; letter-spacing: -.01em; line-height: 1.2; margin-top: 1px; }
+.hd-why { font-size: 12.5px; color: var(--text2); line-height: 1.45; margin-top: 3px; }
+.hd-cta-row { display: flex; gap: 8px; margin-top: 13px; position: relative; }
+.hd-cta { flex: 1; border: none; font-family: inherit; background: var(--card); color: var(--accent);
+  border-radius: 13px; padding: 12px 10px; font-size: 13.5px; font-weight: 780; box-shadow: var(--shadow); cursor: pointer; }
+.hd-ico { flex: none; width: 46px; border: none; font-family: inherit; background: var(--card); border-radius: 13px;
+  font-size: 17px; box-shadow: var(--shadow); cursor: pointer; }
+.hd-swap { animation: hdswap .32s cubic-bezier(.22,.9,.3,1) both; }
+@keyframes hdswap { from { opacity: 0; transform: translateX(16px) scale(.98); } to { opacity: 1; transform: none; } }
+
+/* Кнопка-сканер тарелки: с объяснением */
+.scan-row { display: flex; align-items: center; gap: 11px; width: 100%; text-align: left; border: none; font-family: inherit;
+  background: var(--card); border-radius: 16px; padding: 12px 14px; box-shadow: var(--shadow); cursor: pointer; margin-bottom: 12px; }
+.scan-e { font-size: 22px; }
+.scan-row b { display: block; font-size: 13.5px; font-weight: 750; color: var(--text); }
+.scan-row .grow span { display: block; font-size: 11.5px; color: var(--text2); margin-top: 1px; }
+.act-main { width: 100%; margin-bottom: 9px; }
+
+/* Окно аллергена: явная кликабельность и подсказка */
+.allerg-win.tappable { cursor: pointer; transition: transform .15s ease; }
+.allerg-win.tappable:active { transform: scale(.98); }
+.aw-open { font-size: 10.5px; font-weight: 800; color: var(--accent); margin-left: 4px; }
+.aw-hint { font-size: 11px; font-weight: 650; color: var(--terra, #C77B2E); margin-top: 5px; }

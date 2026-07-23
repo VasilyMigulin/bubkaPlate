@@ -11,6 +11,7 @@ import { ProductSheet } from '../components/ProductSheet';
 import { RULE3_TEXT } from '../data/glossary';
 import { Lightbox } from '../components/Lightbox';
 import { PlateScan } from '../components/PlateScan';
+import { MAIN_PHOTOS } from '../data/mainPhotos';
 import type { Food } from '../types';
 import './MyPlate.css';
 
@@ -28,7 +29,7 @@ function readPlan30Done(): Set<number> {
 export function MyPlate({ goCatalog }: { goCatalog: () => void }) {
   const [plan30Open, setPlan30Open] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
-  const { profile, introduced, log, windows, ironCovered, ironTotal, markAllergenDay, showToast,
+  const { introduced, log, windows, ironCovered, ironTotal, markAllergenDay, showToast,
     ageMonths, readiness, toggleReadiness, answerFollowUp, activeId } = useStore();
   const [scanOpen, setScanOpen] = useState(false);
   const [logOpen, setLogOpen] = useState(false);
@@ -107,22 +108,6 @@ export function MyPlate({ goCatalog }: { goCatalog: () => void }) {
 
   const todayStr = new Date().toLocaleDateString('ru-RU', { weekday: 'long', day: 'numeric', month: 'long' });
 
-  // ── Приветствие: время суток + точный возраст ──
-  const hello = useMemo(() => {
-    const h = new Date().getHours();
-    return h < 5 ? 'Тихой ночи 🌙' : h < 11 ? 'Доброе утро ☀️' : h < 17 ? 'Добрый день 🌤' : 'Добрый вечер 🌙';
-  }, []);
-  const ageText = useMemo(() => {
-    if (!profile || ageMonths == null) return '';
-    const bd = new Date(profile.birthDate);
-    const now = new Date();
-    let days = now.getDate() - bd.getDate();
-    if (days < 0) days += new Date(now.getFullYear(), now.getMonth(), 0).getDate();
-    if (ageMonths >= 24) return `${Math.floor(ageMonths / 12)} г ${ageMonths % 12} мес`;
-    if (ageMonths >= 12) return `${Math.floor(ageMonths / 12)} г ${ageMonths % 12} мес`;
-    return days > 0 ? `${ageMonths} мес ${days} дн` : `сегодня ровно ${ageMonths} мес 🎉`;
-  }, [profile, ageMonths]);
-
   // ── План: один умный вход ──
   const p30 = useMemo(() => {
     const done = readPlan30Done();
@@ -136,22 +121,15 @@ export function MyPlate({ goCatalog }: { goCatalog: () => void }) {
 
   return (
     <>
-      {profile && (
-        <div className="hello st0">
-          <div className="hello-t">{hello}</div>
-          <div className="hello-s">{profile.name} · {ageText}</div>
-        </div>
-      )}
-
-      <button className="ask-row st1" onClick={() => { setSearchInit(undefined); setSearchOpen(true); }}>
+      <button className="ask-row st0" onClick={() => { setSearchInit(undefined); setSearchOpen(true); }}>
         🔍 <span>Спросите: давится, запор, мало ест…</span>
       </button>
 
-      {/* ═══ СЕГОДНЯ ═══ */}
+      {/* ═══ СЕГОДНЯ: hero-сцена ═══ */}
       {notReady ? (
-        <div className="card ready-card st2">
-          <div className="eyebrow" style={{ color: 'var(--terra)' }}>Скоро прикорм · готовность</div>
-          <div className="h-card" style={{ marginTop: 2 }}>{readyCount} из {READINESS.length} признаков</div>
+        <div className="hero-day st1">
+          <div className="hd-eyebrow">Скоро прикорм · {todayStr}</div>
+          <div className="hd-title">Готовность: {readyCount} из {READINESS.length}</div>
           <div className="sub" style={{ marginTop: 4 }}>Прикорм начинают около 6 месяцев и когда малыш готов. Отметьте, что уже есть:</div>
           <div className="ready-list">
             {READINESS.map((r) => {
@@ -169,71 +147,93 @@ export function MyPlate({ goCatalog }: { goCatalog: () => void }) {
             <div className="note" style={{ marginTop: 10 }}><span className="ne">🎉</span><span>Все признаки есть — можно знакомиться с первым овощем. Откройте план 30 дней ниже.</span></div>
           )}
         </div>
-      ) : fuEntry && fuFood?.food ? (
-        <div className="card today-card st2">
-          <div className="td-eyebrow">Сегодня · {todayStr}</div>
-          <div className="fu-head">
-            <span className="fu-e">{fuFood.food.e}</span>
-            <div className="grow">
-              <div className="h-card" style={{ margin: 0 }}>Как прошло с «{fuFood.label ?? fuFood.food.n}»?</div>
-              <div className="sub" style={{ marginTop: 2 }}>Вы отметили «наблюдаю» ({fuEntry.date}). Если всё спокойно — закроем вопрос.</div>
+      ) : (
+        <div className="hero-day st1">
+          <div className="hd-eyebrow">Сегодня · {todayStr}</div>
+          {todayCount > 0 && <div className="td-done">✓ Записано сегодня: {todayCount} {todayCount === 1 ? 'проба' : todayCount < 5 ? 'пробы' : 'проб'}</div>}
+
+          {fuEntry && fuFood?.food ? (
+            <div className="hd-swap" key={`fu-${fuEntry.id}`}>
+              <div className="hd-row">
+                {MAIN_PHOTOS[fuFood.food.id]
+                  ? <img className="hd-pic" src={MAIN_PHOTOS[fuFood.food.id]} alt={fuFood.food.n} />
+                  : <span className="hd-pic hd-pic-e">{fuFood.food.e}</span>}
+                <div className="grow">
+                  <div className="hd-title">Как прошло с «{fuFood.label ?? fuFood.food.n}»?</div>
+                  <div className="hd-why">Вы отметили «наблюдаю» ({fuEntry.date}). Если всё спокойно — закроем вопрос.</div>
+                </div>
+              </div>
+              <div className="fu-btns">
+                <button className="fu-btn ok" onClick={() => fuAnswer('ok')}>💚 Всё хорошо</button>
+                <button className="fu-btn" onClick={() => fuAnswer('skin')}>🌡 Кожа</button>
+                <button className="fu-btn" onClick={() => fuAnswer('tummy')}>💩 Живот</button>
+              </div>
+              <button className="fu-later" onClick={fuSnooze}>Ещё наблюдаю — спросите завтра</button>
             </div>
-          </div>
-          <div className="fu-btns">
-            <button className="fu-btn ok" onClick={() => fuAnswer('ok')}>💚 Всё хорошо</button>
-            <button className="fu-btn" onClick={() => fuAnswer('skin')}>🌡 Кожа</button>
-            <button className="fu-btn" onClick={() => fuAnswer('tummy')}>💩 Живот</button>
-          </div>
-          <button className="fu-later" onClick={fuSnooze}>Ещё наблюдаю — спросите завтра</button>
-        </div>
-      ) : activeWin && winFood ? (
-        <div className="card today-card st2">
-          <div className="td-eyebrow">Сегодня · {todayStr}</div>
-          <div className="td-row">
-            <span className="td-e">{winFood.e}</span>
-            <div className="grow">
-              <div className="h-card" style={{ margin: 0 }}>{winFood.n}: день {activeWin.day} из 3</div>
-              <div className="sub" style={{ marginTop: 2 }}>Дайте утром привычную малую порцию и понаблюдайте. Реакции нет — вечером отметьте день.</div>
+          ) : activeWin && winFood ? (
+            <div className="hd-swap" key={`win-${activeWin.id}-${activeWin.day}`}>
+              <div className="hd-row">
+                {MAIN_PHOTOS[winFood.id]
+                  ? <img className="hd-pic" src={MAIN_PHOTOS[winFood.id]} alt={winFood.n} />
+                  : <span className="hd-pic hd-pic-e">{winFood.e}</span>}
+                <div className="grow">
+                  <div className="hd-kicker">Ввод аллергена</div>
+                  <div className="hd-title">{winFood.n}: день {activeWin.day} из 3</div>
+                  <div className="hd-why">Утром — привычная малая порция. Спокойный день? Отметьте галочкой.</div>
+                </div>
+              </div>
+              <div className="hd-cta-row">
+                <button className="hd-cta" onClick={() => { markAllergenDay(activeWin.id); showToast('🗓', winFood.n, `День ${Math.min(activeWin.day + 1, 3)} из 3`); }}>✓ День прошёл спокойно</button>
+                <button className="hd-ico" onClick={() => setTodayFood(winFood)} aria-label="Карточка продукта">📖</button>
+              </div>
             </div>
-          </div>
-          <div className="td-actions">
-            <button className="btn btn-primary td-btn" onClick={() => { markAllergenDay(activeWin.id); showToast('🗓', winFood.n, `День ${Math.min(activeWin.day + 1, 3)} из 3`); }}>
-              ✓ День прошёл спокойно
-            </button>
-            <button className="btn btn-soft td-btn" onClick={() => setTodayFood(winFood)}>Карточка</button>
-          </div>
-        </div>
-      ) : todayIdea ? (
-        <div className="card today-card st2">
-          <div className="td-eyebrow">Сегодня · {todayStr}</div>
-          {todayCount > 0 && <div className="td-done">✓ Сегодня записано: {todayCount} {todayCount === 1 ? 'проба' : todayCount < 5 ? 'пробы' : 'проб'}</div>}
-          <div className="td-row">
-            <span className="td-e">{todayIdea.f.e}</span>
-            <div className="grow">
-              <div className="h-card" style={{ margin: 0 }}>{todayCount > 0 ? 'Ещё идея' : 'Идея дня'}: {todayIdea.f.n.toLowerCase()}</div>
-              <div className="sub" style={{ marginTop: 2 }}>{todayIdea.why}</div>
+          ) : todayIdea ? (
+            <div className="hd-swap" key={todayIdea.f.id}>
+              <div className="hd-row">
+                {MAIN_PHOTOS[todayIdea.f.id]
+                  ? <img className="hd-pic" src={MAIN_PHOTOS[todayIdea.f.id]} alt={todayIdea.f.n} />
+                  : <span className="hd-pic hd-pic-e">{todayIdea.f.e}</span>}
+                <div className="grow">
+                  <div className="hd-kicker">{todayCount > 0 ? 'Ещё идея' : 'Идея дня'}</div>
+                  <div className="hd-title">{todayIdea.f.n}</div>
+                  <div className="hd-why">{todayIdea.why}</div>
+                </div>
+              </div>
+              <div className="hd-cta-row">
+                <button className="hd-cta" onClick={() => setTodayFood(todayIdea.f)}>Как подать →</button>
+                <button className="hd-ico" onClick={() => setIdeaShift((v) => v + 1)} aria-label="Другая идея">🔀</button>
+                <button className="hd-ico" onClick={() => { setSearchInit(todayIdea.f.n.split(' (')[0]); setSearchOpen(true); }} aria-label="Рецепты">🍲</button>
+              </div>
             </div>
-          </div>
-          <div className="td-actions">
-            <button className="btn btn-primary td-btn" onClick={() => setTodayFood(todayIdea.f)}>Как подать →</button>
-          </div>
-          <div className="td-actions" style={{ marginTop: 8 }}>
-            <button className="btn btn-soft td-btn" onClick={() => setIdeaShift((v) => v + 1)}>🔀 Другая идея</button>
-            <button className="btn btn-soft td-btn" onClick={() => { setSearchInit(todayIdea.f.n.split(' (')[0]); setSearchOpen(true); }}>🍲 Рецепты</button>
-          </div>
+          ) : (
+            <div className="hd-swap" key="alldone">
+              <div className="hd-row">
+                <span className="hd-pic hd-pic-e">🏆</span>
+                <div className="grow">
+                  <div className="hd-title">Всё введено — вы великолепны!</div>
+                  <div className="hd-why">Дальше — разнообразие и общий стол. Загляните в рецепты.</div>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
-      ) : null}
+      )}
 
       {/* ═══ ДЕЙСТВИЯ ═══ */}
       {!notReady && (
-        <div className="act-row st3">
-          <button className="act-main" onClick={() => setLogOpen(true)}>
+        <>
+          <button className="act-main st2" onClick={() => setLogOpen(true)}>
             <span className="act-plus">+</span> Записать пробу
           </button>
-          <button className="act-side" onClick={() => setScanOpen(true)} aria-label="Проверить тарелку по фото">
-            📸<span>тарелка</span>
+          <button className="scan-row st3" onClick={() => setScanOpen(true)}>
+            <span className="scan-e">📸</span>
+            <span className="grow">
+              <b>Проверить тарелку по фото</b>
+              <span>ИИ оценит нарезку, возраст и баланс за 5 секунд</span>
+            </span>
+            <span style={{ color: 'var(--text2)' }}>›</span>
           </button>
-        </div>
+        </>
       )}
 
       {/* ═══ ПЛАН: один умный вход ═══ */}
@@ -365,15 +365,17 @@ export function MyPlate({ goCatalog }: { goCatalog: () => void }) {
         const status = w.reaction === 'bad' ? '⚠️ была реакция — пауза, к врачу'
           : safe ? '✓ 3 дня без реакции — введён' : `день ${w.day} из 3 · реакции нет`;
         return (
-          <div key={w.id} className={`allerg-win ${safe ? 'safe' : ''}`}>
+          <div key={w.id} className={`allerg-win tappable ${safe ? 'safe' : ''}`} onClick={() => setTodayFood(f)}
+            role="button" tabIndex={0}>
             <div style={{ fontSize: 22 }}>{f.e}</div>
             <div className="grow">
-              <div className="fmap-n">{f.n}</div>
+              <div className="fmap-n">{f.n} <span className="aw-open">карточка ›</span></div>
               <div className="fm-d">{status}</div>
               <div className="aw-days">{[1, 2, 3].map((d) => <i key={d} className={d <= w.day ? 'on' : ''} />)}</div>
+              {!safe && w.reaction !== 'bad' && <div className="aw-hint">Сегодня: дать утром малую порцию → вечером отметить ✓</div>}
             </div>
             {!safe && w.reaction !== 'bad' && (
-              <button className="aw-check" onClick={() => { markAllergenDay(w.id); showToast('🗓', f.n, `День ${Math.min(w.day + 1, 3)} из 3`); }} aria-label="Отметить день">✓</button>
+              <button className="aw-check" onClick={(e) => { e.stopPropagation(); markAllergenDay(w.id); showToast('🗓', f.n, `День ${Math.min(w.day + 1, 3)} из 3`); }} aria-label="Отметить день">✓</button>
             )}
           </div>
         );
