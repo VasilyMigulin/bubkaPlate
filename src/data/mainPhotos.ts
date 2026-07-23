@@ -92,4 +92,5 @@ export const MAIN_PHOTOS: Record<string, string> = {
   sourcream: '/main/sourcream.jpg',
   pork: '/main/pork.jpg',
   nuts: '/main/nuts.jpg',
+  grapefruit: '/main/grapefruit.jpg',
 };
