@@ -7,6 +7,7 @@ import { SearchSheet } from '../components/SearchSheet';
 import { RULE3_TEXT } from '../data/glossary';
 import { Lightbox } from '../components/Lightbox';
 import { PlateScan } from '../components/PlateScan';
+import { DoctorReport } from '../components/DoctorReport';
 import './MyPlate.css';
 
 const RX_BADGE: Record<string, { cls: string; label: string }> = {
@@ -26,6 +27,7 @@ export function MyPlate({ goCatalog }: { goCatalog: () => void }) {
   const [schedOpen, setSchedOpen] = useState(false);
   const [lightbox, setLightbox] = useState<{ src: string; alt?: string } | null>(null);
   const [ruleOpen, setRuleOpen] = useState(false);
+  const [reportOpen, setReportOpen] = useState(false);
 
   const notReady = ageMonths != null && ageMonths < 6;
   const readyCount = READINESS.filter((r) => readiness.has(r.key)).length;
@@ -184,8 +186,8 @@ export function MyPlate({ goCatalog }: { goCatalog: () => void }) {
           </div>
         );
       })}
-      <button className="btn btn-soft" style={{ marginTop: 4 }} onClick={() => showToast('📄', 'PDF для аллерголога', 'Дневник и реакции готовы к отправке')}>
-        📄 Сводка для аллерголога (PDF)
+      <button className="btn btn-soft" style={{ marginTop: 4 }} onClick={() => setReportOpen(true)}>
+        📄 Выписка для врача
       </button>
 
       <div className="section-t">Схема введения по неделям</div>
@@ -239,6 +241,7 @@ export function MyPlate({ goCatalog }: { goCatalog: () => void }) {
           </div>
         </div>
       )}
+      {reportOpen && <DoctorReport onClose={() => setReportOpen(false)} />}
       {plan30Open && <Plan30Sheet onClose={() => setPlan30Open(false)} />}
       {searchOpen && <SearchSheet onClose={() => setSearchOpen(false)} />}
     </>
