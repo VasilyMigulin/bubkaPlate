@@ -56,7 +56,7 @@ export function LogPicker({ onClose }: { onClose: () => void }) {
         <div className="bs-title">🥄 Что попробовали?</div>
         <input
           className="em-input lp-search" placeholder="Найти продукт: кабачок, яйцо…"
-          value={q} onChange={(e) => setQ(e.target.value)} autoFocus
+          value={q} onChange={(e) => setQ(e.target.value)}
         />
 
         {query ? (

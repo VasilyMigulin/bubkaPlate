@@ -38,6 +38,8 @@ export function MyPlate({ goCatalog }: { goCatalog: () => void }) {
   const [lightbox, setLightbox] = useState<{ src: string; alt?: string } | null>(null);
   const [ruleOpen, setRuleOpen] = useState(false);
   const [todayFood, setTodayFood] = useState<Food | null>(null);
+  const [ideaShift, setIdeaShift] = useState(0);
+  const [searchInit, setSearchInit] = useState<string | undefined>(undefined);
 
   const notReady = ageMonths != null && ageMonths < 6;
   const readyCount = READINESS.filter((r) => readiness.has(r.key)).length;
@@ -72,6 +74,7 @@ export function MyPlate({ goCatalog }: { goCatalog: () => void }) {
       return { cat, done, total: ids.length, pct: Math.round((done / ids.length) * 100) };
     }), [introduced]);
   const weakest = [...coverage].sort((a, b) => a.pct - b.pct)[0];
+  const introducedCount = introduced.size;
   const allergensCovered = useMemo(() =>
     new Set(FOODS.filter((f) => f.allergen && introduced.has(f.id)).map((f) => f.allergen)).size, [introduced]);
 
@@ -81,7 +84,7 @@ export function MyPlate({ goCatalog }: { goCatalog: () => void }) {
   const age = Math.max(ageMonths ?? 6, 6);
   const todayIdea = useMemo(() => {
     // день в году — чтобы идея дня менялась сама, но не прыгала при каждом рендере
-    const seed = Math.floor((Date.now() - new Date(new Date().getFullYear(), 0, 0).getTime()) / 864e5);
+    const seed = Math.floor((Date.now() - new Date(new Date().getFullYear(), 0, 0).getTime()) / 864e5) + ideaShift;
     if (ironCovered < Math.ceil(ironTotal / 2)) {
       const opts = FOODS.filter((f) => IRON_IDS.includes(f.id) && !introduced.has(f.id) && f.fromMonth <= age);
       if (opts.length) return { f: opts[seed % opts.length], why: 'Железо — фокус прикорма: запасы малыша тают после 6 месяцев.' };
@@ -89,7 +92,18 @@ export function MyPlate({ goCatalog }: { goCatalog: () => void }) {
     const opts = FOODS.filter((f) => f.cat === weakest.cat && !introduced.has(f.id) && f.fromMonth <= age);
     if (opts.length) return { f: opts[seed % opts.length], why: `Группа «${weakest.cat}» пока отстаёт — расширим вкусовой опыт.` };
     return null;
-  }, [introduced, ironCovered, ironTotal, weakest, age]);
+  }, [introduced, ironCovered, ironTotal, weakest, age, ideaShift]);
+
+  // Сколько проб уже записано сегодня
+  const todayCount = useMemo(() => {
+    const today = new Date().toDateString();
+    return log.filter((l) => l.ts && new Date(l.ts).toDateString() === today).length;
+  }, [log]);
+
+  // Этапный прогресс продуктов и следующая веха
+  const MILESTONES = [10, 20, 30, 50, 70, FOODS.length];
+  const stageTarget = MILESTONES.find((m) => introducedCount < m) ?? FOODS.length;
+  const toMilestone = stageTarget - introducedCount;
 
   const todayStr = new Date().toLocaleDateString('ru-RU', { weekday: 'long', day: 'numeric', month: 'long' });
 
@@ -106,7 +120,7 @@ export function MyPlate({ goCatalog }: { goCatalog: () => void }) {
     if (days < 0) days += new Date(now.getFullYear(), now.getMonth(), 0).getDate();
     if (ageMonths >= 24) return `${Math.floor(ageMonths / 12)} г ${ageMonths % 12} мес`;
     if (ageMonths >= 12) return `${Math.floor(ageMonths / 12)} г ${ageMonths % 12} мес`;
-    return days > 0 ? `${ageMonths} мес ${days} дн` : `${ageMonths} мес`;
+    return days > 0 ? `${ageMonths} мес ${days} дн` : `сегодня ровно ${ageMonths} мес 🎉`;
   }, [profile, ageMonths]);
 
   // ── План: один умный вход ──
@@ -120,8 +134,6 @@ export function MyPlate({ goCatalog }: { goCatalog: () => void }) {
   }, [introduced, plan30Open]);
   const showP30 = !!p30.cur && p30.doneCount < 30 && (ageMonths == null || ageMonths <= 8);
 
-  const introducedCount = introduced.size;
-
   return (
     <>
       {profile && (
@@ -131,7 +143,7 @@ export function MyPlate({ goCatalog }: { goCatalog: () => void }) {
         </div>
       )}
 
-      <button className="ask-row st1" onClick={() => setSearchOpen(true)}>
+      <button className="ask-row st1" onClick={() => { setSearchInit(undefined); setSearchOpen(true); }}>
         🔍 <span>Спросите: давится, запор, мало ест…</span>
       </button>
 
@@ -194,15 +206,20 @@ export function MyPlate({ goCatalog }: { goCatalog: () => void }) {
       ) : todayIdea ? (
         <div className="card today-card st2">
           <div className="td-eyebrow">Сегодня · {todayStr}</div>
+          {todayCount > 0 && <div className="td-done">✓ Сегодня записано: {todayCount} {todayCount === 1 ? 'проба' : todayCount < 5 ? 'пробы' : 'проб'}</div>}
           <div className="td-row">
             <span className="td-e">{todayIdea.f.e}</span>
             <div className="grow">
-              <div className="h-card" style={{ margin: 0 }}>Идея дня: {todayIdea.f.n.toLowerCase()}</div>
+              <div className="h-card" style={{ margin: 0 }}>{todayCount > 0 ? 'Ещё идея' : 'Идея дня'}: {todayIdea.f.n.toLowerCase()}</div>
               <div className="sub" style={{ marginTop: 2 }}>{todayIdea.why}</div>
             </div>
           </div>
           <div className="td-actions">
             <button className="btn btn-primary td-btn" onClick={() => setTodayFood(todayIdea.f)}>Как подать →</button>
+          </div>
+          <div className="td-actions" style={{ marginTop: 8 }}>
+            <button className="btn btn-soft td-btn" onClick={() => setIdeaShift((v) => v + 1)}>🔀 Другая идея</button>
+            <button className="btn btn-soft td-btn" onClick={() => { setSearchInit(todayIdea.f.n.split(' (')[0]); setSearchOpen(true); }}>🍲 Рецепты</button>
           </div>
         </div>
       ) : null}
@@ -250,13 +267,16 @@ export function MyPlate({ goCatalog }: { goCatalog: () => void }) {
       <div className="section-t">Прогресс малыша</div>
       <div className="seg-row st5">
         <button className={`seg ${panel === 'iron' ? 'on' : ''}`} onClick={() => setPanel(panel === 'iron' ? null : 'iron')}>
-          <span className="seg-e">🥩</span><b>{ironCovered}<i>/{ironTotal}</i></b><span>железо</span>
+          <span className={`seg-chev ${panel === 'iron' ? 'up' : ''}`}>▾</span>
+          <span className="seg-e">🥩</span><b>{ironCovered}<i>/{ironTotal}</i></b><span>источники железа</span>
         </button>
         <button className={`seg ${panel === 'foods' ? 'on' : ''}`} onClick={() => setPanel(panel === 'foods' ? null : 'foods')}>
-          <span className="seg-e">🌈</span><b>{introducedCount}<i>/{FOODS.length}</i></b><span>продукты</span>
+          <span className={`seg-chev ${panel === 'foods' ? 'up' : ''}`}>▾</span>
+          <span className="seg-e">🌈</span><b>{introducedCount}<i>/{stageTarget}</i></b><span>продуктов · веха</span>
         </button>
         <button className={`seg ${panel === 'allerg' ? 'on' : ''}`} onClick={() => setPanel(panel === 'allerg' ? null : 'allerg')}>
-          <span className="seg-e">🥜</span><b>{allergensCovered}<i>/{BIG_ALLERGENS.size}</i></b><span>аллергены</span>
+          <span className={`seg-chev ${panel === 'allerg' ? 'up' : ''}`}>▾</span>
+          <span className="seg-e">🥜</span><b>{allergensCovered}<i>/{BIG_ALLERGENS.size}</i></b><span>из девятки</span>
         </button>
       </div>
 
@@ -297,7 +317,9 @@ export function MyPlate({ goCatalog }: { goCatalog: () => void }) {
                 <div className="fm-cnt">{c.done}/{c.total}</div>
               </div>
             ))}
-            <div className="sub" style={{ marginTop: 6 }}>Задача первого года — попробовать всего понемногу. Идея дня наверху всегда подсказывает отстающую группу.</div>
+            <div className="sub" style={{ marginTop: 6 }}>{toMilestone > 0
+              ? `До вехи «${stageTarget} продуктов» осталось ${toMilestone} 🎈 Идея дня наверху всегда подсказывает отстающую группу.`
+              : 'Весь каталог пройден — вы великолепны! 🎉'}</div>
           </div>
         </div>
       )}
@@ -390,8 +412,8 @@ export function MyPlate({ goCatalog }: { goCatalog: () => void }) {
       )}
 
       {/* ═══ СПРАВОЧНОЕ ═══ */}
-      <button className="fmap-status" onClick={() => setSchedOpen((v) => !v)}>
-        <div className="fs-item"><span className="fs-e">⚖️</span><b>Объёмы порций</b><span>по возрасту</span></div>
+      <button className="ref-row" onClick={() => setSchedOpen((v) => !v)}>
+        ⚖️ <span className="grow">Объёмы порций по возрасту</span>
         <span className="fs-chev" style={{ transform: schedOpen ? 'rotate(180deg)' : 'none' }}>▾</span>
       </button>
       {schedOpen && (
@@ -406,6 +428,8 @@ export function MyPlate({ goCatalog }: { goCatalog: () => void }) {
         </div>
       )}
 
+      <div className="trust">Собрано по современным рекомендациям ВОЗ, AAP, NHS и данным исследований.<br />Приложение — помощник, а не замена консультации врача.</div>
+
       {scanOpen && <PlateScan onClose={() => setScanOpen(false)} goSafety={goCatalog} />}
       {lightbox && <Lightbox src={lightbox.src} alt={lightbox.alt} onClose={() => setLightbox(null)} />}
 
@@ -418,7 +442,7 @@ export function MyPlate({ goCatalog }: { goCatalog: () => void }) {
         </div>
       )}
       {plan30Open && <Plan30Sheet onClose={() => setPlan30Open(false)} />}
-      {searchOpen && <SearchSheet onClose={() => setSearchOpen(false)} />}
+      {searchOpen && <SearchSheet key={searchInit ?? ''} initial={searchInit} onClose={() => { setSearchOpen(false); setSearchInit(undefined); }} />}
       {logOpen && <LogPicker onClose={() => setLogOpen(false)} />}
       {diaryOpen && <DiaryView onClose={() => setDiaryOpen(false)} />}
       {todayFood && <ProductSheet food={todayFood} onClose={() => setTodayFood(null)} />}

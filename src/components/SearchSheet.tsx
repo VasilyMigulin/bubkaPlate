@@ -13,8 +13,8 @@ import type { Food } from '../types';
 const QUICK = ['давится', 'мало ест', 'запор', 'аллергия', 'с чего начать', 'железо', 'зубки'];
 
 /** Поиск по вопросам: «давится», «запор», «мало ест» → статьи, продукты, рецепты. */
-export function SearchSheet({ onClose }: { onClose: () => void }) {
-  const [q, setQ] = useState('');
+export function SearchSheet({ onClose, initial }: { onClose: () => void; initial?: string }) {
+  const [q, setQ] = useState(initial ?? '');
   const [article, setArticle] = useState<Article | null>(null);
   const [food, setFood] = useState<Food | null>(null);
   const [recipe, setRecipe] = useState<Recipe | null>(null);
