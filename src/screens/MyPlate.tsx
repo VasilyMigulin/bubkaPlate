@@ -29,7 +29,7 @@ function readPlan30Done(): Set<number> {
 export function MyPlate({ goCatalog }: { goCatalog: () => void }) {
   const [plan30Open, setPlan30Open] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
-  const { introduced, log, windows, ironCovered, ironTotal, markAllergenDay, showToast,
+  const { introduced, log, windows, ironCovered, ironTotal, markAllergenDay, restartAllergen, dismissAllergen, showToast,
     ageMonths, readiness, toggleReadiness, answerFollowUp, activeId } = useStore();
   const [scanOpen, setScanOpen] = useState(false);
   const [logOpen, setLogOpen] = useState(false);
@@ -41,6 +41,13 @@ export function MyPlate({ goCatalog }: { goCatalog: () => void }) {
   const [todayFood, setTodayFood] = useState<Food | null>(null);
   const [ideaShift, setIdeaShift] = useState(0);
   const [searchInit, setSearchInit] = useState<string | undefined>(undefined);
+
+  const markDay = (id: string, name: string, day: number) => {
+    markAllergenDay(id);
+    const next = Math.min(day + 1, 3);
+    if (next >= 3) showToast('🎉', `${name} — введён!`, '3 спокойных дня. Отличная работа!');
+    else showToast('🗓', name, `День ${next} из 3`);
+  };
 
   useEffect(() => {
     const h = () => { setSearchInit(undefined); setSearchOpen(true); };
@@ -166,7 +173,7 @@ export function MyPlate({ goCatalog }: { goCatalog: () => void }) {
                 </div>
               </div>
               <div className="fu-btns">
-                <button className="fu-btn ok" onClick={() => fuAnswer('ok')}>💚 Всё хорошо</button>
+                <button className="fu-btn ok" onClick={() => fuAnswer('ok')}>💚 Хорошо</button>
                 <button className="fu-btn" onClick={() => fuAnswer('skin')}>🌡 Кожа</button>
                 <button className="fu-btn" onClick={() => fuAnswer('tummy')}>💩 Живот</button>
               </div>
@@ -185,7 +192,7 @@ export function MyPlate({ goCatalog }: { goCatalog: () => void }) {
                 </div>
               </div>
               <div className="hd-cta-row">
-                <button className="hd-cta" onClick={() => { markAllergenDay(activeWin.id); showToast('🗓', winFood.n, `День ${Math.min(activeWin.day + 1, 3)} из 3`); }}>✓ День прошёл спокойно</button>
+                <button className="hd-cta" onClick={() => markDay(activeWin.id, winFood.n, activeWin.day)}>✓ День прошёл спокойно</button>
                 <button className="hd-ico" onClick={() => setTodayFood(winFood)} aria-label="Карточка продукта">📖</button>
               </div>
             </div>
@@ -376,9 +383,22 @@ export function MyPlate({ goCatalog }: { goCatalog: () => void }) {
               <div className="fm-d">{status}</div>
               <div className="aw-days">{[1, 2, 3].map((d) => <i key={d} className={d <= w.day ? 'on' : ''} />)}</div>
               {!safe && w.reaction !== 'bad' && <div className="aw-hint">Сегодня: дать утром малую порцию → вечером отметить ✓</div>}
+              {w.reaction === 'bad' && (
+                <>
+                  <div className="aw-hint">Пауза после реакции. Обсудите с врачом — и начните заново с малой дозы.</div>
+                  <button className="aw-restart" onClick={(e) => { e.stopPropagation(); restartAllergen(w.id); showToast('🔄', f.n, 'Начинаем заново: день 1 из 3, малая доза утром'); }}>
+                    🔄 Начать 3 дня заново
+                  </button>
+                </>
+              )}
+              {safe && (
+                <button className="aw-restart" onClick={(e) => { e.stopPropagation(); dismissAllergen(w.id); showToast('🎉', f.n, 'Введён! Держите его в рационе регулярно'); }}>
+                  ✓ Готово — убрать из списка
+                </button>
+              )}
             </div>
             {!safe && w.reaction !== 'bad' && (
-              <button className="aw-check" onClick={(e) => { e.stopPropagation(); markAllergenDay(w.id); showToast('🗓', f.n, `День ${Math.min(w.day + 1, 3)} из 3`); }} aria-label="Отметить день">✓</button>
+              <button className="aw-check" onClick={(e) => { e.stopPropagation(); markDay(w.id, f.n, w.day); }} aria-label="Отметить день">✓</button>
             )}
           </div>
         );

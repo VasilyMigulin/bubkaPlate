@@ -237,3 +237,30 @@
 
 /* Сканер: компактнее */
 .scan-row { padding:11px 14px; }
+
+/* Действия в окне аллергена */
+.aw-restart { display:inline-block; border:none; font-family:inherit; background:var(--accent-soft); color:var(--accent);
+  border-radius:999px; padding:7px 13px; font-size:12px; font-weight:750; margin-top:8px; cursor:pointer; }
+
+/* Оранжевую кнопку — в благородную терракоту */
+.act-main { background:linear-gradient(160deg, var(--cta), var(--cta-deep));
+  box-shadow:0 6px 20px color-mix(in srgb, var(--cta-deep) 35%, transparent); }
+.hd-cta { color:var(--cta-deep); }
+
+/* Фиксы переполнений */
+.hero-day .fu-btns { flex-wrap:nowrap; }
+.fu-btn { min-width:0; font-size:12px; padding:9px 2px; }
+.fl-row { min-width:0; }
+.fl-n { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.fl-row .rx { flex:none; font-size:10px; }
+.seg { min-width:0; }
+.seg span:last-child { white-space:nowrap; overflow:hidden; max-width:100%; }
+
+/* Чернильная CTA и нейтральные акценты hero */
+.act-main { background:linear-gradient(170deg, var(--cta), var(--cta-deep)); color:var(--cta-text);
+  box-shadow:0 6px 20px rgba(33,31,27,.16); }
+.hd-cta { color:var(--text); }
+
+/* Финальный вид главной кнопки: глубокий шалфей, флэт, мягкая цветная тень */
+.act-main { background:var(--cta); color:var(--cta-text);
+  box-shadow:0 6px 18px color-mix(in srgb, var(--cta) 34%, transparent); }

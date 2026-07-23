@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react';
+import { useRef, useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import type { Food, Reaction } from '../types';
 import { BIG_ALLERGENS, CHOOSE, FOODS, RELATED } from '../data/foods';
@@ -60,11 +60,11 @@ function TermText({ text, onTerm }: { text: string; onTerm: (t: string) => void 
   );
 }
 
-const RX_OPTS: { rx: Reaction; e: string; label: string }[] = [
-  { rx: 'ok', e: '💚', label: 'Всё хорошо' },
-  { rx: 'wait', e: '👀', label: 'Наблюдаю' },
-  { rx: 'skin', e: '🌡', label: 'Кожа' },
-  { rx: 'tummy', e: '💩', label: 'Живот' },
+const RX_OPTS: { rx: Reaction; e: string; label: string; d: string }[] = [
+  { rx: 'ok', e: '💚', label: 'Всё хорошо', d: 'ел спокойно, реакций нет' },
+  { rx: 'wait', e: '👀', label: 'Понаблюдаю', d: 'пока неясно — напомним вечером' },
+  { rx: 'skin', e: '🌡', label: 'Кожа', d: 'сыпь, краснота, пятна у рта' },
+  { rx: 'tummy', e: '💩', label: 'Живот', d: 'жидкий стул, рвота, вздутие' },
 ];
 
 const isDark = () => window.matchMedia('(prefers-color-scheme: dark)').matches;
@@ -87,7 +87,7 @@ function compressImage(file: File, max = 380, q = 0.72): Promise<string> {
   });
 }
 
-export function ProductSheet({ food, onClose }: { food: Food; onClose: () => void; elevated?: boolean }) {
+export function ProductSheet({ food, onClose, openLog }: { food: Food; onClose: () => void; elevated?: boolean; openLog?: boolean }) {
   const { logFood, startAllergen, showToast, ageMonths, profile, introduced, log } = useStore();
   const [rxOpen, setRxOpen] = useState(false);
   const [rxVariant, setRxVariant] = useState<{ key: string; label: string } | null>(null);
@@ -125,6 +125,8 @@ export function ProductSheet({ food, onClose }: { food: Food; onClose: () => voi
   const openRelated = (r: Food) => { setRelated(r); document.querySelector('.prod-sheet')?.scrollTo({ top: 0 }); };
 
   const openRx = () => { setRxVariant(null); setSelRx(null); setNote(''); setPhoto(undefined); setRxOpen(true); };
+  // «Записать пробу» с главной: форма записи открывается сразу, карточка остаётся фоном
+  useEffect(() => { if (openLog) setRxOpen(true); }, [openLog]);
   const openRxVariant = (v: { key: string; label: string }) => { setRxVariant(v); setSelRx(null); setNote(''); setPhoto(undefined); setRxOpen(true); };
   // статус отдельного вида: была ли реакция, введён ли
   const variantStatus = (key: string) => {
@@ -317,11 +319,15 @@ export function ProductSheet({ food, onClose }: { food: Food; onClose: () => voi
             </>
           )}
 
-          {!f.variants && <button className="btn btn-primary" style={{ marginTop: 12 }} onClick={openRx}>✓ Дали сегодня — в дневник</button>}
-          {canAllergen && (
-            <button className="btn btn-soft" style={{ marginTop: 8 }} onClick={() => { startAllergen(f.id); showToast('🗓', `Ввод начат: ${f.n}`, 'Давайте утром 3 дня подряд'); onClose(); }}>
-              🗓 Начать ввод по правилу 3 дней
-            </button>
+          {(!f.variants || canAllergen) && (
+            <div className="ps-dock">
+              {!f.variants && <button className="btn btn-primary ps-dock-main" onClick={openRx}>🥄 Дали сегодня — записать</button>}
+              {canAllergen && (
+                <button className="btn btn-soft ps-dock-soft" onClick={() => { startAllergen(f.id); showToast('🗓', `Ввод начат: ${f.n}`, 'Давайте утром 3 дня подряд'); onClose(); }}>
+                  🗓 3 дня
+                </button>
+              )}
+            </div>
           )}
         </div>
 
@@ -356,11 +362,19 @@ export function ProductSheet({ food, onClose }: { food: Food; onClose: () => voi
                 </div>
               </div>
 
-              <div className="rx-label">Впечатление малыша</div>
+              {f.allergen && (
+                <div className="rx-al-note">
+                  <b>🥜 {f.allergen[0].toUpperCase() + f.allergen.slice(1)} — аллерген.</b> Давайте утром, с малой дозы, и первые 2 часа поглядывайте на кожу, дыхание и стул.
+                  <span className="rx-al-danger">Отёк губ или языка, осиплость, тяжёлое дыхание, резкая вялость — сразу вызывайте скорую.</span>
+                </div>
+              )}
+              <div className="rx-label">Как прошло?</div>
               <div className="rx-chips">
                 {RX_OPTS.map((o) => (
                   <button key={o.rx} className={`rx-chip ${selRx === o.rx ? 'on' : ''}`} onClick={() => setSelRx(o.rx)}>
-                    <span className="rxe">{o.e}</span>{o.label}
+                    <span className="rxe">{o.e}</span>
+                    <b>{o.label}</b>
+                    <i>{o.d}</i>
                   </button>
                 ))}
               </div>

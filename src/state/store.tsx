@@ -21,6 +21,8 @@ interface Store {
   answerFollowUp: (idx: number, rx: Reaction) => void;
   startAllergen: (id: string) => void;
   markAllergenDay: (id: string) => void;
+  restartAllergen: (id: string) => void;
+  dismissAllergen: (id: string) => void;
   toggleReadiness: (key: string) => void;
   showToast: (icon: string, title: string, sub?: string) => void;
   resetAll: () => void;
@@ -54,7 +56,17 @@ function freshChild(p: Profile, withDemo: boolean): ChildState {
 function loadState(): PersistedV2 | null {
   try {
     const raw = localStorage.getItem(KEY);
-    if (!raw) return null;
+    if (!raw) {
+      // ?demo — мгновенный демо-профиль (скриншоты, витрина, разработка)
+      if (new URLSearchParams(location.search).has('demo')) {
+        const bd = new Date();
+        bd.setMonth(bd.getMonth() - 8);
+        bd.setDate(bd.getDate() - 12);
+        const c = freshChild({ name: 'Мия', birthDate: bd.toISOString().slice(0, 10), approach: 'both', started: true }, true);
+        return { v: 2, active: c.id, children: [c] };
+      }
+      return null;
+    }
     const data = JSON.parse(raw) as PersistedV2 | PersistedState;
     if ('children' in data) return data as PersistedV2;
     const old = data as PersistedState;
@@ -151,13 +163,23 @@ export function StoreProvider({ children: kids }: { children: ReactNode }) {
       if (id.includes(':')) introduced.add(id.split(':')[0]);
       const ts = when ?? Date.now();
       const entry = { id, date: humanWhen(ts), rx, note: note?.trim() || undefined, photo, ts };
+      // проба аллергена без открытого окна — автоматически запускаем правило 3 дней
+      const baseId = id.split(':')[0];
+      const baseFood = FOODS.find((f) => f.id === baseId);
+      const hasWin = c.windows.some((w) => w.id === id || w.id === baseId);
+      const autoWin = !hasWin && baseFood?.allergen
+        ? [{ id: baseId, day: 1, reaction: (rx === 'skin' || rx === 'tummy' ? 'bad' : null) as 'bad' | null }]
+        : [];
       return {
         ...c,
         log: [entry, ...c.log].sort((a, b) => (b.ts ?? 0) - (a.ts ?? 0)),
         introduced: [...introduced],
-        windows: c.windows.map((w) => {
-          if (w.id !== id) return w;
+        windows: [...autoWin, ...c.windows].map((w) => {
+          if (autoWin.length && w.id === baseId) return w; // только что создано — день 1 уже учтён
+          if (w.id !== id && w.id !== baseId) return w;
           if (rx === 'skin' || rx === 'tummy') return { ...w, reaction: 'bad' as const };
+          // продукт был на паузе после реакции — спокойная проба запускает правило 3 дней заново
+          if (w.reaction === 'bad') return { ...w, day: 1, reaction: null };
           return w.day < 3 ? { ...w, day: w.day + 1 } : w;
         }),
       };
@@ -179,6 +201,16 @@ export function StoreProvider({ children: kids }: { children: ReactNode }) {
 
   const startAllergen = useCallback((id: string) => {
     patch((c) => (c.windows.some((w) => w.id === id) ? c : { ...c, windows: [{ id, day: 1, reaction: null }, ...c.windows] }));
+  }, [patch]);
+
+  /** Начать ввод заново после паузы: снова 3 дня с малой дозы. */
+  const restartAllergen = useCallback((id: string) => {
+    patch((c) => ({ ...c, windows: c.windows.map((w) => (w.id === id ? { ...w, day: 1, reaction: null } : w)) }));
+  }, [patch]);
+
+  /** Убрать завершённое окно из списка. */
+  const dismissAllergen = useCallback((id: string) => {
+    patch((c) => ({ ...c, windows: c.windows.filter((w) => w.id !== id) }));
   }, [patch]);
 
   const markAllergenDay = useCallback((id: string) => {
@@ -219,7 +251,7 @@ export function StoreProvider({ children: kids }: { children: ReactNode }) {
     children: childList.map((c) => ({ id: c.id, profile: c.profile })),
     activeId: child?.id ?? null,
     addChild, switchChild, removeChild,
-    setProfile, logFood, answerFollowUp, startAllergen, markAllergenDay, toggleReadiness, showToast, resetAll,
+    setProfile, logFood, answerFollowUp, startAllergen, markAllergenDay, restartAllergen, dismissAllergen, toggleReadiness, showToast, resetAll,
     ironCovered, ironTotal: IRON_IDS.length,
   };
   return <Ctx.Provider value={value}>{kids}</Ctx.Provider>;

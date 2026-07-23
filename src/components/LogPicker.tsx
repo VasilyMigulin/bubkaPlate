@@ -106,7 +106,7 @@ export function LogPicker({ onClose }: { onClose: () => void }) {
         `}</style>
       </div>
     </div>
-    {food && <ProductSheet food={food} onClose={() => setFood(null)} />}
+    {food && <ProductSheet food={food} openLog onClose={() => setFood(null)} />}
     </>,
     document.body,
   );
