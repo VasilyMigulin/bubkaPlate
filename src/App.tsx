@@ -143,7 +143,7 @@ function Shell() {
           {tab === 'mine' ? (
             <>
               <div className="kid-row">
-                <div className="kid-ava">👶</div>
+                <div className="kid-ava">{profile.photo ? <img src={profile.photo} alt={profile.name} /> : '👶'}</div>
                 <div className="grow">
                   <h1 className="h-screen" style={{ fontSize: 22 }}>{profile.name}</h1>
                   <div className="sub">{ageMonths != null ? ageLabel(ageMonths) : ''} · {profile.approach === 'puree' ? 'пюре' : profile.approach === 'blw' ? 'кусочки' : 'пюре и кусочки'}</div>

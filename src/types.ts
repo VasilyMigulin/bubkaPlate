@@ -62,6 +62,7 @@ export interface Profile {
   birthDate: string;        // ISO yyyy-mm-dd
   approach: FeedingApproach;
   started: boolean;         // начали ли прикорм
+  photo?: string;           // аватар малыша (сжатый dataURL)
 }
 
 export interface PersistedState {
@@ -70,4 +71,20 @@ export interface PersistedState {
   log: LogEntry[];
   windows: AllergenWindow[];
   readiness: string[];      // отмеченные признаки готовности
+}
+
+/** Данные одного малыша (v2 — поддержка нескольких детей). */
+export interface ChildState {
+  id: string;
+  profile: Profile;
+  introduced: string[];
+  log: LogEntry[];
+  windows: AllergenWindow[];
+  readiness: string[];
+}
+
+export interface PersistedV2 {
+  v: 2;
+  active: string;
+  children: ChildState[];
 }

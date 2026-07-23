@@ -116,3 +116,6 @@ img { max-width:100%; }
   animation:viewin .3s cubic-bezier(.3,.7,.3,1) both; }
 .article-view::-webkit-scrollbar { display:none; }
 @keyframes viewin { from { transform:translateX(100%); } to { transform:none; } }
+
+.kid-ava { overflow:hidden; }
+.kid-ava img { width:100%; height:100%; object-fit:cover; border-radius:50%; }
