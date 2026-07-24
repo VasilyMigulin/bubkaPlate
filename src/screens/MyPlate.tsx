@@ -393,7 +393,7 @@ export function MyPlate({ goCatalog }: { goCatalog: () => void }) {
       {showP30 ? (
         <button className="card next-card st3" onClick={() => setPlan30Open(true)}>
           <div className="row">
-            <div className="next-e">🗓</div>
+            <div className="row-ico">🗓</div>
             <div className="grow">
               <div className="eyebrow" style={{ color: 'var(--accent)' }}>Мой план · день {p30.cur!.d} из 30</div>
               <div className="h-card" style={{ margin: '2px 0 0' }}>{p30.cur!.t}</div>
@@ -406,7 +406,7 @@ export function MyPlate({ goCatalog }: { goCatalog: () => void }) {
       ) : (
         <button className="card next-card st3" onClick={goCatalog}>
           <div className="row">
-            <div className="next-e">🌟</div>
+            <div className="row-ico">🌟</div>
             <div className="grow">
               <div className="eyebrow" style={{ color: 'var(--accent)' }}>Что ввести дальше</div>
               <div className="h-card" style={{ margin: '2px 0 0' }}>{weakest.cat}</div>
@@ -419,7 +419,7 @@ export function MyPlate({ goCatalog }: { goCatalog: () => void }) {
 
       {!notReady && (
         <button className="scan-row st3" onClick={() => setScanOpen(true)}>
-          <span className="scan-e">📸</span>
+          <span className="row-ico">📸</span>
           <span className="grow">
             <b>Проверить тарелку по фото</b>
             <span>ИИ оценит нарезку, возраст и баланс за 5 секунд</span>
@@ -560,7 +560,7 @@ export function MyPlate({ goCatalog }: { goCatalog: () => void }) {
       {log.some((l) => l.ts) && (
         <button className="card film-card" onClick={() => setFilmOpen(true)}>
           <div className="row">
-            <div className="next-e">🎬</div>
+            <div className="row-ico">🎬</div>
             <div className="grow">
               <div className="eyebrow" style={{ color: 'var(--terra)' }}>Фильм месяца</div>
               <div className="h-card" style={{ margin: '2px 0 0' }}>Как прошёл ваш месяц вкусов</div>
@@ -573,11 +573,11 @@ export function MyPlate({ goCatalog }: { goCatalog: () => void }) {
 
       {/* ═══ СПРАВОЧНОЕ ═══ */}
       <button className="ref-row" onClick={() => setGrannyOpen(true)}>
-        👵 <span className="grow">Памятка для бабушки и няни</span>
+        <span className="row-ico sm">👵</span> <span className="grow">Памятка для бабушки и няни</span>
         <span className="fs-chev">›</span>
       </button>
       <button className="ref-row" onClick={() => setSchedOpen((v) => !v)}>
-        ⚖️ <span className="grow">Объёмы порций по возрасту</span>
+        <span className="row-ico sm">⚖️</span> <span className="grow">Объёмы порций по возрасту</span>
         <span className="fs-chev" style={{ transform: schedOpen ? 'rotate(180deg)' : 'none' }}>▾</span>
       </button>
       {schedOpen && (

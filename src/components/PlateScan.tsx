@@ -27,6 +27,7 @@ export function PlateScan({ onClose, goSafety }: { onClose: () => void; goSafety
           <div className="plate-emoji">📸</div>
           <h2>Проверка тарелки</h2>
           <p>Сфотографируйте тарелку — ИИ проверит нарезку, возраст и баланс.</p>
+          <span className="demo-tag">демо-режим · настоящее распознавание подключим с выходом</span>
         </div>
 
         {phase === 'start' && (

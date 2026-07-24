@@ -297,3 +297,8 @@
 /* Кольцо и бейдж уровня — чётче */
 .ava-ring circle { transition: stroke-dashoffset .6s ease; }
 .ava-lvl { width: 26px; height: 26px; border: 2px solid var(--bg); box-shadow: var(--shadow); }
+
+/* Ритм и базовые линии */
+.seg b { line-height:1; margin-top:2px; }
+.ref-row { padding:10px 12px; gap:10px; }
+.scan-row { gap:10px; padding:10px 12px; }
