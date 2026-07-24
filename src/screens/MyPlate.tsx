@@ -40,6 +40,7 @@ export function MyPlate({ goCatalog }: { goCatalog: () => void }) {
   const [ruleOpen, setRuleOpen] = useState(false);
   const [todayFood, setTodayFood] = useState<Food | null>(null);
   const [ideaShift, setIdeaShift] = useState(0);
+  const [moreIdeas, setMoreIdeas] = useState(false);
   const [searchInit, setSearchInit] = useState<string | undefined>(undefined);
 
   const markDay = (id: string, name: string, day: number) => {
@@ -206,6 +207,21 @@ export function MyPlate({ goCatalog }: { goCatalog: () => void }) {
               <div className="hd-cta-row">
                 <button className="hd-cta" onClick={() => markDay(activeWin.id, winFood.n, activeWin.day)}>✓ День прошёл спокойно</button>
                 <button className="hd-ico" onClick={() => setTodayFood(winFood)} aria-label="Карточка продукта">📖</button>
+              </div>
+            </div>
+          ) : todayCount > 0 && !moreIdeas ? (
+            <div className="hd-swap" key="daydone">
+              <div className="hd-row">
+                <span className="hd-pic hd-pic-e">💚</span>
+                <div className="grow">
+                  <div className="hd-kicker">День идёт отлично</div>
+                  <div className="hd-title">{todayCount} {todayCount === 1 ? 'проба' : todayCount < 5 ? 'пробы' : 'проб'} — всё записано</div>
+                  <div className="hd-why">Малыш знакомится со вкусами, дневник ведётся. Вы молодцы!</div>
+                </div>
+              </div>
+              <div className="hd-cta-row">
+                <button className="hd-cta" onClick={() => setMoreIdeas(true)}>💡 Ещё идея на сегодня</button>
+                <button className="hd-ico" onClick={() => window.dispatchEvent(new CustomEvent('bubka-tab', { detail: 'recipes' }))} aria-label="Рецепты">🍲</button>
               </div>
             </div>
           ) : todayIdea ? (
