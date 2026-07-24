@@ -1,6 +1,6 @@
 // Референсные фото подачи продуктов.
 // Лежат в public/foods; путь резолвится по id продукта.
-export const FOOD_PHOTOS: Record<string, string> = {
+const RAW_FOOD_PHOTOS: Record<string, string> = {
   apple: '/foods/apple.png',
   apricot: '/foods/apricot.jpeg',
   avocado: '/foods/avocado.png',
@@ -42,3 +42,9 @@ export const FOOD_PHOTOS: Record<string, string> = {
   wheat: '/foods/wheat.png',
   zucchini: '/foods/zucchini.jpeg',
 };
+
+
+// Пути с учётом base (деплой в подкаталог, напр. GitHub Pages)
+export const FOOD_PHOTOS: typeof RAW_FOOD_PHOTOS = Object.fromEntries(
+  Object.entries(RAW_FOOD_PHOTOS).map(([k, v]) => [k, import.meta.env.BASE_URL + (v as string).slice(1)]),
+) as typeof RAW_FOOD_PHOTOS;

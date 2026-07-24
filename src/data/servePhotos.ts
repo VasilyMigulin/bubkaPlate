@@ -1,6 +1,6 @@
 // Фото нарезки по возрастам: продукт → ступень → файл.
 // Ключ — id продукта, вложенно — месяц → фото нужной нарезки.
-export const SERVE_PHOTOS: Record<string, Record<string, string>> = {
+const RAW_SERVE_PHOTOS: Record<string, Record<string, string>> = {
   zucchini: { '6': '/serve/zucchini-6.jpg', '8': '/serve/zucchini-8.jpg', '10': '/serve/zucchini-8.jpg', '12': '/serve/zucchini-8.jpg' },
   apricot: { '6': '/serve/apricot-6.jpg', '8': '/serve/apricot-8.jpg', '12': '/serve/apricot-12.jpg' },
   avocado: { '6': '/serve/avocado-6.jpg', '8': '/serve/avocado-8.jpg', '12': '/serve/avocado-12.jpg', '18': '/serve/avocado-18.jpg' },
@@ -26,3 +26,11 @@ export const SERVE_PHOTOS: Record<string, Record<string, string>> = {
   bellpepper: { '6': '/serve/bellpepper-6.jpg', '8': '/serve/bellpepper-8.jpg', '12': '/serve/bellpepper-12.jpg' },
   sweetpotato: { '6': '/serve/sweetpotato-6.jpg', '8': '/serve/sweetpotato-8.jpg', '12': '/serve/sweetpotato-12.jpg' },
 };
+
+
+// Пути с учётом base (деплой в подкаталог, напр. GitHub Pages)
+export const SERVE_PHOTOS: typeof RAW_SERVE_PHOTOS = Object.fromEntries(
+  Object.entries(RAW_SERVE_PHOTOS).map(([k, m]) => [k, Object.fromEntries(
+    Object.entries(m).map(([a, v]) => [a, import.meta.env.BASE_URL + (v as string).slice(1)]),
+  )]),
+) as typeof RAW_SERVE_PHOTOS;

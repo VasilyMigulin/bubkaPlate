@@ -12,6 +12,6 @@ createRoot(document.getElementById('root')!).render(
 // PWA: офлайн-кэш и фундамент для будущих пуш-напоминаний
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
-    navigator.serviceWorker.register('/sw.js').catch(() => { /* dev или старый браузер */ });
+    navigator.serviceWorker.register(import.meta.env.BASE_URL + 'sw.js').catch(() => { /* dev или старый браузер */ });
   });
 }

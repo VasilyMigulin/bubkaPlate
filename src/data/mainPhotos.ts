@@ -1,5 +1,5 @@
 // Собственные главные фото продуктов (public/main), путь по id. Отдельно от PDF-фото нарезки.
-export const MAIN_PHOTOS: Record<string, string> = {
+const RAW_MAIN_PHOTOS: Record<string, string> = {
   apple: '/main/apple.jpg',
   apricot: '/main/apricot.jpg',
   avocado: '/main/avocado.jpg',
@@ -94,3 +94,9 @@ export const MAIN_PHOTOS: Record<string, string> = {
   nuts: '/main/nuts.jpg',
   grapefruit: '/main/grapefruit.jpg',
 };
+
+
+// Пути с учётом base (деплой в подкаталог, напр. GitHub Pages)
+export const MAIN_PHOTOS: typeof RAW_MAIN_PHOTOS = Object.fromEntries(
+  Object.entries(RAW_MAIN_PHOTOS).map(([k, v]) => [k, import.meta.env.BASE_URL + (v as string).slice(1)]),
+) as typeof RAW_MAIN_PHOTOS;

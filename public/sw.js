@@ -12,7 +12,7 @@ self.addEventListener('fetch', (e) => {
   if (e.request.method !== 'GET' || url.origin !== location.origin) return;
 
   // фото продуктов — cache-first (не меняются)
-  if (url.pathname.startsWith('/main/')) {
+  if (url.pathname.includes('/main/')) {
     e.respondWith(
       caches.open(CACHE).then((c) =>
         c.match(e.request).then((hit) => hit || fetch(e.request).then((res) => { c.put(e.request, res.clone()); return res; })),
