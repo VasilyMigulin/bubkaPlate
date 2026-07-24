@@ -1,5 +1,6 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { helloNow, ageTextOf } from './lib/day';
+import { computeXP, earnedBadges, levelOf } from './data/badges';
 import { StoreProvider, useStore } from './state/store';
 import { MyPlate } from './screens/MyPlate';
 import { Catalog } from './screens/Catalog';
@@ -39,12 +40,22 @@ function Toast() {
 
 function Shell() {
   const [tab, setTab] = useState<Tab>(() => {
+    const q = new URLSearchParams(location.search).get('tab') as Tab | null;
+    if (q && ['mine', 'catalog', 'recipes', 'safety'].includes(q)) return q;
     const t = localStorage.getItem('bubka-plate-start-tab') as Tab | null;
     if (t) { localStorage.removeItem('bubka-plate-start-tab'); return t; }
     return 'mine';
   });
   const [settingsOpen, setSettingsOpen] = useState(false);
-  const { profile, ageMonths } = useStore();
+  const { profile, ageMonths, log, introduced, windows, activeId } = useStore();
+  const achCtx = useMemo(() => ({ log, introduced, windows }), [log, introduced, windows]);
+  const lvl = levelOf(computeXP(achCtx));
+  const hasNewBadges = useMemo(() => {
+    try {
+      const seen = new Set(JSON.parse(localStorage.getItem(`bubka-plate-badges-seen-${activeId ?? ''}`) || '[]') as string[]);
+      return earnedBadges(achCtx).some((b) => !seen.has(b.id));
+    } catch { return false; }
+  }, [achCtx, activeId]);
   // онбординг завершился с «Читать базу» — переключаемся на неё
   useEffect(() => {
     if (profile) {
@@ -138,7 +149,16 @@ function Shell() {
           {tab === 'mine' ? (
             <>
               <div className="kid-row">
-                <div className="kid-ava">{profile.photo ? <img src={profile.photo} alt={profile.name} /> : '👶'}</div>
+                <button className="ava-wrap" onClick={() => window.dispatchEvent(new CustomEvent('bubka-ach'))} aria-label="Достижения">
+                  <svg className="ava-ring" viewBox="0 0 60 60">
+                    <circle cx="30" cy="30" r="27" fill="none" stroke="var(--elev)" strokeWidth="3.5" />
+                    <circle cx="30" cy="30" r="27" fill="none" stroke="var(--accent)" strokeWidth="3.5" strokeLinecap="round"
+                      strokeDasharray={String(2 * Math.PI * 27)} strokeDashoffset={String(2 * Math.PI * 27 * (1 - lvl.pct / 100))}
+                      transform="rotate(-90 30 30)" />
+                  </svg>
+                  <div className="kid-ava">{profile.photo ? <img src={profile.photo} alt={profile.name} /> : '👶'}</div>
+                  <span className="ava-lvl">{lvl.cur.e}{hasNewBadges && <i className="ava-dot" />}</span>
+                </button>
                 <div className="grow">
                   <div className="kid-hello">{helloNow()}</div>
                   <h1 className="h-screen" style={{ fontSize: 26, lineHeight: 1.1 }}>{profile.name}</h1>

@@ -9,7 +9,6 @@ import { LogPicker } from '../components/LogPicker';
 import { DiaryView } from '../components/DiaryView';
 import { MonthFilm } from '../components/MonthFilm';
 import { Achievements } from '../components/Achievements';
-import { computeXP, earnedBadges, levelOf } from '../data/badges';
 import { ProductSheet } from '../components/ProductSheet';
 import { RULE3_TEXT } from '../data/glossary';
 import { Lightbox } from '../components/Lightbox';
@@ -58,8 +57,10 @@ export function MyPlate({ goCatalog }: { goCatalog: () => void }) {
 
   useEffect(() => {
     const h = () => { setSearchInit(undefined); setSearchOpen(true); };
+    const a = () => setAchOpen(true);
     window.addEventListener('bubka-search', h);
-    return () => window.removeEventListener('bubka-search', h);
+    window.addEventListener('bubka-ach', a);
+    return () => { window.removeEventListener('bubka-search', h); window.removeEventListener('bubka-ach', a); };
   }, []);
 
   const notReady = ageMonths != null && ageMonths < 6;
@@ -97,16 +98,6 @@ export function MyPlate({ goCatalog }: { goCatalog: () => void }) {
   const weakest = [...coverage].sort((a, b) => a.pct - b.pct)[0];
   const introducedCount = introduced.size;
 
-  // Уровень и бейджи
-  const achCtx = useMemo(() => ({ log, introduced, windows }), [log, introduced, windows]);
-  const earned = useMemo(() => earnedBadges(achCtx), [achCtx]);
-  const lvl = levelOf(computeXP(achCtx));
-  const hasNewBadges = useMemo(() => {
-    try {
-      const seen = new Set(JSON.parse(localStorage.getItem(`bubka-plate-badges-seen-${activeId ?? ''}`) || '[]') as string[]);
-      return earned.some((b) => !seen.has(b.id));
-    } catch { return earned.length > 0; }
-  }, [earned, activeId, achOpen]);
   const allergensCovered = useMemo(() =>
     new Set(FOODS.filter((f) => f.allergen && introduced.has(f.id)).map((f) => f.allergen)).size, [introduced]);
 
@@ -451,15 +442,6 @@ export function MyPlate({ goCatalog }: { goCatalog: () => void }) {
           <span className="seg-e">🥜</span><b>{allergensCovered}<i>/{BIG_ALLERGENS.size}</i></b><span>из девятки</span>
         </button>
       </div>
-
-      <button className="ach-row" onClick={() => setAchOpen(true)}>
-        <span className="ach-e">{lvl.cur.e}</span>
-        <span className="grow">
-          <b>{lvl.cur.title}{hasNewBadges && <i className="ach-dot" />}</b>
-          <span className="ach-s">Уровень {lvl.idx + 1} · {earned.length} {earned.length === 1 ? 'бейдж' : earned.length < 5 ? 'бейджа' : 'бейджей'}</span>
-        </span>
-        <span style={{ color: 'var(--text2)' }}>›</span>
-      </button>
 
       {panel === 'iron' && (
         <div className="rise">
