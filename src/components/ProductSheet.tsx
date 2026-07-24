@@ -93,6 +93,7 @@ export function ProductSheet({ food, onClose, openLog }: { food: Food; onClose: 
   const [rxVariant, setRxVariant] = useState<{ key: string; label: string } | null>(null);
   const [selRx, setSelRx] = useState<Reaction | null>(null);
   const [note, setNote] = useState('');
+  const [varPick, setVarPick] = useState(false);
   const [when, setWhen] = useState(() => {
     const d = new Date();
     d.setMinutes(d.getMinutes() - d.getTimezoneOffset());
@@ -110,7 +111,7 @@ export function ProductSheet({ food, onClose, openLog }: { food: Food; onClose: 
   const usingPuree = serveMode === 'puree' && !!f.servePuree;
   const serveMap = usingPuree ? f.servePuree! : f.serve;
   const ages = Object.keys(serveMap);
-  const canAllergen = f.allergen && f.allergen !== 'глютен';
+  const canAllergen = !!f.allergen;
   const choose = f.choose ?? CHOOSE[f.id];
   const relatedIds = (RELATED[f.id] || []).map((id) => FOODS.find((x) => x.id === id)).filter(Boolean) as Food[];
   const productRecipes = RECIPES.filter((r) => r.ing.includes(f.n.toLowerCase()));
@@ -319,9 +320,11 @@ export function ProductSheet({ food, onClose, openLog }: { food: Food; onClose: 
             </>
           )}
 
-          {(!f.variants || canAllergen) && (
+          {(
             <div className="ps-dock">
-              {!f.variants && <button className="btn btn-primary ps-dock-main" onClick={openRx}>🥄 Дали сегодня — записать</button>}
+              {f.variants
+                ? <button className="btn btn-primary ps-dock-main" onClick={() => setVarPick(true)}>🥄 Дали сегодня — записать</button>
+                : <button className="btn btn-primary ps-dock-main" onClick={openRx}>🥄 Дали сегодня — записать</button>}
               {canAllergen && (
                 <button className="btn btn-soft ps-dock-soft" onClick={() => { startAllergen(f.id); showToast('🗓', `Ввод начат: ${f.n}`, 'Давайте утром 3 дня подряд'); onClose(); }}>
                   🗓 3 дня
@@ -330,6 +333,21 @@ export function ProductSheet({ food, onClose, openLog }: { food: Food; onClose: 
             </div>
           )}
         </div>
+
+        {varPick && f.variants && createPortal(
+          <div className="skill-pop-scrim" onClick={() => setVarPick(false)}>
+            <div className="skill-pop" onClick={(e) => e.stopPropagation()}>
+              <div className="vp-title">Какой вид пробовали?</div>
+              {f.variants.map((v) => (
+                <button key={v.key} className="vp-row" onClick={() => { setVarPick(false); openRxVariant(v); }}>
+                  <span className="grow">{v.label}</span>
+                  {introduced.has(`${f.id}:${v.key}`) && <span className="vp-in">✓ введён</span>}
+                </button>
+              ))}
+            </div>
+          </div>,
+          document.body,
+        )}
 
         {recipeOpen && <RecipeSheet recipe={recipeOpen} onClose={() => setRecipeOpen(null)} />}
 

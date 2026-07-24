@@ -264,3 +264,10 @@
 /* Финальный вид главной кнопки: глубокий шалфей, флэт, мягкая цветная тень */
 .act-main { background:var(--cta); color:var(--cta-text);
   box-shadow:0 6px 18px color-mix(in srgb, var(--cta) 34%, transparent); }
+
+/* Строка повторов */
+.repeat-row { display:flex; align-items:center; gap:9px; width:100%; text-align:left; border:none; font-family:inherit;
+  background:var(--card); border-radius:14px; padding:11px 14px; font-size:12.5px; font-weight:650; color:var(--text);
+  box-shadow:var(--shadow); margin-bottom:12px; cursor:pointer; }
+.repeat-row b { font-weight:780; }
+.rep-days { flex:none; font-size:11px; font-weight:700; color:var(--text2); }

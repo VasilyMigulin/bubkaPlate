@@ -154,3 +154,10 @@ button:active { transform: scale(.965); }
   border-radius:14px; padding:11px 13px; font-size:12.5px; line-height:1.5; margin-bottom:14px; }
 .rx-al-note b { display:block; margin-bottom:2px; }
 .rx-al-danger { display:block; margin-top:6px; font-weight:700; color:var(--danger); }
+
+/* Выбор вида в вариантных карточках (орехи и т. п.) */
+.vp-title { font-size:15px; font-weight:750; margin-bottom:10px; }
+.vp-row { display:flex; align-items:center; gap:8px; width:100%; text-align:left; border:none; font-family:inherit;
+  background:var(--elev); border-radius:12px; padding:12px 13px; margin-bottom:6px; font-size:13.5px; font-weight:650;
+  color:var(--text); cursor:pointer; }
+.vp-in { flex:none; font-size:11px; font-weight:800; color:var(--accent); }

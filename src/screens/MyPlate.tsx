@@ -121,6 +121,18 @@ export function MyPlate({ goCatalog }: { goCatalog: () => void }) {
 
   const todayStr = new Date().toLocaleDateString('ru-RU', { weekday: 'long', day: 'numeric', month: 'long' });
 
+  // «Повторные встречи важнее новинок»: продукт, который дольше всех не появлялся в тарелке
+  const repeatIdea = useMemo(() => {
+    const last: Record<string, number> = {};
+    log.forEach((l) => { const b = l.id.split(':')[0]; const t = l.ts ?? 0; if (!last[b] || t > last[b]) last[b] = t; });
+    const cands = Object.entries(last)
+      .filter(([id, t]) => t > 0 && Date.now() - t > 4 * 864e5 && FOODS.some((f) => f.id === id))
+      .sort((a, b) => a[1] - b[1]);
+    if (!cands.length) return null;
+    const f = FOODS.find((x) => x.id === cands[0][0])!;
+    return { f, days: Math.floor((Date.now() - cands[0][1]) / 864e5) };
+  }, [log]);
+
   // ── План: один умный вход ──
   const p30 = useMemo(() => {
     const done = readPlan30Done();
@@ -234,16 +246,55 @@ export function MyPlate({ goCatalog }: { goCatalog: () => void }) {
           <button className="act-main st1" onClick={() => setLogOpen(true)}>
             <span className="act-plus">+</span> Записать пробу
           </button>
-          <button className="scan-row st2" onClick={() => setScanOpen(true)}>
-            <span className="scan-e">📸</span>
-            <span className="grow">
-              <b>Проверить тарелку по фото</b>
-              <span>ИИ оценит нарезку, возраст и баланс за 5 секунд</span>
-            </span>
-            <span style={{ color: 'var(--text2)' }}>›</span>
-          </button>
+          {repeatIdea && (
+            <button className="repeat-row st2" onClick={() => setTodayFood(repeatIdea.f)}>
+              🔁 <span className="grow">Давно не повторяли: <b>{repeatIdea.f.n}</b></span>
+              <span className="rep-days">{repeatIdea.days} дн назад</span>
+            </button>
+          )}
         </>
       )}
+
+      {/* ═══ АКТИВНЫЕ ОКНА АЛЛЕРГЕНОВ ═══ */}
+      {windows.length > 0 && (
+        <div className="section-t" style={{ display: 'flex', alignItems: 'center', gap: 7 }}>Ввод аллергенов · правило 3 дней
+          <button className="skill-i" onClick={() => setRuleOpen(true)} aria-label="Что это">?</button>
+        </div>
+      )}
+      {windows.map((w) => {
+        const f = FOODS.find((x) => x.id === w.id)!;
+        const safe = w.day >= 3 && w.reaction !== 'bad';
+        const status = w.reaction === 'bad' ? '⚠️ была реакция — пауза, к врачу'
+          : safe ? '✓ 3 дня без реакции — введён' : `день ${w.day} из 3 · реакции нет`;
+        return (
+          <div key={w.id} className={`allerg-win tappable ${safe ? 'safe' : ''}`} onClick={() => setTodayFood(f)}
+            role="button" tabIndex={0}>
+            <div style={{ fontSize: 22 }}>{f.e}</div>
+            <div className="grow">
+              <div className="fmap-n">{f.n} <span className="aw-open">карточка ›</span></div>
+              <div className="fm-d">{status}</div>
+              <div className="aw-days">{[1, 2, 3].map((d) => <i key={d} className={d <= w.day ? 'on' : ''} />)}</div>
+              {!safe && w.reaction !== 'bad' && <div className="aw-hint">Сегодня: дать утром малую порцию → вечером отметить ✓</div>}
+              {w.reaction === 'bad' && (
+                <>
+                  <div className="aw-hint">Пауза после реакции. Обсудите с врачом — и начните заново с малой дозы.</div>
+                  <button className="aw-restart" onClick={(e) => { e.stopPropagation(); restartAllergen(w.id); showToast('🔄', f.n, 'Начинаем заново: день 1 из 3, малая доза утром'); }}>
+                    🔄 Начать 3 дня заново
+                  </button>
+                </>
+              )}
+              {safe && (
+                <button className="aw-restart" onClick={(e) => { e.stopPropagation(); dismissAllergen(w.id); showToast('🎉', f.n, 'Введён! Держите его в рационе регулярно'); }}>
+                  ✓ Готово — убрать из списка
+                </button>
+              )}
+            </div>
+            {!safe && w.reaction !== 'bad' && (
+              <button className="aw-check" onClick={(e) => { e.stopPropagation(); markDay(w.id, f.n, w.day); }} aria-label="Отметить день">✓</button>
+            )}
+          </div>
+        );
+      })}
 
       {/* ═══ ПЛАН: один умный вход ═══ */}
       {showP30 ? (
@@ -270,6 +321,17 @@ export function MyPlate({ goCatalog }: { goCatalog: () => void }) {
             </div>
             <span style={{ color: 'var(--text2)' }}>›</span>
           </div>
+        </button>
+      )}
+
+      {!notReady && (
+        <button className="scan-row st3" onClick={() => setScanOpen(true)}>
+          <span className="scan-e">📸</span>
+          <span className="grow">
+            <b>Проверить тарелку по фото</b>
+            <span>ИИ оценит нарезку, возраст и баланс за 5 секунд</span>
+          </span>
+          <span style={{ color: 'var(--text2)' }}>›</span>
         </button>
       )}
 
@@ -362,47 +424,6 @@ export function MyPlate({ goCatalog }: { goCatalog: () => void }) {
           </div>
         </div>
       )}
-
-      {/* ═══ АКТИВНЫЕ ОКНА АЛЛЕРГЕНОВ ═══ */}
-      {windows.length > 0 && (
-        <div className="section-t" style={{ display: 'flex', alignItems: 'center', gap: 7 }}>Ввод аллергенов · правило 3 дней
-          <button className="skill-i" onClick={() => setRuleOpen(true)} aria-label="Что это">?</button>
-        </div>
-      )}
-      {windows.map((w) => {
-        const f = FOODS.find((x) => x.id === w.id)!;
-        const safe = w.day >= 3 && w.reaction !== 'bad';
-        const status = w.reaction === 'bad' ? '⚠️ была реакция — пауза, к врачу'
-          : safe ? '✓ 3 дня без реакции — введён' : `день ${w.day} из 3 · реакции нет`;
-        return (
-          <div key={w.id} className={`allerg-win tappable ${safe ? 'safe' : ''}`} onClick={() => setTodayFood(f)}
-            role="button" tabIndex={0}>
-            <div style={{ fontSize: 22 }}>{f.e}</div>
-            <div className="grow">
-              <div className="fmap-n">{f.n} <span className="aw-open">карточка ›</span></div>
-              <div className="fm-d">{status}</div>
-              <div className="aw-days">{[1, 2, 3].map((d) => <i key={d} className={d <= w.day ? 'on' : ''} />)}</div>
-              {!safe && w.reaction !== 'bad' && <div className="aw-hint">Сегодня: дать утром малую порцию → вечером отметить ✓</div>}
-              {w.reaction === 'bad' && (
-                <>
-                  <div className="aw-hint">Пауза после реакции. Обсудите с врачом — и начните заново с малой дозы.</div>
-                  <button className="aw-restart" onClick={(e) => { e.stopPropagation(); restartAllergen(w.id); showToast('🔄', f.n, 'Начинаем заново: день 1 из 3, малая доза утром'); }}>
-                    🔄 Начать 3 дня заново
-                  </button>
-                </>
-              )}
-              {safe && (
-                <button className="aw-restart" onClick={(e) => { e.stopPropagation(); dismissAllergen(w.id); showToast('🎉', f.n, 'Введён! Держите его в рационе регулярно'); }}>
-                  ✓ Готово — убрать из списка
-                </button>
-              )}
-            </div>
-            {!safe && w.reaction !== 'bad' && (
-              <button className="aw-check" onClick={(e) => { e.stopPropagation(); markDay(w.id, f.n, w.day); }} aria-label="Отметить день">✓</button>
-            )}
-          </div>
-        );
-      })}
 
       {/* ═══ ДНЕВНИК: последние записи ═══ */}
       <div className="section-t">Дневник прикорма</div>
