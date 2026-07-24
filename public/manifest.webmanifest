@@ -1,0 +1,14 @@
+{
+  "name": "bubka plate — прикорм без тревог",
+  "short_name": "bubka plate",
+  "description": "Дневник прикорма: безопасная подача продуктов, рецепты и планы для малыша",
+  "start_url": ".",
+  "display": "standalone",
+  "background_color": "#FBF9F6",
+  "theme_color": "#FBF9F6",
+  "lang": "ru",
+  "icons": [
+    { "src": "/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" },
+    { "src": "/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+  ]
+}

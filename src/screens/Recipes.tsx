@@ -7,6 +7,7 @@ import { PlanSheet } from '../components/PlanSheet';
 import { PlateSheet } from '../components/PlateSheet';
 import { WeekPlanSheet } from '../components/WeekPlanSheet';
 import { WEEKPLANS, type WeekPlan } from '../data/weekplans';
+import { buildSmartWeek } from '../data/smartplan';
 import { PLATES, type Plate } from '../data/plates';
 import { DAYPLANS, type DayPlan } from '../data/plans';
 import { ShopSheet } from '../components/ShopSheet';
@@ -75,7 +76,7 @@ export function Recipes() {
   const [prem, setPrem] = useState(isPremium());
   const FREE_COUNT = 30;
   const isLocked = (r: Recipe) => !prem && RECIPES.indexOf(r) >= FREE_COUNT;
-  const { ageMonths } = useStore();
+  const { ageMonths, introduced, showToast } = useStore();
   // возраст малыша → его возрастная корзина планов
   const myAge = ageMonths == null ? null : ageMonths >= 12 ? '12+' : ageMonths >= 9 ? '9+' : '6+';
   const plansSorted = useMemo(() =>
@@ -129,6 +130,15 @@ export function Recipes() {
 
       <div className="section-t" style={{ margin: '4px 2px 8px' }}>🗓 Планы на неделю</div>
       <div className="plans-row">
+        <button className="plan-card plan-smart" onClick={() => {
+          const p = buildSmartWeek(introduced, ageMonths);
+          if (!p) { showToast('🥣', 'Пока рано для умного плана', 'Он соберётся, когда в рационе будет побольше продуктов'); return; }
+          setWeekOpen(p);
+        }}>
+          <span className="plan-e">✨</span>
+          <span className="plan-t">Мой план недели</span>
+          <span className="plan-a">из введённого · железо каждый день</span>
+        </button>
         {[...WEEKPLANS].sort((a, b) => (a.age === myAge ? -1 : 0) - (b.age === myAge ? -1 : 0)).map((w) => (
           <button key={w.id} className="plan-card" onClick={() => setWeekOpen(w)}>
             <span className="plan-e">{w.e}</span>

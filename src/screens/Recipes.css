@@ -85,3 +85,7 @@
 .fav-b.on { color:var(--danger); }
 .fav-big { border:none; background:none; font-family:inherit; font-size:24px; color:var(--text2); vertical-align:middle; margin-left:8px; cursor:pointer; }
 .fav-big.on { color:var(--danger); }
+
+/* Карточка умного плана */
+.plan-smart { border: 1.5px solid color-mix(in srgb, var(--accent) 35%, transparent);
+  background: linear-gradient(150deg, var(--accent-soft), var(--card) 75%); }
