@@ -4,6 +4,7 @@ import { useStore } from '../state/store';
 import { isPremium } from './Paywall';
 import { SubscriptionSheet } from './SubscriptionSheet';
 import { DateWheel } from './DateWheel';
+import { BIG_ALLERGENS } from '../data/foods';
 import type { FeedingApproach } from '../types';
 
 const APPROACHES: { key: FeedingApproach; label: string }[] = [
@@ -38,6 +39,9 @@ export function Settings({ open, onClose }: { open: boolean; onClose: () => void
   const [name, setName] = useState(profile?.name ?? '');
   const [birth, setBirth] = useState(profile?.birthDate ?? '');
   const [approach, setApproach] = useState<FeedingApproach>(profile?.approach ?? 'both');
+  const [early, setEarly] = useState(profile?.earlyWeeks ?? 0);
+  const [fam, setFam] = useState<string[]>(profile?.famAllergens ?? []);
+  const toggleFam = (a: string) => setFam((f) => (f.includes(a) ? f.filter((x) => x !== a) : [...f, a]));
   const [adding, setAdding] = useState(false);
   const [newName, setNewName] = useState('');
   const [newBirth, setNewBirth] = useState('');
@@ -50,6 +54,8 @@ export function Settings({ open, onClose }: { open: boolean; onClose: () => void
     setName(profile.name);
     setBirth(profile.birthDate);
     setApproach(profile.approach);
+    setEarly(profile.earlyWeeks ?? 0);
+    setFam(profile.famAllergens ?? []);
   }, [activeId]);
   const importRef = useRef<HTMLInputElement>(null);
 
@@ -57,7 +63,7 @@ export function Settings({ open, onClose }: { open: boolean; onClose: () => void
 
   const save = () => {
     if (!name.trim() || !birth) return;
-    setProfile({ ...profile, name: name.trim(), birthDate: birth, approach });
+    setProfile({ ...profile, name: name.trim(), birthDate: birth, approach, earlyWeeks: early || undefined, famAllergens: fam.length ? fam : undefined });
     showToast('✓', 'Сохранено', 'Профиль обновлён');
     onClose();
   };
@@ -157,6 +163,23 @@ export function Settings({ open, onClose }: { open: boolean; onClose: () => void
             <button key={a.key} className={`chip ${approach === a.key ? 'on' : ''}`} onClick={() => setApproach(a.key)}>{a.label}</button>
           ))}
         </div>
+        <div className="bs-label" style={{ marginTop: 12 }}>Родился раньше срока?</div>
+        <select className="em-input" style={{ width: '100%' }} value={early} onChange={(e) => setEarly(Number(e.target.value))}>
+          <option value={0}>Нет, в срок (или до 3 недель раньше)</option>
+          <option value={4}>Раньше на 4–5 недель</option>
+          <option value={7}>Раньше на 6–8 недель</option>
+          <option value={10}>Раньше на 9–12 недель</option>
+          <option value={14}>Раньше более чем на 12 недель</option>
+        </select>
+        {early >= 4 && <div className="sub" style={{ margin: '6px 2px 0' }}>Советы идут по скорректированному возрасту 💛</div>}
+
+        <div className="bs-label" style={{ marginTop: 12 }}>Аллергии у близких</div>
+        <div className="exc-grid">
+          {[...BIG_ALLERGENS].map((a) => (
+            <button key={a} className={`chip ${fam.includes(a) ? 'on' : ''}`} onClick={() => toggleFam(a)}>{a}</button>
+          ))}
+        </div>
+
         <button className="btn btn-primary" style={{ marginTop: 10 }} onClick={save}>Сохранить</button>
         {children.length > 1 && (
           <button className="set-danger" style={{ margin: '10px auto 0' }} onClick={() => {

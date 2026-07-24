@@ -64,6 +64,8 @@ export interface Profile {
   approach: FeedingApproach;
   started: boolean;         // начали ли прикорм
   photo?: string;           // аватар малыша (сжатый dataURL)
+  earlyWeeks?: number;      // родился раньше срока на N недель (для скорректированного возраста)
+  famAllergens?: string[];  // аллергены, на которые есть аллергия у близких
 }
 
 export interface PersistedState {

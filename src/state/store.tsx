@@ -9,7 +9,8 @@ interface Store {
   windows: AllergenWindow[];
   readiness: Set<string>;
   toast: { icon: string; title: string; sub?: string } | null;
-  ageMonths: number | null;
+  ageMonths: number | null;       // скорректированный (равен реальному, если малыш в срок)
+  ageMonthsReal: number | null;   // хронологический
   // мультидети
   children: { id: string; profile: Profile }[];
   activeId: string | null;
@@ -238,7 +239,11 @@ export function StoreProvider({ children: kids }: { children: ReactNode }) {
   const introduced = useMemo(() => new Set(child?.introduced ?? []), [child]);
   const readiness = useMemo(() => new Set(child?.readiness ?? []), [child]);
   const ironCovered = useMemo(() => IRON_IDS.filter((id) => introduced.has(id)).length, [introduced]);
-  const ageMonths = child ? computeAgeMonths(child.profile.birthDate) : null;
+  // хронологический и скорректированный возраст (для недоношенных рекомендации идут по скорректированному)
+  const ageMonthsReal = child ? computeAgeMonths(child.profile.birthDate) : null;
+  const ageMonths = ageMonthsReal != null && child
+    ? Math.max(0, ageMonthsReal - ((child.profile.earlyWeeks ?? 0) >= 4 ? Math.round((child.profile.earlyWeeks ?? 0) / 4.345) : 0))
+    : null;
 
   const value: Store = {
     profile: child?.profile ?? null,
@@ -248,6 +253,7 @@ export function StoreProvider({ children: kids }: { children: ReactNode }) {
     readiness,
     toast,
     ageMonths,
+    ageMonthsReal,
     children: childList.map((c) => ({ id: c.id, profile: c.profile })),
     activeId: child?.id ?? null,
     addChild, switchChild, removeChild,

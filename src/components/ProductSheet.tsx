@@ -253,6 +253,13 @@ export function ProductSheet({ food, onClose, openLog }: { food: Food; onClose: 
             </>
           )}
 
+          {f.allergen && profile?.famAllergens?.includes(f.allergen) && (
+            <div className="note alert">
+              <span className="ne">👨‍👩‍👧</span>
+              <span><b>Семейная история:</b> у близких аллергия на {f.allergen}. Вводите особенно осторожно — утром, с крошечной дозы, и обсудите старт с врачом.</span>
+            </div>
+          )}
+
           {f.warnings && f.warnings.length > 0 && (
             <>
               <div className="section-t">⚠️ Важно</div>
@@ -382,6 +389,7 @@ export function ProductSheet({ food, onClose, openLog }: { food: Food; onClose: 
 
               {f.allergen && (
                 <div className="rx-al-note">
+                  {profile?.famAllergens?.includes(f.allergen) && <span className="rx-al-danger" style={{ marginTop: 0, marginBottom: 6 }}>👨‍👩‍👧 У близких аллергия на {f.allergen} — двойная осторожность.</span>}
                   <b>🥜 {f.allergen[0].toUpperCase() + f.allergen.slice(1)} — аллерген.</b> Давайте утром, с малой дозы, и первые 2 часа поглядывайте на кожу, дыхание и стул.
                   <span className="rx-al-danger">Отёк губ или языка, осиплость, тяжёлое дыхание, резкая вялость — сразу вызывайте скорую.</span>
                 </div>

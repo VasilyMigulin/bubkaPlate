@@ -9,6 +9,7 @@ import { LogPicker } from '../components/LogPicker';
 import { DiaryView } from '../components/DiaryView';
 import { MonthFilm } from '../components/MonthFilm';
 import { Achievements } from '../components/Achievements';
+import { GrannyCard } from '../components/GrannyCard';
 import { ProductSheet } from '../components/ProductSheet';
 import { RULE3_TEXT } from '../data/glossary';
 import { Lightbox } from '../components/Lightbox';
@@ -36,6 +37,7 @@ export function MyPlate({ goCatalog }: { goCatalog: () => void }) {
   const [diaryOpen, setDiaryOpen] = useState(false);
   const [filmOpen, setFilmOpen] = useState(false);
   const [achOpen, setAchOpen] = useState(false);
+  const [grannyOpen, setGrannyOpen] = useState(false);
   const [panel, setPanel] = useState<null | 'iron' | 'foods' | 'allerg'>(null);
   const [schedOpen, setSchedOpen] = useState(false);
   const [lightbox, setLightbox] = useState<{ src: string; alt?: string } | null>(null);
@@ -567,6 +569,10 @@ export function MyPlate({ goCatalog }: { goCatalog: () => void }) {
       )}
 
       {/* ═══ СПРАВОЧНОЕ ═══ */}
+      <button className="ref-row" onClick={() => setGrannyOpen(true)}>
+        👵 <span className="grow">Памятка для бабушки и няни</span>
+        <span className="fs-chev">›</span>
+      </button>
       <button className="ref-row" onClick={() => setSchedOpen((v) => !v)}>
         ⚖️ <span className="grow">Объёмы порций по возрасту</span>
         <span className="fs-chev" style={{ transform: schedOpen ? 'rotate(180deg)' : 'none' }}>▾</span>
@@ -602,6 +608,7 @@ export function MyPlate({ goCatalog }: { goCatalog: () => void }) {
       {diaryOpen && <DiaryView onClose={() => setDiaryOpen(false)} />}
       {filmOpen && <MonthFilm onClose={() => setFilmOpen(false)} />}
       {achOpen && <Achievements onClose={() => setAchOpen(false)} />}
+      {grannyOpen && <GrannyCard onClose={() => setGrannyOpen(false)} />}
       {todayFood && <ProductSheet food={todayFood} onClose={() => setTodayFood(null)} />}
     </>
   );

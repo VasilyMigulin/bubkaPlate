@@ -47,7 +47,7 @@ function Shell() {
     return 'mine';
   });
   const [settingsOpen, setSettingsOpen] = useState(false);
-  const { profile, ageMonths, log, introduced, windows, activeId } = useStore();
+  const { profile, ageMonths, ageMonthsReal, log, introduced, windows, activeId } = useStore();
   const achCtx = useMemo(() => ({ log, introduced, windows, activeId }), [log, introduced, windows, activeId]);
   const lvl = levelOf(computeXP(achCtx));
   const hasNewBadges = useMemo(() => {
@@ -162,7 +162,7 @@ function Shell() {
                 <div className="grow">
                   <div className="kid-hello">{helloNow()}</div>
                   <h1 className="h-screen" style={{ fontSize: 26, lineHeight: 1.1 }}>{profile.name}</h1>
-                  <div className="sub" style={{ marginTop: 3 }}>{ageMonths != null ? ageTextOf(profile.birthDate, ageMonths) : ''} · {profile.approach === 'puree' ? 'пюре' : profile.approach === 'blw' ? 'кусочки' : 'пюре и кусочки'}</div>
+                  <div className="sub" style={{ marginTop: 3 }}>{ageMonthsReal != null ? ageTextOf(profile.birthDate, ageMonthsReal) : ''}{ageMonths != null && ageMonthsReal != null && ageMonths !== ageMonthsReal ? ` · скорр. ${ageMonths} мес` : ''} · {profile.approach === 'puree' ? 'пюре' : profile.approach === 'blw' ? 'кусочки' : 'пюре и кусочки'}</div>
                 </div>
               </div>
             </>
