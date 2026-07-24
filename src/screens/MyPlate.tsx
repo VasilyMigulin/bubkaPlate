@@ -7,6 +7,7 @@ import { Plan30Sheet } from '../components/Plan30Sheet';
 import { SearchSheet } from '../components/SearchSheet';
 import { LogPicker } from '../components/LogPicker';
 import { DiaryView } from '../components/DiaryView';
+import { MonthFilm } from '../components/MonthFilm';
 import { ProductSheet } from '../components/ProductSheet';
 import { RULE3_TEXT } from '../data/glossary';
 import { Lightbox } from '../components/Lightbox';
@@ -34,6 +35,7 @@ export function MyPlate({ goCatalog }: { goCatalog: () => void }) {
   const [scanOpen, setScanOpen] = useState(false);
   const [logOpen, setLogOpen] = useState(false);
   const [diaryOpen, setDiaryOpen] = useState(false);
+  const [filmOpen, setFilmOpen] = useState(false);
   const [panel, setPanel] = useState<null | 'iron' | 'foods' | 'allerg'>(null);
   const [schedOpen, setSchedOpen] = useState(false);
   const [lightbox, setLightbox] = useState<{ src: string; alt?: string } | null>(null);
@@ -547,6 +549,20 @@ export function MyPlate({ goCatalog }: { goCatalog: () => void }) {
         </button>
       )}
 
+      {log.some((l) => l.ts) && (
+        <button className="card film-card" onClick={() => setFilmOpen(true)}>
+          <div className="row">
+            <div className="next-e">🎬</div>
+            <div className="grow">
+              <div className="eyebrow" style={{ color: 'var(--terra)' }}>Фильм месяца</div>
+              <div className="h-card" style={{ margin: '2px 0 0' }}>Как прошёл ваш месяц вкусов</div>
+              <div className="sub">Статистика, новые продукты и фото-моменты — одной красивой карточкой</div>
+            </div>
+            <span style={{ color: 'var(--text2)' }}>›</span>
+          </div>
+        </button>
+      )}
+
       {/* ═══ СПРАВОЧНОЕ ═══ */}
       <button className="ref-row" onClick={() => setSchedOpen((v) => !v)}>
         ⚖️ <span className="grow">Объёмы порций по возрасту</span>
@@ -581,6 +597,7 @@ export function MyPlate({ goCatalog }: { goCatalog: () => void }) {
       {searchOpen && <SearchSheet key={searchInit ?? ''} initial={searchInit} onClose={() => { setSearchOpen(false); setSearchInit(undefined); }} />}
       {logOpen && <LogPicker onClose={() => setLogOpen(false)} />}
       {diaryOpen && <DiaryView onClose={() => setDiaryOpen(false)} />}
+      {filmOpen && <MonthFilm onClose={() => setFilmOpen(false)} />}
       {todayFood && <ProductSheet food={todayFood} onClose={() => setTodayFood(null)} />}
     </>
   );

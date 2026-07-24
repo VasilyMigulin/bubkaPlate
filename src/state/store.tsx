@@ -35,9 +35,9 @@ const KEY = 'bubka-plate-v1';
 
 /** Демо-данные первого малыша — чтобы экраны не были пустыми. */
 const demoLog: LogEntry[] = [
-  { id: 'broccoli', date: 'вчера, утро', rx: 'ok' },
-  { id: 'egg', date: '3 дня назад', rx: 'wait' },
-  { id: 'carrot', date: '5 дней назад', rx: 'ok' },
+  { id: 'broccoli', date: 'вчера, утро', rx: 'ok', ts: Date.now() - 1 * 864e5 },
+  { id: 'egg', date: '3 дня назад', rx: 'wait', ts: Date.now() - 3 * 864e5 },
+  { id: 'carrot', date: '5 дней назад', rx: 'ok', ts: Date.now() - 5 * 864e5 },
 ];
 const demoIntroduced = () => FOODS.filter((f) => f.status).map((f) => f.id);
 
