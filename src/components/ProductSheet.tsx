@@ -351,7 +351,7 @@ export function ProductSheet({ food, onClose, openLog }: { food: Food; onClose: 
 
           <div className="ps-dock">
             {canAllergen && !introduced.has(f.id) && (
-              <div className="ps-dock-hint">🗓 Это аллерген: вводим малой дозой утром 3 дня подряд — отсчёт начнётся автоматически с первой пробы.</div>
+              <div className="ps-dock-hint">Это аллерген: вводим малой дозой утром 3 дня подряд — отсчёт начнётся сам с первой пробы.</div>
             )}
             <button className="btn btn-primary ps-dock-main" onClick={() => (f.variants ? setVarPick(true) : openRx())}>
               🥄 Дали сегодня — записать пробу

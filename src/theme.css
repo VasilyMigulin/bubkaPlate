@@ -138,8 +138,8 @@ button:active { transform: scale(.965); }
 
 /* Докнутая панель действий в карточке продукта */
 .ps-dock { position:sticky; bottom:0; z-index:5; display:flex; gap:8px; margin-top:14px;
-  padding:10px 0 calc(10px + env(safe-area-inset-bottom));
-  background:linear-gradient(to top, var(--bg) 62%, transparent); }
+  padding:12px 0 calc(12px + env(safe-area-inset-bottom));
+  background:var(--bg); box-shadow:0 -8px 16px -8px var(--bg), 0 -1px 0 var(--hairline); }
 .ps-dock-main { flex:1; }
 .ps-dock-soft { flex:none; }
 

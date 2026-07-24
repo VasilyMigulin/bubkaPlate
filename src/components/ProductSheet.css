@@ -164,9 +164,13 @@
 
 /* Пояснение для аллергенов над кнопкой записи */
 .ps-dock { flex-direction:column; align-items:stretch; }
-.ps-dock-hint { font-size:12px; line-height:1.45; color:var(--terra); background:var(--terra-soft);
-  border-radius:12px; padding:9px 12px; margin-bottom:2px; }
+.ps-dock-hint { display:flex; gap:7px; font-size:11.5px; line-height:1.4; color:var(--text2);
+  padding:2px 4px 6px; }
+.ps-dock-hint::before { content:'🗓'; flex:none; }
 
 /* Видео-метка на превью момента */
 .rx-vid-mark { position:absolute; left:6px; bottom:6px; width:22px; height:22px; border-radius:50%;
   background:rgba(0,0,0,.55); color:#fff; font-size:10px; display:flex; align-items:center; justify-content:center; }
+
+/* Форма «приготовили» прижата к низу экрана */
+.skill-pop-scrim:has(.cook-form) { align-items:flex-end; }

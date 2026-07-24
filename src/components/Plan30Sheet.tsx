@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { createPortal } from 'react-dom';
 import { PLAN30 } from '../data/plan30';
-import { SCHEDULE } from '../data/schedule';
 import { FOODS } from '../data/foods';
 import { ProductSheet } from './ProductSheet';
 import { useStore } from '../state/store';
@@ -63,24 +62,31 @@ export function Plan30Sheet({ onClose }: { onClose: () => void }) {
       </div>
       {view === 'weeks' ? (
         <div className="p30-body">
-          <div className="sub" style={{ margin: '0 2px 10px' }}>Общая логика первого полугодия прикорма — куда всё движется после первых 30 дней.</div>
-          <div className="sched">
-            {SCHEDULE.map((w, i) => (
-              <div key={i} className="sched-week">
-                <div className="sched-line">
-                  <div className="sched-badge">{w.week}</div>
-                  <div className="sched-focus">{w.focus}</div>
+          <div className="sub" style={{ margin: '0 2px 12px' }}>Общая логика месяца: от первых овощей — к кашам, мясу и аллергенам. Тапните продукт, чтобы открыть карточку.</div>
+          {PLAN30.map((w, wi) => {
+            const weekLocked = !prem && wi > 0;
+            const ids = [...new Set(w.days.flatMap((d) => d.pids))];
+            return (
+              <div key={w.title} className={`sw-week ${weekLocked ? 'locked' : ''}`} onClick={weekLocked ? () => setPwOpen(true) : undefined}>
+                <div className="sw-num">{wi + 1}</div>
+                <div className="grow">
+                  <div className="sw-title">{w.title.replace(/^Неделя \d+ · /, '')}{weekLocked && <span className="p30-lock"> ✨ bubka+</span>}</div>
+                  <div className="sw-sub">{w.sub}</div>
+                  {weekLocked ? (
+                    <div className="sw-lock">🔒 Продукты недели — с bubka+</div>
+                  ) : (
+                    <div className="sched-foods" style={{ marginTop: 8 }}>
+                      {ids.map((id) => {
+                        const f = FOODS.find((x) => x.id === id);
+                        return f ? <button key={id} className="sched-chip" onClick={(e) => { e.stopPropagation(); setFoodOpen(f); }}>{f.e} {f.n}</button> : null;
+                      })}
+                    </div>
+                  )}
                 </div>
-                <div className="sched-foods">
-                  {w.foods.map((id) => {
-                    const f = FOODS.find((x) => x.id === id);
-                    return f ? <button key={id} className="sched-chip" onClick={() => setFoodOpen(f)}>{f.e} {f.n}</button> : null;
-                  })}
-                </div>
-                <div className="sched-note">{w.note}</div>
               </div>
-            ))}
-          </div>
+            );
+          })}
+          <div className="note" style={{ marginTop: 4 }}><span className="ne">🧭</span><span>Это ориентир, а не жёсткий график. Порядок можно менять — главное вводить по одному и наблюдать.</span></div>
         </div>
       ) : (
       <div className="p30-body">
@@ -92,10 +98,10 @@ export function Plan30Sheet({ onClose }: { onClose: () => void }) {
             <div className="sub" style={{ margin: '-4px 2px 10px' }}>{w.sub}</div>
             {weekLocked ? (
               <button className="p30-locked-week" onClick={() => setPwOpen(true)}>
-                {w.days.map((day) => (
-                  <span key={day.d} className="p30-locked-day">{day.d} · {day.t}</span>
-                ))}
-                <span className="p30-unlock">✨ Открыть полный план с bubka+</span>
+                <span className="p30-lock-ico">🔒</span>
+                <span className="p30-lock-title">{w.days.length} дней по шагам</span>
+                <span className="p30-lock-sub">Что вводить каждый день, в каком порядке и как подавать — с отметками и напоминаниями.</span>
+                <span className="p30-unlock">✨ Открыть с bubka+</span>
               </button>
             ) : w.days.map((day) => {
               const dDone = isDone(day.d, day.pids);
@@ -134,6 +140,12 @@ export function Plan30Sheet({ onClose }: { onClose: () => void }) {
 
       <style>{`
         .p30-tabs { display:flex; gap:7px; margin-top:12px; }
+        .sw-week { display:flex; gap:13px; background:var(--card); border-radius:18px; padding:15px; box-shadow:var(--shadow); margin-bottom:10px; }
+        .sw-week.locked { background:linear-gradient(150deg, var(--accent-soft), var(--card) 80%); border:1.5px solid color-mix(in srgb, var(--accent) 20%, transparent); cursor:pointer; }
+        .sw-num { flex:none; width:30px; height:30px; border-radius:50%; background:var(--accent); color:#fff; font-size:14px; font-weight:800; display:flex; align-items:center; justify-content:center; }
+        .sw-title { font-size:15.5px; font-weight:800; letter-spacing:-.01em; }
+        .sw-sub { font-size:12.5px; color:var(--text2); line-height:1.45; margin-top:3px; }
+        .sw-lock { margin-top:8px; font-size:12.5px; font-weight:700; color:var(--accent); }
         .p30-head { padding:64px 20px 4px; }
         .p30-head h2 { font-size:24px; font-weight:750; letter-spacing:-.02em; }
         .p30-bar { height:8px; border-radius:999px; background:var(--elev); margin-top:12px; overflow:hidden; }
@@ -155,10 +167,12 @@ export function Plan30Sheet({ onClose }: { onClose: () => void }) {
         .p30-note { font-size:12.5px; color:var(--text2); line-height:1.45; margin-top:4px; }
         .p30-chips { display:flex; flex-wrap:wrap; gap:6px; margin-top:8px; }
         .p30-lock { font-size:11px; font-weight:800; color:var(--terra); }
-        .p30-locked-week { display:flex; flex-direction:column; gap:7px; width:100%; text-align:left; border:none; font-family:inherit;
-          background:var(--card); border-radius:16px; padding:14px; box-shadow:var(--shadow); margin-bottom:8px; cursor:pointer; }
-        .p30-locked-day { font-size:12.5px; color:var(--text2); filter:blur(0px); opacity:.65; }
-        .p30-unlock { margin-top:6px; font-size:13px; font-weight:800; color:var(--accent); }
+        .p30-locked-week { display:flex; flex-direction:column; align-items:flex-start; gap:5px; width:100%; text-align:left; border:1.5px solid color-mix(in srgb, var(--accent) 22%, transparent); font-family:inherit;
+          background:linear-gradient(150deg, var(--accent-soft), var(--card) 78%); border-radius:16px; padding:16px; box-shadow:var(--shadow); margin-bottom:8px; cursor:pointer; }
+        .p30-lock-ico { font-size:22px; }
+        .p30-lock-title { font-size:15px; font-weight:800; }
+        .p30-lock-sub { font-size:12.5px; color:var(--text2); line-height:1.45; }
+        .p30-unlock { margin-top:8px; font-size:13px; font-weight:800; color:var(--accent); }
       `}</style>
     </div>
     {foodOpen && <ProductSheet food={foodOpen} onClose={() => setFoodOpen(null)} />}
