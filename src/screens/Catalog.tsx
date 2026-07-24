@@ -194,13 +194,14 @@ export function Catalog() {
 
       {open && <ProductSheet food={open} onClose={() => setOpen(null)} />}
 
-      {ruleOpen && (
+      {ruleOpen && createPortal(
         <div className="skill-pop-scrim" onClick={() => setRuleOpen(false)}>
           <div className="skill-pop" onClick={(e) => e.stopPropagation()}>
             <div className="skill-pop-text">{RULE3_TEXT}</div>
             <button className="btn btn-soft" onClick={() => setRuleOpen(false)}>Понятно</button>
           </div>
-        </div>
+        </div>,
+        document.body,
       )}
     </>
   );

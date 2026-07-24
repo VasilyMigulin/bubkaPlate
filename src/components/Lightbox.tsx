@@ -6,7 +6,9 @@ export function Lightbox({ src, alt, onClose }: { src: string; alt?: string; onC
   return createPortal(
     <div className="lb-scrim" onClick={onClose}>
       <button className="lb-close" onClick={onClose} aria-label="Закрыть">✕</button>
-      <img className="lb-img" src={src} alt={alt || ''} />
+      {src.startsWith('data:video')
+        ? <video className="lb-img" src={src} controls autoPlay playsInline onClick={(e) => e.stopPropagation()} />
+        : <img className="lb-img" src={src} alt={alt || ''} />}
       {alt && <div className="lb-cap">{alt}</div>}
     </div>,
     document.body,

@@ -88,7 +88,7 @@ function compressImage(file: File, max = 380, q = 0.72): Promise<string> {
 }
 
 export function ProductSheet({ food, onClose, openLog }: { food: Food; onClose: () => void; elevated?: boolean; openLog?: boolean }) {
-  const { logFood, startAllergen, showToast, ageMonths, profile, introduced, log } = useStore();
+  const { logFood, showToast, ageMonths, profile, introduced, log } = useStore();
   const [rxOpen, setRxOpen] = useState(false);
   const [rxVariant, setRxVariant] = useState<{ key: string; label: string } | null>(null);
   const [selRx, setSelRx] = useState<Reaction | null>(null);
@@ -139,13 +139,24 @@ export function ProductSheet({ food, onClose, openLog }: { food: Food; onClose: 
     return { cls: '', text: 'ещё не пробовали' };
   };
 
+  const fileToDataURL = (f: File) => new Promise<string>((res, rej) => {
+    const r = new FileReader(); r.onload = () => res(r.result as string); r.onerror = rej; r.readAsDataURL(f);
+  });
   const onPhoto = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = [...(e.target.files ?? [])].slice(0, 5);
+    const files = [...(e.target.files ?? [])];
     if (!files.length) return;
-    const imgs = await Promise.all(files.filter((f) => f.type.startsWith('image/')).map((f) => compressImage(f)));
-    setPhotos((prev) => [...prev, ...imgs].slice(0, 5));
+    const out: string[] = [];
+    for (const f of files) {
+      if (f.type.startsWith('image/')) out.push(await compressImage(f));
+      else if (f.type.startsWith('video/')) {
+        if (f.size > 25 * 1024 * 1024) { showToast('🎬', 'Видео великовато', 'До 25 МБ — снимите покороче'); continue; }
+        out.push(await fileToDataURL(f));
+      }
+    }
+    setPhotos((prev) => [...prev, ...out].slice(0, 5));
     e.target.value = '';
   };
+  const isVideo = (m: string) => m.startsWith('data:video');
 
   const saveEntry = () => {
     if (!selRx) return;
@@ -224,10 +235,17 @@ export function ProductSheet({ food, onClose, openLog }: { food: Food; onClose: 
               const photo = usingPuree ? PUREE_PHOTOS[f.id]?.[a] : SERVE_PHOTOS[f.id]?.[a];
               return (
                 <div key={a} className={`serve-row ${isNow ? 'now' : ''}`}>
-                  {photo
-                    ? <img className="serve-photo tappable" src={photo} alt={`${f.n}, ${ageText}`} loading="lazy"
-                        onClick={() => setLightbox({ src: photo, alt: `${f.n} · ${ageText}` })} />
-                    : <ServeShape shape={shape} color={bg} size={124} />}
+                  {photo ? (
+                    <img className="serve-photo tappable" src={photo} alt={`${f.n}, ${ageText}`} loading="lazy"
+                      onClick={() => setLightbox({ src: photo, alt: `${f.n} · ${ageText}` })} />
+                  ) : MAIN_PHOTOS[f.id] ? (
+                    <div className="serve-photo serve-fallback">
+                      <img src={MAIN_PHOTOS[f.id]} alt={f.n} loading="lazy" />
+                      <span className="serve-shape-badge"><ServeShape shape={shape} color={bg} size={38} /></span>
+                    </div>
+                  ) : (
+                    <ServeShape shape={shape} color={bg} size={124} />
+                  )}
                   <div className="serve-info">
                     <div className="serve-age">
                       {ageText}
@@ -331,18 +349,14 @@ export function ProductSheet({ food, onClose, openLog }: { food: Food; onClose: 
             </>
           )}
 
-          {(
-            <div className="ps-dock">
-              {f.variants
-                ? <button className="btn btn-primary ps-dock-main" onClick={() => setVarPick(true)}>🥄 Дали сегодня — записать</button>
-                : <button className="btn btn-primary ps-dock-main" onClick={openRx}>🥄 Дали сегодня — записать</button>}
-              {canAllergen && (
-                <button className="btn btn-soft ps-dock-soft" onClick={() => { startAllergen(f.id); showToast('🗓', `Ввод начат: ${f.n}`, 'Давайте утром 3 дня подряд'); onClose(); }}>
-                  🗓 3 дня
-                </button>
-              )}
-            </div>
-          )}
+          <div className="ps-dock">
+            {canAllergen && !introduced.has(f.id) && (
+              <div className="ps-dock-hint">🗓 Это аллерген: вводим малой дозой утром 3 дня подряд — отсчёт начнётся автоматически с первой пробы.</div>
+            )}
+            <button className="btn btn-primary ps-dock-main" onClick={() => (f.variants ? setVarPick(true) : openRx())}>
+              🥄 Дали сегодня — записать пробу
+            </button>
+          </div>
         </div>
 
         {varPick && f.variants && createPortal(
@@ -415,23 +429,26 @@ export function ProductSheet({ food, onClose, openLog }: { food: Food; onClose: 
               <div className="rx-label">Заметка для себя <span className="rx-opt-tag">необязательно</span></div>
               <textarea className="rx-note" placeholder="Сколько съел, как реагировал, понравилось ли…" value={note} onChange={(e) => setNote(e.target.value)} rows={3} />
 
-              <div className="rx-label">Фото моментов <span className="rx-opt-tag">до 5 штук</span></div>
-              <input ref={fileRef} type="file" accept="image/*" multiple style={{ display: 'none' }} onChange={onPhoto} />
-              <input ref={camRef} type="file" accept="image/*" capture="environment" style={{ display: 'none' }} onChange={onPhoto} />
+              <div className="rx-label">Фото и видео моментов <span className="rx-opt-tag">до 5 штук</span></div>
+              <input ref={fileRef} type="file" accept="image/*,video/*" multiple style={{ display: 'none' }} onChange={onPhoto} />
+              <input ref={camRef} type="file" accept="image/*,video/*" capture="environment" style={{ display: 'none' }} onChange={onPhoto} />
               {photos.length > 0 && (
                 <div className="rx-photos-grid">
                   {photos.map((p, i) => (
                     <div key={i} className="rx-photo-wrap">
-                      <img className="rx-photo" src={p} alt="момент" />
-                      <button className="rx-photo-del" onClick={() => setPhotos((arr) => arr.filter((_, j) => j !== i))} aria-label="Удалить фото">✕</button>
+                      {isVideo(p)
+                        ? <video className="rx-photo" src={p} muted playsInline />
+                        : <img className="rx-photo" src={p} alt="момент" />}
+                      {isVideo(p) && <span className="rx-vid-mark">▶</span>}
+                      <button className="rx-photo-del" onClick={() => setPhotos((arr) => arr.filter((_, j) => j !== i))} aria-label="Удалить">✕</button>
                     </div>
                   ))}
                 </div>
               )}
               {photos.length < 5 && (
                 <div className="rx-photo-btns">
-                  <button className="rx-photo-add" onClick={() => fileRef.current?.click()}>🖼 Из галереи</button>
-                  <button className="rx-photo-add" onClick={() => camRef.current?.click()}>📷 Камера</button>
+                  <button className="rx-photo-add" onClick={() => fileRef.current?.click()}>🖼 Галерея</button>
+                  <button className="rx-photo-add" onClick={() => camRef.current?.click()}>📷 Снять</button>
                 </div>
               )}
 

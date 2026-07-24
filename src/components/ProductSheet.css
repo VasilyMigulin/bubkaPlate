@@ -151,3 +151,22 @@
 .var-status.bad { color:var(--danger); font-weight:600; }
 .var-add { border:none; background:var(--accent-soft); color:var(--accent); font-family:inherit; font-size:12.5px; font-weight:700;
   border-radius:999px; padding:7px 13px; flex:none; }
+
+/* Фото продукта как подложка подачи (когда нет реального фото нарезки) */
+.serve-fallback { position:relative; overflow:hidden; }
+.serve-fallback img { width:100%; height:100%; object-fit:cover; filter:saturate(.96); }
+.serve-shape-badge { position:absolute; right:6px; bottom:6px; width:46px; height:46px; border-radius:12px;
+  background:color-mix(in srgb, var(--card) 92%, transparent); backdrop-filter:blur(4px);
+  display:flex; align-items:center; justify-content:center; box-shadow:var(--shadow); }
+
+/* Докнутая кнопка не переносит текст */
+.ps-dock-main { white-space:nowrap; }
+
+/* Пояснение для аллергенов над кнопкой записи */
+.ps-dock { flex-direction:column; align-items:stretch; }
+.ps-dock-hint { font-size:12px; line-height:1.45; color:var(--terra); background:var(--terra-soft);
+  border-radius:12px; padding:9px 12px; margin-bottom:2px; }
+
+/* Видео-метка на превью момента */
+.rx-vid-mark { position:absolute; left:6px; bottom:6px; width:22px; height:22px; border-radius:50%;
+  background:rgba(0,0,0,.55); color:#fff; font-size:10px; display:flex; align-items:center; justify-content:center; }
