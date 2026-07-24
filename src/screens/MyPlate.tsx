@@ -136,6 +136,28 @@ export function MyPlate({ goCatalog }: { goCatalog: () => void }) {
 
   const todayStr = new Date().toLocaleDateString('ru-RU', { weekday: 'long', day: 'numeric', month: 'long' });
 
+  // Что уже пробовали сегодня — чипами в hero
+  const todayFoods = useMemo(() => {
+    const today = new Date().toDateString();
+    const seen = new Set<string>();
+    const out: Food[] = [];
+    log.forEach((l) => {
+      if (!l.ts || new Date(l.ts).toDateString() !== today) return;
+      const b = l.id.split(':')[0];
+      if (seen.has(b)) return;
+      seen.add(b);
+      const f = FOODS.find((x) => x.id === b);
+      if (f) out.push(f);
+    });
+    return out.slice(0, 6);
+  }, [log]);
+
+  // Продукты, которые открылись в текущем возрасте и ещё не введены
+  const unlocked = useMemo(() => {
+    if (ageMonths == null || ageMonths < 6) return [];
+    return FOODS.filter((f) => f.fromMonth === ageMonths && !introduced.has(f.id));
+  }, [ageMonths, introduced]);
+
   // «Повторные встречи важнее новинок»: продукт, который дольше всех не появлялся в тарелке
   const repeatIdea = useMemo(() => {
     const last: Record<string, number> = {};
@@ -245,8 +267,15 @@ export function MyPlate({ goCatalog }: { goCatalog: () => void }) {
                   <div className="hd-kicker">День идёт отлично</div>
                   <div className="hd-title">{todayCount} {todayCount === 1 ? 'проба' : todayCount < 5 ? 'пробы' : 'проб'} — всё записано</div>
                   <div className="hd-why">Малыш знакомится со вкусами, дневник ведётся. Вы молодцы!</div>
+                  {todayFoods.length > 0 && (
+                    <div className="hd-chips">
+                      {todayFoods.map((f) => (
+                        <button key={f.id} className="hd-chip" onClick={() => setTodayFood(f)}>{f.e} {f.n}</button>
+                      ))}
+                    </div>
+                  )}
                   <div className="hd-stats">
-                    <span>🥩 железо {ironCovered}/{ironTotal}</span>
+                    <span>🥩 железо: {ironCovered} ист.</span>
                     <span>🥜 девятка {allergensCovered}/{BIG_ALLERGENS.size}</span>
                     {toMilestone > 0 && <span>🎈 до вехи {toMilestone}</span>}
                   </div>
@@ -295,6 +324,12 @@ export function MyPlate({ goCatalog }: { goCatalog: () => void }) {
           <button className="act-main st1" onClick={() => setLogOpen(true)}>
             <span className="act-plus">+</span> Записать пробу
           </button>
+          {unlocked.length > 0 && (
+            <button className="repeat-row st2" onClick={goCatalog}>
+              ✨ <span className="grow">В {ageMonths} мес открылись: <b>{unlocked.slice(0, 2).map((f) => f.n).join(', ')}</b>{unlocked.length > 2 ? ` и ещё ${unlocked.length - 2}` : ''}</span>
+              <span className="rep-days">›</span>
+            </button>
+          )}
           {repeatIdea && (
             <button className="repeat-row st2" onClick={() => setTodayFood(repeatIdea.f)}>
               🔁 <span className="grow">Давно не повторяли: <b>{repeatIdea.f.n}</b></span>
@@ -389,7 +424,7 @@ export function MyPlate({ goCatalog }: { goCatalog: () => void }) {
       <div className="seg-row st4">
         <button className={`seg ${panel === 'iron' ? 'on' : ''}`} onClick={() => setPanel(panel === 'iron' ? null : 'iron')}>
           <span className={`seg-chev ${panel === 'iron' ? 'up' : ''}`}>▾</span>
-          <span className="seg-e">🥩</span><b>{ironCovered}<i>/{ironTotal}</i></b><span>источники железа</span>
+          <span className="seg-e">🥩</span><b>{ironCovered}</b><span>источники железа</span>
         </button>
         <button className={`seg ${panel === 'foods' ? 'on' : ''}`} onClick={() => setPanel(panel === 'foods' ? null : 'foods')}>
           <span className={`seg-chev ${panel === 'foods' ? 'up' : ''}`}>▾</span>
@@ -407,12 +442,16 @@ export function MyPlate({ goCatalog }: { goCatalog: () => void }) {
             <div className="eyebrow" style={{ color: 'var(--terra)' }}>Фокус после 6 месяцев</div>
             <div className="row" style={{ marginTop: 4 }}>
               <div className="grow">
-                <div className="fmap-big">{ironCovered} из {ironTotal}</div>
-                <div className="sub" style={{ color: 'var(--text)', marginTop: 2 }}>источника железа в рационе</div>
+                <div className="fmap-big">{ironCovered}</div>
+                <div className="sub" style={{ color: 'var(--text)', marginTop: 2 }}>источников железа в рационе</div>
               </div>
               <div style={{ fontSize: 34 }}>🥩</div>
             </div>
-            <div className="sub" style={{ marginTop: 8 }}>Запасы железа истощаются к 6 мес — ради этого и вводят прикорм.</div>
+            <div className="sub" style={{ marginTop: 8 }}>{ironCovered === 0
+              ? 'Начните с мяса, желтка или чечевицы — запасы железа малыша тают после 6 месяцев.'
+              : ironCovered < 3
+              ? 'Хорошее начало! Добавьте ещё 1–2 источника — и чередуйте их в течение недели.'
+              : 'Этого достаточно — чередуйте источники в течение недели: железо нужно малышу каждый день.'}</div>
             {(() => {
               const todo = FOODS.filter((f) => IRON_IDS.includes(f.id) && !introduced.has(f.id) && f.fromMonth <= age).slice(0, 6);
               return todo.length > 0 && (

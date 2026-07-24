@@ -6,6 +6,15 @@ import { useStore } from '../state/store';
 import { Lightbox } from './Lightbox';
 import { DoctorReport } from './DoctorReport';
 
+function dayLabel(ts: number): string {
+  const d = new Date(ts);
+  const now = new Date();
+  const t0 = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
+  const d0 = new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime();
+  const diff = Math.round((t0 - d0) / 864e5);
+  return diff === 0 ? 'Сегодня' : diff === 1 ? 'Вчера' : d.toLocaleDateString('ru-RU', { day: 'numeric', month: 'long' });
+}
+
 const RX_BADGE: Record<string, { cls: string; label: string }> = {
   ok: { cls: 'ok', label: '💚 без реакции' },
   wait: { cls: 'wait', label: '👀 наблюдаю' },
@@ -38,8 +47,12 @@ export function DiaryView({ onClose }: { onClose: () => void }) {
           const ref = resolveFoodRef(l.id);
           const name = ref.label ?? ref.food?.n ?? l.id;
           const b = RX_BADGE[l.rx];
+          const dayOf = (e: typeof l) => (e.ts ? dayLabel(e.ts) : e.date.split(',')[0]);
+          const header = i === 0 || dayOf(log[i - 1]) !== dayOf(l) ? dayOf(l) : null;
           return (
-            <div key={i} className="fl-card">
+            <div key={i}>
+            {header && <div className="dv-day">{header}</div>}
+            <div className="fl-card">
               <div className="fl-row">
                 {ref.food && MAIN_PHOTOS[ref.food.id]
                   ? <img className="fl-pic" src={MAIN_PHOTOS[ref.food.id]} alt={name} />
@@ -53,6 +66,7 @@ export function DiaryView({ onClose }: { onClose: () => void }) {
                   {l.note && <div className="fl-note">{l.note}</div>}
                 </div>
               )}
+            </div>
             </div>
           );
         })}
