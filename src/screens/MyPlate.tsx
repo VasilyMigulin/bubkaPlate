@@ -215,7 +215,7 @@ export function MyPlate({ goCatalog }: { goCatalog: () => void }) {
       ) : (
         <div className="hero-day st0">
           <div className="hd-eyebrow">Сегодня · {todayStr}</div>
-          {todayCount > 0 && <div className="td-done">✓ Записано сегодня: {todayCount} {todayCount === 1 ? 'проба' : todayCount < 5 ? 'пробы' : 'проб'}</div>}
+          {todayCount > 0 && (fuEntry || activeWin || moreIdeas) && <div className="td-done">✓ Записано сегодня: {todayCount} {todayCount === 1 ? 'проба' : todayCount < 5 ? 'пробы' : 'проб'}</div>}
 
           {fuEntry && fuFood?.food ? (
             <div className="hd-swap" key={`fu-${fuEntry.id}`}>
@@ -269,24 +269,26 @@ export function MyPlate({ goCatalog }: { goCatalog: () => void }) {
           ) : todayCount > 0 && !moreIdeas ? (
             <div className="hd-swap" key="daydone">
               <div className="hd-row">
-                <span className="hd-pic hd-pic-e">💚</span>
-                <div className="grow">
-                  <div className="hd-kicker">День идёт отлично</div>
-                  <div className="hd-title">{todayCount} {todayCount === 1 ? 'проба' : todayCount < 5 ? 'пробы' : 'проб'} — всё записано</div>
-                  <div className="hd-why">Малыш знакомится со вкусами, дневник ведётся. Вы молодцы!</div>
-                  {todayFoods.length > 0 && (
-                    <div className="hd-chips">
-                      {todayFoods.map((f) => (
-                        <button key={f.id} className="hd-chip" onClick={() => setTodayFood(f)}>{f.e} {f.n}</button>
-                      ))}
-                    </div>
-                  )}
-                  <div className="hd-stats">
-                    <span>🥩 железо: {ironCovered} ист.</span>
-                    <span>🥜 девятка {allergensCovered}/{BIG_ALLERGENS.size}</span>
-                    {toMilestone > 0 && <span>🎈 до вехи {toMilestone}</span>}
+                {todayFoods.length > 0 ? (
+                  <div className="hd-stack">
+                    {todayFoods.slice(0, 3).map((f, i) => (
+                      MAIN_PHOTOS[f.id]
+                        ? <img key={f.id} src={MAIN_PHOTOS[f.id]} alt={f.n} style={{ zIndex: 3 - i }} />
+                        : <span key={f.id} style={{ zIndex: 3 - i }}>{f.e}</span>
+                    ))}
                   </div>
+                ) : <span className="hd-pic hd-pic-e">💚</span>}
+                <div className="grow">
+                  <div className="hd-kicker">День идёт отлично 💚</div>
+                  <div className="hd-title">{todayCount} {todayCount === 1 ? 'проба записана' : todayCount < 5 ? 'пробы записаны' : 'проб записано'}</div>
+                  <div className="hd-why">{todayFoods.slice(0, 3).map((f) => f.n).join(', ')}{todayFoods.length > 3 ? ` и ещё ${todayFoods.length - 3}` : ''}. Вы молодцы!</div>
                 </div>
+              </div>
+              <div className="hd-div" />
+              <div className="hd-stats">
+                <span>🥩 железо: {ironCovered} ист.</span>
+                <span>🥜 девятка {allergensCovered}/{BIG_ALLERGENS.size}</span>
+                {toMilestone > 0 && <span>🎈 до вехи {toMilestone}</span>}
               </div>
               <div className="hd-cta-row">
                 <button className="hd-cta" onClick={() => setMoreIdeas(true)}>💡 Ещё идея на сегодня</button>
@@ -346,13 +348,13 @@ export function MyPlate({ goCatalog }: { goCatalog: () => void }) {
         </>
       )}
 
-      {/* ═══ АКТИВНЫЕ ОКНА АЛЛЕРГЕНОВ ═══ */}
-      {windows.length > 0 && (
+      {/* ═══ АКТИВНЫЕ ОКНА АЛЛЕРГЕНОВ (кроме того, что уже в hero) ═══ */}
+      {windows.filter((w) => w.id !== activeWin?.id).length > 0 && (
         <div className="section-t" style={{ display: 'flex', alignItems: 'center', gap: 7 }}>Ввод аллергенов · правило 3 дней
           <button className="skill-i" onClick={() => setRuleOpen(true)} aria-label="Что это">?</button>
         </div>
       )}
-      {windows.map((w) => {
+      {windows.filter((w) => w.id !== activeWin?.id).map((w) => {
         const f = FOODS.find((x) => x.id === w.id)!;
         const safe = w.day >= 3 && w.reaction !== 'bad';
         const status = w.reaction === 'bad' ? '⚠️ была реакция — пауза, к врачу'
@@ -435,7 +437,7 @@ export function MyPlate({ goCatalog }: { goCatalog: () => void }) {
         </button>
         <button className={`seg ${panel === 'foods' ? 'on' : ''}`} onClick={() => setPanel(panel === 'foods' ? null : 'foods')}>
           <span className={`seg-chev ${panel === 'foods' ? 'up' : ''}`}>▾</span>
-          <span className="seg-e">🌈</span><b>{introducedCount}<i>/{stageTarget}</i></b><span>продуктов · веха</span>
+          <span className="seg-e">🌈</span><b>{introducedCount}<i>/{stageTarget}</i></b><span>продукты</span>
         </button>
         <button className={`seg ${panel === 'allerg' ? 'on' : ''}`} onClick={() => setPanel(panel === 'allerg' ? null : 'allerg')}>
           <span className={`seg-chev ${panel === 'allerg' ? 'up' : ''}`}>▾</span>
@@ -554,6 +556,7 @@ export function MyPlate({ goCatalog }: { goCatalog: () => void }) {
         </button>
       )}
 
+      <div className="section-t">Семье и на память</div>
       {log.some((l) => l.ts) && (
         <button className="card film-card" onClick={() => setFilmOpen(true)}>
           <div className="row">

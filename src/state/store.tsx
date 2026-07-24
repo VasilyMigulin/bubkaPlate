@@ -58,12 +58,27 @@ function loadState(): PersistedV2 | null {
   try {
     const raw = localStorage.getItem(KEY);
     if (!raw) {
-      // ?demo — мгновенный демо-профиль (скриншоты, витрина, разработка)
-      if (new URLSearchParams(location.search).has('demo')) {
+      // ?demo — мгновенный демо-профиль (скриншоты, витрина, разработка).
+      // Варианты состояния hero: ?demo (вопрос) | ?demo=win (день аллергена) | ?demo=idea | ?demo=calm (день закрыт)
+      const demoKind = new URLSearchParams(location.search).get('demo');
+      if (demoKind !== null) {
         const bd = new Date();
         bd.setMonth(bd.getMonth() - 8);
         bd.setDate(bd.getDate() - 12);
         const c = freshChild({ name: 'Мия', birthDate: bd.toISOString().slice(0, 10), approach: 'both', started: true }, true);
+        if (demoKind === 'win') {
+          c.log = c.log.map((l) => (l.id === 'egg' ? { ...l, rx: 'ok' as const } : l));
+        } else if (demoKind === 'idea') {
+          c.log = c.log.filter((l) => l.id !== 'egg');
+          c.windows = [];
+        } else if (demoKind === 'calm') {
+          c.log = [
+            { id: 'banana', date: 'сегодня, 09:10', rx: 'ok' as const, ts: Date.now() - 2 * 3600e3 },
+            { id: 'buckwheat', date: 'сегодня, 12:40', rx: 'ok' as const, ts: Date.now() - 3600e3 },
+            ...c.log.filter((l) => l.id !== 'egg'),
+          ];
+          c.windows = [];
+        }
         return { v: 2, active: c.id, children: [c] };
       }
       return null;
