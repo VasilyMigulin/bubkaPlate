@@ -148,7 +148,8 @@ export function StoreProvider({ children: kids }: { children: ReactNode }) {
   const setProfile = useCallback((p: Profile) => {
     setChildList((list) => {
       if (list.length === 0) {
-        const c = freshChild(p, true);
+        // новый профиль всегда чистый; демо-данные — только по ?demo
+        const c = freshChild(p, false);
         setActiveId(c.id);
         return [c];
       }
