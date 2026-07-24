@@ -8,6 +8,8 @@ import { SearchSheet } from '../components/SearchSheet';
 import { LogPicker } from '../components/LogPicker';
 import { DiaryView } from '../components/DiaryView';
 import { MonthFilm } from '../components/MonthFilm';
+import { Achievements } from '../components/Achievements';
+import { computeXP, earnedBadges, levelOf } from '../data/badges';
 import { ProductSheet } from '../components/ProductSheet';
 import { RULE3_TEXT } from '../data/glossary';
 import { Lightbox } from '../components/Lightbox';
@@ -36,6 +38,7 @@ export function MyPlate({ goCatalog }: { goCatalog: () => void }) {
   const [logOpen, setLogOpen] = useState(false);
   const [diaryOpen, setDiaryOpen] = useState(false);
   const [filmOpen, setFilmOpen] = useState(false);
+  const [achOpen, setAchOpen] = useState(false);
   const [panel, setPanel] = useState<null | 'iron' | 'foods' | 'allerg'>(null);
   const [schedOpen, setSchedOpen] = useState(false);
   const [lightbox, setLightbox] = useState<{ src: string; alt?: string } | null>(null);
@@ -93,6 +96,17 @@ export function MyPlate({ goCatalog }: { goCatalog: () => void }) {
     }), [introduced]);
   const weakest = [...coverage].sort((a, b) => a.pct - b.pct)[0];
   const introducedCount = introduced.size;
+
+  // Уровень и бейджи
+  const achCtx = useMemo(() => ({ log, introduced, windows }), [log, introduced, windows]);
+  const earned = useMemo(() => earnedBadges(achCtx), [achCtx]);
+  const lvl = levelOf(computeXP(achCtx));
+  const hasNewBadges = useMemo(() => {
+    try {
+      const seen = new Set(JSON.parse(localStorage.getItem(`bubka-plate-badges-seen-${activeId ?? ''}`) || '[]') as string[]);
+      return earned.some((b) => !seen.has(b.id));
+    } catch { return earned.length > 0; }
+  }, [earned, activeId, achOpen]);
   const allergensCovered = useMemo(() =>
     new Set(FOODS.filter((f) => f.allergen && introduced.has(f.id)).map((f) => f.allergen)).size, [introduced]);
 
@@ -438,6 +452,15 @@ export function MyPlate({ goCatalog }: { goCatalog: () => void }) {
         </button>
       </div>
 
+      <button className="ach-row" onClick={() => setAchOpen(true)}>
+        <span className="ach-e">{lvl.cur.e}</span>
+        <span className="grow">
+          <b>{lvl.cur.title}{hasNewBadges && <i className="ach-dot" />}</b>
+          <span className="ach-s">Уровень {lvl.idx + 1} · {earned.length} {earned.length === 1 ? 'бейдж' : earned.length < 5 ? 'бейджа' : 'бейджей'}</span>
+        </span>
+        <span style={{ color: 'var(--text2)' }}>›</span>
+      </button>
+
       {panel === 'iron' && (
         <div className="rise">
           <div className="fmap-iron">
@@ -598,6 +621,7 @@ export function MyPlate({ goCatalog }: { goCatalog: () => void }) {
       {logOpen && <LogPicker onClose={() => setLogOpen(false)} />}
       {diaryOpen && <DiaryView onClose={() => setDiaryOpen(false)} />}
       {filmOpen && <MonthFilm onClose={() => setFilmOpen(false)} />}
+      {achOpen && <Achievements onClose={() => setAchOpen(false)} />}
       {todayFood && <ProductSheet food={todayFood} onClose={() => setTodayFood(null)} />}
     </>
   );
