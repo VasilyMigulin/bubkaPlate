@@ -271,3 +271,6 @@
   box-shadow:var(--shadow); margin-bottom:12px; cursor:pointer; }
 .repeat-row b { font-weight:780; }
 .rep-days { flex:none; font-size:11px; font-weight:700; color:var(--text2); }
+
+/* Сводка прогресса в hero спокойного дня */
+.hd-stats { display:flex; flex-wrap:wrap; gap:6px 12px; margin-top:8px; font-size:11px; font-weight:750; color:var(--text2); }

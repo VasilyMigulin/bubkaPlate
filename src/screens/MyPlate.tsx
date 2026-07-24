@@ -41,6 +41,7 @@ export function MyPlate({ goCatalog }: { goCatalog: () => void }) {
   const [todayFood, setTodayFood] = useState<Food | null>(null);
   const [ideaShift, setIdeaShift] = useState(0);
   const [moreIdeas, setMoreIdeas] = useState(false);
+  const [msTick, setMsTick] = useState(0);
   const [searchInit, setSearchInit] = useState<string | undefined>(undefined);
 
   const markDay = (id: string, name: string, day: number) => {
@@ -119,6 +120,19 @@ export function MyPlate({ goCatalog }: { goCatalog: () => void }) {
   const MILESTONES = [10, 20, 30, 50, 70, FOODS.length];
   const stageTarget = MILESTONES.find((m) => introducedCount < m) ?? FOODS.length;
   const toMilestone = stageTarget - introducedCount;
+
+  // Достигнутая, но ещё не отпразднованная веха — прорывается в hero
+  const MS_KEY = `bubka-plate-ms-${activeId ?? ''}`;
+  const milestone = useMemo(() => {
+    const hit = [...MILESTONES].reverse().find((m) => introducedCount >= m);
+    if (!hit) return null;
+    if (hit <= Number(localStorage.getItem(MS_KEY) || 0)) return null;
+    return { hit, next: MILESTONES.find((m) => m > hit) ?? null };
+  }, [introducedCount, MS_KEY, msTick]);
+  const dismissMilestone = () => {
+    if (milestone) localStorage.setItem(MS_KEY, String(milestone.hit));
+    setMsTick((t) => t + 1);
+  };
 
   const todayStr = new Date().toLocaleDateString('ru-RU', { weekday: 'long', day: 'numeric', month: 'long' });
 
@@ -209,6 +223,20 @@ export function MyPlate({ goCatalog }: { goCatalog: () => void }) {
                 <button className="hd-ico" onClick={() => setTodayFood(winFood)} aria-label="Карточка продукта">📖</button>
               </div>
             </div>
+          ) : milestone ? (
+            <div className="hd-swap" key={`ms-${milestone.hit}`}>
+              <div className="hd-row">
+                <span className="hd-pic hd-pic-e">🎉</span>
+                <div className="grow">
+                  <div className="hd-kicker">Веха!</div>
+                  <div className="hd-title">{milestone.hit} продуктов в рационе</div>
+                  <div className="hd-why">{milestone.next ? `Вы отлично идёте. Следующая веха — ${milestone.next} продуктов.` : 'Весь каталог пройден. Невероятно!'}</div>
+                </div>
+              </div>
+              <div className="hd-cta-row">
+                <button className="hd-cta" onClick={dismissMilestone}>Ура! Дальше →</button>
+              </div>
+            </div>
           ) : todayCount > 0 && !moreIdeas ? (
             <div className="hd-swap" key="daydone">
               <div className="hd-row">
@@ -217,6 +245,11 @@ export function MyPlate({ goCatalog }: { goCatalog: () => void }) {
                   <div className="hd-kicker">День идёт отлично</div>
                   <div className="hd-title">{todayCount} {todayCount === 1 ? 'проба' : todayCount < 5 ? 'пробы' : 'проб'} — всё записано</div>
                   <div className="hd-why">Малыш знакомится со вкусами, дневник ведётся. Вы молодцы!</div>
+                  <div className="hd-stats">
+                    <span>🥩 железо {ironCovered}/{ironTotal}</span>
+                    <span>🥜 девятка {allergensCovered}/{BIG_ALLERGENS.size}</span>
+                    {toMilestone > 0 && <span>🎈 до вехи {toMilestone}</span>}
+                  </div>
                 </div>
               </div>
               <div className="hd-cta-row">
