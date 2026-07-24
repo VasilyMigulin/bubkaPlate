@@ -149,7 +149,7 @@ export function ProductSheet({ food, onClose, openLog }: { food: Food; onClose: 
     const targetName = rxVariant ? rxVariant.label : f.n;
     logFood(targetId, selRx, note, photo, when ? new Date(when).getTime() : undefined);
     setRxOpen(false);
-    if (selRx === 'skin' || selRx === 'tummy') showToast('👀', 'Реакция записана', 'Отметили — покажите аллергологу');
+    if (selRx === 'skin' || selRx === 'tummy') showToast('👀', 'Реакция записана', 'Отметили — обсудите с врачом');
     else showToast('✓', 'Записано в дневник', `${targetName}${photo ? ' · с фото 📷' : ''}`);
     if (!rxVariant) onClose();
     setRxVariant(null);
@@ -414,7 +414,7 @@ export function ProductSheet({ food, onClose, openLog }: { food: Food; onClose: 
                 <button className="rx-photo-add" onClick={() => fileRef.current?.click()}>📷 Сфотографировать первую пробу</button>
               )}
 
-              <div className="rx-hint">Заметка и фото — только для вас. Реакция попадёт в дневник и PDF для аллерголога.</div>
+              <div className="rx-hint">Заметка и фото — только для вас. Реакция попадёт в дневник и в выписку для врача.</div>
             </div>
             <div className="rx-foot">
               <button className="btn btn-primary" disabled={!selRx} onClick={saveEntry}>

@@ -3,7 +3,7 @@ import { BIG_ALLERGENS, CATEGORIES, FOODS, IRON_IDS, resolveFoodRef } from '../d
 import { PORTIONS, READINESS } from '../data/schedule';
 import { PLAN30 } from '../data/plan30';
 import { useStore } from '../state/store';
-import { Plan30Sheet } from '../components/Plan30Sheet';
+import { Plan30Sheet, readP30Done } from '../components/Plan30Sheet';
 import { SearchSheet } from '../components/SearchSheet';
 import { LogPicker } from '../components/LogPicker';
 import { DiaryView } from '../components/DiaryView';
@@ -24,9 +24,7 @@ const RX_BADGE: Record<string, { cls: string; label: string }> = {
   tummy: { cls: 'bad', label: '💩 живот' },
 };
 
-function readPlan30Done(): Set<number> {
-  try { return new Set(JSON.parse(localStorage.getItem('bubka-plate-plan30') || '[]') as number[]); } catch { return new Set(); }
-}
+
 
 export function MyPlate({ goCatalog }: { goCatalog: () => void }) {
   const [plan30Open, setPlan30Open] = useState(false);
@@ -179,7 +177,7 @@ export function MyPlate({ goCatalog }: { goCatalog: () => void }) {
 
   // ── План: один умный вход ──
   const p30 = useMemo(() => {
-    const done = readPlan30Done();
+    const done = readP30Done(activeId);
     const all = PLAN30.flatMap((w) => w.days);
     const isD = (day: typeof all[number]) => done.has(day.d) || (day.pids.length > 0 && day.pids.every((p) => introduced.has(p)));
     const doneCount = all.filter(isD).length;

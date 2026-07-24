@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { useStore } from '../state/store';
 import { isPremium } from './Paywall';
@@ -43,6 +43,14 @@ export function Settings({ open, onClose }: { open: boolean; onClose: () => void
   const [newBirth, setNewBirth] = useState('');
   const [newApproach, setNewApproach] = useState<FeedingApproach>('both');
   const photoRef = useRef<HTMLInputElement>(null);
+
+  // при переключении малыша поля формы обязаны показать ЕГО профиль, а не прежний
+  useEffect(() => {
+    if (!profile) return;
+    setName(profile.name);
+    setBirth(profile.birthDate);
+    setApproach(profile.approach);
+  }, [activeId]);
   const importRef = useRef<HTMLInputElement>(null);
 
   if (!open || !profile) return null;

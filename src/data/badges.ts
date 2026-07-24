@@ -7,6 +7,7 @@ export interface BadgeCtx {
   log: LogEntry[];
   introduced: Set<string>;
   windows: AllergenWindow[];
+  activeId?: string | null;
 }
 
 export interface Badge {
@@ -32,7 +33,10 @@ function streakDays(c: BadgeCtx): number {
 
 function plan30Done(c: BadgeCtx): boolean {
   let manual: Set<number>;
-  try { manual = new Set(JSON.parse(localStorage.getItem('bubka-plate-plan30') || '[]') as number[]); } catch { manual = new Set(); }
+  try {
+    const raw = localStorage.getItem(`bubka-plate-plan30-${c.activeId ?? ''}`) ?? localStorage.getItem('bubka-plate-plan30');
+    manual = new Set(JSON.parse(raw || '[]') as number[]);
+  } catch { manual = new Set(); }
   return PLAN30.flatMap((w) => w.days).every((d) => manual.has(d.d) || (d.pids.length > 0 && d.pids.every((p) => c.introduced.has(p))));
 }
 

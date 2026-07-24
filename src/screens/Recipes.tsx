@@ -103,7 +103,7 @@ export function Recipes() {
 
   // пагинация: рендерим порциями, чтобы список не грузился «портянкой»
   const [shown, setShown] = useState(20);
-  useEffect(() => { setShown(20); }, [ageF, kindF, sel, exc]);
+  useEffect(() => { setShown(20); }, [ageF, kindF, sel, exc, favF]);
 
   const resetFilters = () => {
     setAgeF('all'); setKindF('all'); setSel(new Set());

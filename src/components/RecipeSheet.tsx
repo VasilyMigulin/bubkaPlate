@@ -87,7 +87,7 @@ export function RecipeSheet({ recipe, onClose }: { recipe: Recipe; onClose: () =
             </ul>
           </>
         )}
-        <button className="btn btn-primary" style={{ marginTop: 8 }} onClick={() => { onClose(); showToast('🥣', 'Приготовили!', 'Записано в дневник прикорма'); }}>
+        <button className="btn btn-primary" style={{ marginTop: 8 }} onClick={() => { onClose(); showToast('🥣', 'Приятного аппетита!', 'Пробы продуктов отмечайте в дневнике — с главного экрана'); }}>
           Приготовили ✓
         </button>
       </div>

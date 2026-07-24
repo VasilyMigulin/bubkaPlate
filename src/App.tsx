@@ -48,7 +48,7 @@ function Shell() {
   });
   const [settingsOpen, setSettingsOpen] = useState(false);
   const { profile, ageMonths, log, introduced, windows, activeId } = useStore();
-  const achCtx = useMemo(() => ({ log, introduced, windows }), [log, introduced, windows]);
+  const achCtx = useMemo(() => ({ log, introduced, windows, activeId }), [log, introduced, windows, activeId]);
   const lvl = levelOf(computeXP(achCtx));
   const hasNewBadges = useMemo(() => {
     try {
@@ -82,7 +82,7 @@ function Shell() {
       const sh = el.closest('.bottom-sheet') as HTMLElement | null;
       if (sh && sh.scrollTop <= 0) { sheet = sh; mode = 'sheet'; return; }
       if (startX < 28) {
-        const vw = el.closest('.product-view, .recipe-view, .article-view, .rx-screen') as HTMLElement | null;
+        const vw = el.closest('.product-view, .recipe-view, .article-view, .rx-screen, .mfs') as HTMLElement | null;
         if (vw) { view = vw; mode = 'back'; }
       }
     };
@@ -193,7 +193,7 @@ function Shell() {
 
       <Toast />
       <style>{`
-        .toast-wrap { position:fixed; left:0; right:0; bottom:96px; z-index:50; display:flex; justify-content:center; pointer-events:none; }
+        .toast-wrap { position:fixed; left:0; right:0; bottom:96px; z-index:95; display:flex; justify-content:center; pointer-events:none; }
         .toast { display:flex; align-items:center; gap:12px; background:var(--card); border-radius:18px; padding:14px 16px;
           box-shadow:var(--shadow-lg); max-width:400px; margin:0 18px; animation:toastin .38s cubic-bezier(.34,1.4,.64,1) both; }
         @keyframes toastin { from { opacity:0; transform:translateY(24px);} to { opacity:1; transform:none; } }

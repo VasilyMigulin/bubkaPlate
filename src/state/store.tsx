@@ -192,7 +192,7 @@ export function StoreProvider({ children: kids }: { children: ReactNode }) {
       ...c,
       log: c.log.map((l, i) => (i === idx ? { ...l, rx, fu: true } : l)),
       windows: c.windows.map((w) => {
-        if (w.id !== c.log[idx]?.id) return w;
+        if (w.id !== (c.log[idx]?.id ?? '').split(':')[0]) return w;
         if (rx === 'skin' || rx === 'tummy') return { ...w, reaction: 'bad' as const };
         return w;
       }),

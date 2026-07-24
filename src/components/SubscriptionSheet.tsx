@@ -70,7 +70,7 @@ export function SubscriptionSheet({ open, onClose }: { open: boolean; onClose: (
           <span className={`sub-badge ${prem ? 'on' : ''}`}>{prem ? 'Активна' : 'Не активна'}</span>
         </div>
         <div className="sub-links">
-          Уже оформили? <button className="term-link" onClick={refresh}>Обновить статус</button> или <button className="term-link" onClick={() => { showToast('🔄', 'Покупки восстановлены'); refresh(); }}>восстановить покупки</button>
+          Уже оформили? <button className="term-link" onClick={refresh}>Обновить статус</button> или <button className="term-link" onClick={refresh}>восстановить покупки</button>
         </div>
 
         {!prem && (

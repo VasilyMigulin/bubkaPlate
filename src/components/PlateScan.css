@@ -1,5 +1,5 @@
 .sheet-scrim {
-  position:fixed; inset:0; z-index:58; background:rgba(20,16,12,.4);
+  position:fixed; inset:0; z-index:60; background:rgba(20,16,12,.4);
   display:flex; justify-content:center; animation:fade .2s both;
 }
 @keyframes fade { from { opacity:0; } to { opacity:1; } }

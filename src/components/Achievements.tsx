@@ -6,7 +6,7 @@ import { useStore } from '../state/store';
 /** Достижения: уровень мамы-и-малыша + коллекция бейджей. */
 export function Achievements({ onClose }: { onClose: () => void }) {
   const { log, introduced, windows, activeId, profile } = useStore();
-  const ctx = useMemo(() => ({ log, introduced, windows }), [log, introduced, windows]);
+  const ctx = useMemo(() => ({ log, introduced, windows, activeId }), [log, introduced, windows, activeId]);
   const earned = useMemo(() => new Set(earnedBadges(ctx).map((b) => b.id)), [ctx]);
   const xp = computeXP(ctx);
   const lvl = levelOf(xp);

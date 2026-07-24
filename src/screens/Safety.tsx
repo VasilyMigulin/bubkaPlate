@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { createPortal } from 'react-dom';
 import { ARTICLES, POSTS, type Article } from '../data/basics';
 import { ArticleView } from '../components/ArticleView';
+import { Paywall, isPremium } from '../components/Paywall';
 
 const EMERGENCY_KEY = 'bubka-plate-emergency';
 
@@ -38,6 +39,8 @@ export function Safety() {
   const doneCount = ARTICLES.filter((a) => read.has(a.id)).length;
   const [guided, setGuided] = useState(() => localStorage.getItem('bubka-plate-guided') === '1');
   const [postsOpen, setPostsOpen] = useState(false);
+  const [pwOpen, setPwOpen] = useState(false);
+  const prem = isPremium();
   const [finale, setFinale] = useState(false);
   const nextUnread = (exceptId?: string) => ARTICLES.find((a) => !read.has(a.id) && a.id !== exceptId) ?? null;
   const guidedNext = (current: Article) => {
@@ -171,20 +174,25 @@ export function Safety() {
             <div className="sub">Пополняем регулярно — заглядывайте.</div>
           </div>
           <div className="posts-view-body">
-            {POSTS.map((a) => (
-              <button key={'all' + a.id} className="art-card" onClick={() => setArticle(a)}>
-                <div className="art-pic" style={{ background: `radial-gradient(circle at 30% 25%, ${a.bg[0]}, ${a.bg[1]})` }}>{a.e}</div>
-                <div className="grow">
-                  <div className="art-t">{a.t}{marks.has(a.id) && <span className="art-mark"> 🔖</span>}</div>
-                  <div className="art-s">{a.sub}</div>
-                </div>
-                {read.has(a.id) ? <span className="art-done">✓</span> : <span className="art-chev">›</span>}
-              </button>
-            ))}
+            {POSTS.map((a, ai) => {
+              const locked = !prem && ai >= 3;
+              return (
+                <button key={'all' + a.id} className="art-card" onClick={() => (locked ? setPwOpen(true) : setArticle(a))}>
+                  <div className="art-pic" style={{ background: `radial-gradient(circle at 30% 25%, ${a.bg[0]}, ${a.bg[1]})` }}>{a.e}</div>
+                  <div className="grow">
+                    <div className="art-t">{a.t}{marks.has(a.id) && <span className="art-mark"> 🔖</span>}</div>
+                    <div className="art-s">{locked ? '✨ Статья доступна с bubka+' : a.sub}</div>
+                  </div>
+                  {locked ? <span className="art-chev">✨</span> : read.has(a.id) ? <span className="art-done">✓</span> : <span className="art-chev">›</span>}
+                </button>
+              );
+            })}
           </div>
         </div>,
         document.body,
       )}
+
+      <Paywall open={pwOpen} onClose={() => setPwOpen(false)} onSuccess={() => setPwOpen(false)} />
 
       {/* Финал курса */}
       {finale && createPortal(

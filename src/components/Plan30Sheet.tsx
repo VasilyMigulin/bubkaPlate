@@ -8,16 +8,26 @@ import { useStore } from '../state/store';
 import { Paywall, isPremium } from './Paywall';
 import type { Food } from '../types';
 
-const P30_KEY = 'bubka-plate-plan30';
-
-function readDone(): Set<number> {
-  try { return new Set(JSON.parse(localStorage.getItem(P30_KEY) || '[]') as number[]); } catch { return new Set(); }
+/** Отметки плана-30 — у каждого малыша свои; старый общий ключ мигрирует к активному. */
+export function p30Key(activeId: string | null): string { return `bubka-plate-plan30-${activeId ?? ''}`; }
+export function readP30Done(activeId: string | null): Set<number> {
+  try {
+    const own = localStorage.getItem(p30Key(activeId));
+    if (own) return new Set(JSON.parse(own) as number[]);
+    const legacy = localStorage.getItem('bubka-plate-plan30');
+    if (legacy) {
+      localStorage.setItem(p30Key(activeId), legacy);
+      localStorage.removeItem('bubka-plate-plan30');
+      return new Set(JSON.parse(legacy) as number[]);
+    }
+  } catch { /* повреждено — начинаем чисто */ }
+  return new Set();
 }
 
 /** «Первые 30 дней прикорма» — пошаговый календарь для новичка. */
 export function Plan30Sheet({ onClose }: { onClose: () => void }) {
-  const { introduced, showToast } = useStore();
-  const [done, setDone] = useState<Set<number>>(readDone);
+  const { introduced, showToast, activeId } = useStore();
+  const [done, setDone] = useState<Set<number>>(() => readP30Done(activeId));
   const [foodOpen, setFoodOpen] = useState<Food | null>(null);
   const [prem, setPrem] = useState(isPremium());
   const [pwOpen, setPwOpen] = useState(false);
@@ -33,7 +43,7 @@ export function Plan30Sheet({ onClose }: { onClose: () => void }) {
   const toggle = (d: number) => setDone((prev) => {
     const n = new Set(prev);
     if (n.has(d)) n.delete(d); else { n.add(d); if (doneCount + 1 === 30) showToast('🎉', '30 дней позади!', 'Вы прошли самый волнительный месяц'); }
-    localStorage.setItem(P30_KEY, JSON.stringify([...n]));
+    localStorage.setItem(p30Key(activeId), JSON.stringify([...n]));
     return n;
   });
 
