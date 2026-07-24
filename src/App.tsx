@@ -8,6 +8,8 @@ import { Recipes } from './screens/Recipes';
 import { Safety } from './screens/Safety';
 import { Onboarding } from './screens/Onboarding';
 import { Settings } from './components/Settings';
+import { ProductSheet } from './components/ProductSheet';
+import { FOODS } from './data/foods';
 
 type Tab = 'mine' | 'catalog' | 'recipes' | 'safety';
 
@@ -47,6 +49,11 @@ function Shell() {
     return 'mine';
   });
   const [settingsOpen, setSettingsOpen] = useState(false);
+  // дев-диплинк: ?food=egg открывает карточку продукта (для тестов и скриншотов)
+  const [devFood, setDevFood] = useState(() => {
+    const id = new URLSearchParams(location.search).get('food');
+    return id ? FOODS.find((f) => f.id === id) ?? null : null;
+  });
   const { profile, ageMonths, ageMonthsReal, log, introduced, windows, activeId } = useStore();
   const achCtx = useMemo(() => ({ log, introduced, windows, activeId }), [log, introduced, windows, activeId]);
   const lvl = levelOf(computeXP(achCtx));
@@ -190,6 +197,7 @@ function Shell() {
       </nav>
 
       <Settings open={settingsOpen} onClose={() => setSettingsOpen(false)} />
+      {devFood && <ProductSheet food={devFood} onClose={() => setDevFood(null)} />}
 
       <Toast />
       <style>{`

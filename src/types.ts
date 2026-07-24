@@ -45,7 +45,8 @@ export interface LogEntry {
   date: string;     // человекочитаемая дата
   rx: Reaction;
   note?: string;    // заметка мамы для себя
-  photo?: string;   // фото момента (сжатый data URL)
+  photo?: string;   // фото момента (старый формат, одно)
+  photos?: string[];// фото моментов (до 5, сжатые data URL)
   ts?: number;      // метка времени для группировки по месяцам («фильм месяца»)
   fu?: boolean;     // follow-up задан и закрыт («вопрос после пробы»)
 }

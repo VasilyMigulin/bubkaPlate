@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { BIG_ALLERGENS, CATEGORIES, FOODS, IRON_IDS, resolveFoodRef } from '../data/foods';
+import { BIG_ALLERGENS, CATEGORIES, FOODS, IRON_IDS, photosOf, resolveFoodRef } from '../data/foods';
 import { PORTIONS, READINESS } from '../data/schedule';
 import { PLAN30 } from '../data/plan30';
 import { useStore } from '../state/store';
@@ -541,9 +541,11 @@ export function MyPlate({ goCatalog }: { goCatalog: () => void }) {
               <div className="grow"><div className="fl-n">{name}</div><div className="fl-d">{l.date}</div></div>
               <span className={`rx ${b.cls}`}>{b.label}</span>
             </div>
-            {(l.note || l.photo) && (
+            {(l.note || photosOf(l).length > 0) && (
               <div className="fl-extra">
-                {l.photo && <img className="fl-photo tappable" src={l.photo} alt="момент" onClick={() => setLightbox({ src: l.photo!, alt: name + ' · первая проба' })} />}
+                {photosOf(l).map((p, pi) => (
+                  <img key={pi} className="fl-photo tappable" src={p} alt="момент" onClick={() => setLightbox({ src: p, alt: name + ' · момент' })} />
+                ))}
                 {l.note && <div className="fl-note">{l.note}</div>}
               </div>
             )}

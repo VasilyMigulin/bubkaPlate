@@ -18,7 +18,7 @@ interface Store {
   switchChild: (id: string) => void;
   removeChild: (id: string) => void;
   setProfile: (p: Profile) => void;
-  logFood: (id: string, rx: Reaction, note?: string, photo?: string, when?: number) => void;
+  logFood: (id: string, rx: Reaction, note?: string, photos?: string[], when?: number) => void;
   answerFollowUp: (idx: number, rx: Reaction) => void;
   startAllergen: (id: string) => void;
   markAllergenDay: (id: string) => void;
@@ -174,12 +174,12 @@ export function StoreProvider({ children: kids }: { children: ReactNode }) {
     });
   }, []);
 
-  const logFood = useCallback((id: string, rx: Reaction, note?: string, photo?: string, when?: number) => {
+  const logFood = useCallback((id: string, rx: Reaction, note?: string, photos?: string[], when?: number) => {
     patch((c) => {
       const introduced = new Set(c.introduced).add(id);
       if (id.includes(':')) introduced.add(id.split(':')[0]);
       const ts = when ?? Date.now();
-      const entry = { id, date: humanWhen(ts), rx, note: note?.trim() || undefined, photo, ts };
+      const entry = { id, date: humanWhen(ts), rx, note: note?.trim() || undefined, photos: photos?.length ? photos : undefined, ts };
       // проба аллергена без открытого окна — автоматически запускаем правило 3 дней
       const baseId = id.split(':')[0];
       const baseFood = FOODS.find((f) => f.id === baseId);

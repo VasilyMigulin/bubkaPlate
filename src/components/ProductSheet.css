@@ -2,7 +2,7 @@
 .product-view {
   position:fixed; inset:0; z-index:60; max-width:440px; margin:0 auto;
   background:var(--bg); display:flex; flex-direction:column; overflow-y:auto;
-  box-shadow:0 0 0 100vw var(--page);
+  
   animation:pushin .3s cubic-bezier(.3,.7,.3,1) both;
 }
 .product-view::-webkit-scrollbar { display:none; }
@@ -12,7 +12,7 @@
 
 .ps-back {
   position:absolute; top:14px; left:14px; z-index:5; width:38px; height:38px; border-radius:50%;
-  background:color-mix(in srgb, var(--card) 88%, transparent); backdrop-filter:blur(10px); border:none;
+  background:color-mix(in srgb, var(--card) 96%, transparent); border:none;
   color:var(--text); font-size:19px; box-shadow:var(--shadow);
 }
 .ps-hero { height:220px; display:flex; align-items:center; justify-content:center; font-size:96px; flex:none; overflow:hidden; }
@@ -96,7 +96,7 @@
 
 /* Полноэкранная форма записи в дневник */
 .rx-screen { position:fixed; inset:0; height:100dvh; z-index:60; background:var(--bg); display:flex; flex-direction:column;
-  max-width:440px; margin:0 auto; box-shadow:0 0 0 100vw var(--page); animation:slideup .34s cubic-bezier(.22,.9,.3,1) both; }
+  max-width:440px; margin:0 auto;  animation:slideup .34s cubic-bezier(.22,.9,.3,1) both; }
 .rx-top { display:flex; align-items:center; gap:6px; padding:14px 12px 10px; border-bottom:1px solid var(--hairline); }
 .rx-back { width:38px; height:38px; border-radius:50%; border:none; background:var(--elev); color:var(--text); font-size:20px; flex:none; }
 .rx-top-title { font-size:16px; font-weight:700; }

@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { createPortal } from 'react-dom';
-import { resolveFoodRef } from '../data/foods';
+import { photosOf, resolveFoodRef } from '../data/foods';
 import { MAIN_PHOTOS } from '../data/mainPhotos';
 import { useStore } from '../state/store';
 import { Lightbox } from './Lightbox';
@@ -60,9 +60,11 @@ export function DiaryView({ onClose }: { onClose: () => void }) {
                 <div className="grow"><div className="fl-n">{name}</div><div className="fl-d">{l.date}</div></div>
                 <span className={`rx ${b.cls}`}>{b.label}</span>
               </div>
-              {(l.note || l.photo) && (
+              {(l.note || photosOf(l).length > 0) && (
                 <div className="fl-extra">
-                  {l.photo && <img className="fl-photo tappable" src={l.photo} alt="момент" onClick={() => setLightbox({ src: l.photo!, alt: name })} />}
+                  {photosOf(l).map((p, pi) => (
+                    <img key={pi} className="fl-photo tappable" src={p} alt="момент" onClick={() => setLightbox({ src: p, alt: name })} />
+                  ))}
                   {l.note && <div className="fl-note">{l.note}</div>}
                 </div>
               )}

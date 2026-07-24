@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 import { createPortal } from 'react-dom';
-import { FOODS } from '../data/foods';
+import { FOODS, photosOf } from '../data/foods';
 import { MAIN_PHOTOS } from '../data/mainPhotos';
 import { useStore } from '../state/store';
 import type { Food, LogEntry } from '../types';
@@ -52,7 +52,7 @@ function buildMonths(log: LogEntry[]): MonthData[] {
         label: `${MONTHS_RU[m]} ${y}`,
         entries,
         newFoods,
-        photos: entries.filter((l) => l.photo).map((l) => l.photo!),
+        photos: entries.flatMap((l) => photosOf(l)),
         days: new Set(entries.map((l) => new Date(l.ts!).getDate())).size,
         calmShare: entries.length ? Math.round((calm / entries.length) * 100) : 0,
         brave: newFoods.filter((f) => f.allergen),

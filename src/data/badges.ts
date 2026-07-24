@@ -54,7 +54,7 @@ export const BADGES: Badge[] = [
   { id: 'p30', e: '🌿', title: 'Тридцать вкусов', hint: '30 продуктов в рационе', check: (c) => c.introduced.size >= 30 },
   { id: 'p50', e: '🌳', title: 'Полсотни!', hint: '50 продуктов в рационе', check: (c) => c.introduced.size >= 50 },
   { id: 'pall', e: '🏆', title: 'Весь каталог', hint: `Все ${FOODS.length} продуктов`, check: (c) => c.introduced.size >= FOODS.length },
-  { id: 'photo1', e: '📸', title: 'Первый кадр', hint: 'Добавьте фото к записи', check: (c) => c.log.some((l) => l.photo) },
+  { id: 'photo1', e: '📸', title: 'Первый кадр', hint: 'Добавьте фото к записи', check: (c) => c.log.some((l) => l.photo || l.photos?.length) },
   { id: 'calm10', e: '💚', title: 'Десять спокойных', hint: '10 проб без реакции', check: (c) => c.log.filter((l) => l.rx === 'ok').length >= 10 },
   { id: 'streak7', e: '🔥', title: 'Неделя без пропусков', hint: '7 дней записей подряд', check: (c) => streakDays(c) >= 7 },
   { id: 'plan30', e: '🗓', title: 'Месяц новичка пройден', hint: 'Завершите план 30 дней', check: plan30Done },

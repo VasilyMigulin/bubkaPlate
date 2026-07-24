@@ -1278,3 +1278,9 @@ export const CATEGORIES: Food['cat'][] = ['Овощи', 'Фрукты', 'Яго�
 /** Возрастные ступени для оси «по месяцам». */
 export const AGE_STEPS = [6, 7, 8, 9];
 export const AGE_LABEL: Record<number, string> = { 6: 'с 6 мес', 7: 'с 7 мес', 8: 'с 8 мес', 9: 'с 9 мес', 10: 'с 10 мес', 12: '12+ мес' };
+
+
+/** Все фото записи дневника (совместимо со старым одиночным полем). */
+export function photosOf(l: { photo?: string; photos?: string[] }): string[] {
+  return l.photos?.length ? l.photos : l.photo ? [l.photo] : [];
+}

@@ -99,11 +99,12 @@ export function ProductSheet({ food, onClose, openLog }: { food: Food; onClose: 
     d.setMinutes(d.getMinutes() - d.getTimezoneOffset());
     return d.toISOString().slice(0, 16);
   });
-  const [photo, setPhoto] = useState<string | undefined>();
+  const [photos, setPhotos] = useState<string[]>([]);
   const [skillInfo, setSkillInfo] = useState<string | null>(null);
   const [recipeOpen, setRecipeOpen] = useState<Recipe | null>(null);
   const [lightbox, setLightbox] = useState<{ src: string; alt?: string } | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
+  const camRef = useRef<HTMLInputElement>(null);
   const [related, setRelated] = useState<Food>(food);
   const f = related;
   const bg = isDark() ? f.dbg : f.bg;
@@ -125,10 +126,10 @@ export function ProductSheet({ food, onClose, openLog }: { food: Food; onClose: 
 
   const openRelated = (r: Food) => { setRelated(r); document.querySelector('.prod-sheet')?.scrollTo({ top: 0 }); };
 
-  const openRx = () => { setRxVariant(null); setSelRx(null); setNote(''); setPhoto(undefined); setRxOpen(true); };
+  const openRx = () => { setRxVariant(null); setSelRx(null); setNote(''); setPhotos([]); setRxOpen(true); };
   // «Записать пробу» с главной: форма записи открывается сразу, карточка остаётся фоном
   useEffect(() => { if (openLog) setRxOpen(true); }, [openLog]);
-  const openRxVariant = (v: { key: string; label: string }) => { setRxVariant(v); setSelRx(null); setNote(''); setPhoto(undefined); setRxOpen(true); };
+  const openRxVariant = (v: { key: string; label: string }) => { setRxVariant(v); setSelRx(null); setNote(''); setPhotos([]); setRxOpen(true); };
   // статус отдельного вида: была ли реакция, введён ли
   const variantStatus = (key: string) => {
     const vid = `${f.id}:${key}`;
@@ -139,18 +140,21 @@ export function ProductSheet({ food, onClose, openLog }: { food: Food; onClose: 
   };
 
   const onPhoto = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) setPhoto(await compressImage(file));
+    const files = [...(e.target.files ?? [])].slice(0, 5);
+    if (!files.length) return;
+    const imgs = await Promise.all(files.filter((f) => f.type.startsWith('image/')).map((f) => compressImage(f)));
+    setPhotos((prev) => [...prev, ...imgs].slice(0, 5));
+    e.target.value = '';
   };
 
   const saveEntry = () => {
     if (!selRx) return;
     const targetId = rxVariant ? `${f.id}:${rxVariant.key}` : f.id;
     const targetName = rxVariant ? rxVariant.label : f.n;
-    logFood(targetId, selRx, note, photo, when ? new Date(when).getTime() : undefined);
+    logFood(targetId, selRx, note, photos, when ? new Date(when).getTime() : undefined);
     setRxOpen(false);
     if (selRx === 'skin' || selRx === 'tummy') showToast('👀', 'Реакция записана', 'Отметили — обсудите с врачом');
-    else showToast('✓', 'Записано в дневник', `${targetName}${photo ? ' · с фото 📷' : ''}`);
+    else showToast('✓', 'Записано в дневник', `${targetName}${photos.length ? ` · фото: ${photos.length} 📷` : ''}`);
     if (!rxVariant) onClose();
     setRxVariant(null);
   };
@@ -411,15 +415,24 @@ export function ProductSheet({ food, onClose, openLog }: { food: Food; onClose: 
               <div className="rx-label">Заметка для себя <span className="rx-opt-tag">необязательно</span></div>
               <textarea className="rx-note" placeholder="Сколько съел, как реагировал, понравилось ли…" value={note} onChange={(e) => setNote(e.target.value)} rows={3} />
 
-              <div className="rx-label">Фото момента <span className="rx-opt-tag">необязательно</span></div>
-              <input ref={fileRef} type="file" accept="image/*" capture="environment" style={{ display: 'none' }} onChange={onPhoto} />
-              {photo ? (
-                <div className="rx-photo-wrap">
-                  <img className="rx-photo" src={photo} alt="момент" />
-                  <button className="rx-photo-del" onClick={() => setPhoto(undefined)} aria-label="Удалить фото">✕</button>
+              <div className="rx-label">Фото моментов <span className="rx-opt-tag">до 5 штук</span></div>
+              <input ref={fileRef} type="file" accept="image/*" multiple style={{ display: 'none' }} onChange={onPhoto} />
+              <input ref={camRef} type="file" accept="image/*" capture="environment" style={{ display: 'none' }} onChange={onPhoto} />
+              {photos.length > 0 && (
+                <div className="rx-photos-grid">
+                  {photos.map((p, i) => (
+                    <div key={i} className="rx-photo-wrap">
+                      <img className="rx-photo" src={p} alt="момент" />
+                      <button className="rx-photo-del" onClick={() => setPhotos((arr) => arr.filter((_, j) => j !== i))} aria-label="Удалить фото">✕</button>
+                    </div>
+                  ))}
                 </div>
-              ) : (
-                <button className="rx-photo-add" onClick={() => fileRef.current?.click()}>📷 Сфотографировать первую пробу</button>
+              )}
+              {photos.length < 5 && (
+                <div className="rx-photo-btns">
+                  <button className="rx-photo-add" onClick={() => fileRef.current?.click()}>🖼 Из галереи</button>
+                  <button className="rx-photo-add" onClick={() => camRef.current?.click()}>📷 Камера</button>
+                </div>
               )}
 
               <div className="rx-hint">Заметка и фото — только для вас. Реакция попадёт в дневник и в выписку для врача.</div>
