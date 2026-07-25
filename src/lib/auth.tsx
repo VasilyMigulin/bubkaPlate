@@ -1,6 +1,6 @@
 import { createContext, useCallback, useContext, useEffect, useRef, useState, type ReactNode } from 'react';
 import type { Session, User } from '@supabase/supabase-js';
-import { cloudEnabled, pullState, pushState, supabase } from './cloud';
+import { cloudEnabled, pullState, pushState, signInOAuth, supabase } from './cloud';
 
 const KEY = 'bubka-plate-v1';
 const MTIME = 'bubka-plate-mtime';
@@ -12,6 +12,7 @@ interface AuthCtx {
   syncing: boolean;
   signUp: (email: string, pass: string) => Promise<string | null>; // возвращает текст ошибки или null
   signIn: (email: string, pass: string) => Promise<string | null>;
+  signInWith: (p: 'google' | 'apple') => Promise<string | null>;
   signOut: () => Promise<void>;
 }
 
@@ -90,9 +91,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const { error } = await supabase.auth.signInWithPassword({ email, password: pass });
     return error ? error.message : null;
   }, []);
+  const signInWith = useCallback((p: 'google' | 'apple') => signInOAuth(p), []);
   const signOut = useCallback(async () => { await supabase?.auth.signOut(); }, []);
 
-  return <Ctx.Provider value={{ enabled: cloudEnabled, user, ready, syncing, signUp, signIn, signOut }}>{children}</Ctx.Provider>;
+  return <Ctx.Provider value={{ enabled: cloudEnabled, user, ready, syncing, signUp, signIn, signInWith, signOut }}>{children}</Ctx.Provider>;
 }
 
 export function useAuth() {

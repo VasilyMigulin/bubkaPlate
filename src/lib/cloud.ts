@@ -24,6 +24,14 @@ export const supabase: SupabaseClient | null = cloudEnabled
  */
 export interface CloudRow { state: unknown; updated_at: string }
 
+/** Вход через Google/Apple — редирект на текущую страницу. */
+export async function signInOAuth(provider: 'google' | 'apple'): Promise<string | null> {
+  if (!supabase) return 'Облако не настроено';
+  const redirectTo = window.location.origin + window.location.pathname;
+  const { error } = await supabase.auth.signInWithOAuth({ provider, options: { redirectTo } });
+  return error ? error.message : null;
+}
+
 export async function pullState(userId: string): Promise<CloudRow | null> {
   if (!supabase) return null;
   const { data, error } = await supabase.from('states').select('state, updated_at').eq('user_id', userId).maybeSingle();
