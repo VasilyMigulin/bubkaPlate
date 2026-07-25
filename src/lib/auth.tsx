@@ -1,6 +1,6 @@
 import { createContext, useCallback, useContext, useEffect, useRef, useState, type ReactNode } from 'react';
 import type { Session, User } from '@supabase/supabase-js';
-import { cloudEnabled, pullState, pushState, signInOAuth, supabase } from './cloud';
+import { cloudEnabled, deleteCloudData, pullState, pushState, signInOAuth, supabase } from './cloud';
 
 const KEY = 'bubka-plate-v1';
 const MTIME = 'bubka-plate-mtime';
@@ -14,6 +14,7 @@ interface AuthCtx {
   signIn: (email: string, pass: string) => Promise<string | null>;
   signInWith: (p: 'google' | 'apple') => Promise<string | null>;
   signOut: () => Promise<void>;
+  deleteAccount: () => Promise<void>;
 }
 
 const Ctx = createContext<AuthCtx | null>(null);
@@ -93,8 +94,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
   const signInWith = useCallback((p: 'google' | 'apple') => signInOAuth(p), []);
   const signOut = useCallback(async () => { await supabase?.auth.signOut(); }, []);
+  const deleteAccount = useCallback(async () => {
+    if (user) await deleteCloudData(user.id);
+    await supabase?.auth.signOut();
+  }, [user]);
 
-  return <Ctx.Provider value={{ enabled: cloudEnabled, user, ready, syncing, signUp, signIn, signInWith, signOut }}>{children}</Ctx.Provider>;
+  return <Ctx.Provider value={{ enabled: cloudEnabled, user, ready, syncing, signUp, signIn, signInWith, signOut, deleteAccount }}>{children}</Ctx.Provider>;
 }
 
 export function useAuth() {

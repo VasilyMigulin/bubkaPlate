@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useAuth } from '../lib/auth';
+import { PrivacyPolicy } from '../components/PrivacyPolicy';
 import './Onboarding.css';
 
 /** Стартовый экран: регистрация/вход сразу, либо «без аккаунта». Показывается до онбординга. */
@@ -12,6 +13,7 @@ export function WelcomeAuth({ onSkip }: { onSkip: () => void }) {
   const [busy, setBusy] = useState(false);
   const [msg, setMsg] = useState<string | null>(null);
   const [ok, setOk] = useState<string | null>(null);
+  const [ppOpen, setPpOpen] = useState(false);
 
   const tryOAuth = async (prov: 'google' | 'apple') => {
     setMsg(null);
@@ -73,7 +75,8 @@ export function WelcomeAuth({ onSkip }: { onSkip: () => void }) {
         )}
       </div>
 
-      <div className="wa-consent">Продолжая, вы соглашаетесь на обработку данных для работы приложения. Мы храним их защищённо и не передаём третьим лицам.</div>
+      <div className="wa-consent">Продолжая, вы соглашаетесь на обработку данных для работы приложения по <button className="wa-pp-link" onClick={() => setPpOpen(true)}>политике конфиденциальности</button>.</div>
+      {ppOpen && <PrivacyPolicy onClose={() => setPpOpen(false)} />}
       <div className="wa-foot">
         <button className="wa-skip" onClick={() => {
           if (confirm('Без аккаунта дневник хранится только на этом устройстве:\n\n• не синхронизируется с другими устройствами\n• может пропасть, если очистить браузер или удалить приложение\n• не восстановится при потере телефона\n\nПродолжить без аккаунта?')) onSkip();
@@ -100,6 +103,7 @@ export function WelcomeAuth({ onSkip }: { onSkip: () => void }) {
         .acc-msg.ok { background:var(--accent-soft); color:var(--accent); }
         .wa-foot { margin-top:auto; padding:24px; text-align:center; }
         .wa-skip { border:none; background:none; font-family:inherit; font-size:15px; font-weight:750; color:var(--text); cursor:pointer; }
+        .wa-pp-link { border:none; background:none; font-family:inherit; font-size:11px; font-weight:700; color:var(--accent); cursor:pointer; padding:0; text-decoration:underline; }
         .wa-consent { font-size:11px; color:var(--text2); line-height:1.5; text-align:center; padding:0 28px; margin-top:8px; }
         .wa-skip-note { font-size:11.5px; color:var(--text2); line-height:1.45; margin-top:8px; max-width:300px; margin-left:auto; margin-right:auto; }
       `}</style>

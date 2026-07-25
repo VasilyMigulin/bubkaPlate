@@ -1,6 +1,8 @@
 import { useEffect, useRef, useState } from 'react';
 import { exportAllMedia, importAllMedia } from '../lib/idbMedia';
 import { AccountSection } from './AccountSection';
+import { PrivacyPolicy } from './PrivacyPolicy';
+import { useAuth } from '../lib/auth';
 import { createPortal } from 'react-dom';
 import { useStore } from '../state/store';
 import { isPremium } from './Paywall';
@@ -37,6 +39,8 @@ function compressAvatar(file: File): Promise<string> {
 export function Settings({ open, onClose }: { open: boolean; onClose: () => void }) {
   const { profile, setProfile, children, activeId, addChild, switchChild, removeChild, resetAll, showToast } = useStore();
   const [subOpen, setSubOpen] = useState(false);
+  const [ppOpen, setPpOpen] = useState(false);
+  const { user, deleteAccount } = useAuth();
   const [prem, setPrem] = useState(isPremium());
   const [name, setName] = useState(profile?.name ?? '');
   const [birth, setBirth] = useState(profile?.birthDate ?? '');
@@ -230,10 +234,22 @@ export function Settings({ open, onClose }: { open: boolean; onClose: () => void
           <p>Правила подачи основаны на современных рекомендациях ВОЗ, AAP, NHS и данных исследований.</p>
           <p>Приложение носит ознакомительный характер и не заменяет консультацию врача.</p>
         </div>
+        <button className="set-row" style={{ marginTop: 8 }} onClick={() => setPpOpen(true)}>
+          <span className="set-e">🔒</span>
+          <span className="grow"><b>Политика конфиденциальности</b><span className="set-s">Какие данные и как мы храним</span></span>
+          <span className="set-chev">›</span>
+        </button>
 
         <button className="set-danger" onClick={() => {
           if (confirm('Точно сбросить все данные? Дневник, введённые продукты и настройки будут удалены.')) { resetAll(); onClose(); }
         }}>Сбросить все данные</button>
+        {user && (
+          <button className="set-danger" style={{ marginTop: 2 }} onClick={async () => {
+            if (confirm('Удалить аккаунт и ВСЕ данные — на этом устройстве и в облаке? Это необратимо.')) {
+              await deleteAccount(); resetAll(); onClose();
+            }
+          }}>Удалить аккаунт и все данные</button>
+        )}
 
         <style>{`
           .kids-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:6px; }
@@ -263,6 +279,7 @@ export function Settings({ open, onClose }: { open: boolean; onClose: () => void
         `}</style>
       </div>
     </div>
+    {ppOpen && <PrivacyPolicy onClose={() => setPpOpen(false)} />}
     <SubscriptionSheet open={subOpen} onClose={() => { setSubOpen(false); setPrem(isPremium()); }} />
     </>,
     document.body,

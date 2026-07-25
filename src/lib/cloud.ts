@@ -39,6 +39,11 @@ export async function pullState(userId: string): Promise<CloudRow | null> {
   return (data as CloudRow) ?? null;
 }
 
+export async function deleteCloudData(userId: string): Promise<void> {
+  if (!supabase) return;
+  await supabase.from('states').delete().eq('user_id', userId);
+}
+
 export async function pushState(userId: string, state: unknown): Promise<boolean> {
   if (!supabase) return false;
   const { error } = await supabase.from('states').upsert(
