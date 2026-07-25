@@ -62,3 +62,24 @@ export async function delMedia(ref: string): Promise<void> {
   const store = await tx('readwrite');
   store.delete(ref.slice(4));
 }
+
+/** Все медиа как {key: dataURL} — для резервной копии. */
+export async function exportAllMedia(): Promise<Record<string, string>> {
+  const store = await tx('readonly');
+  const keys = await new Promise<IDBValidKey[]>((res, rej) => { const r = store.getAllKeys(); r.onsuccess = () => res(r.result); r.onerror = () => rej(r.error); });
+  const blobs = await new Promise<Blob[]>((res, rej) => { const r = store.getAll(); r.onsuccess = () => res(r.result as Blob[]); r.onerror = () => rej(r.error); });
+  const out: Record<string, string> = {};
+  for (let i = 0; i < keys.length; i++) {
+    out[String(keys[i])] = await new Promise<string>((res, rej) => { const fr = new FileReader(); fr.onload = () => res(fr.result as string); fr.onerror = rej; fr.readAsDataURL(blobs[i]); });
+  }
+  return out;
+}
+
+/** Восстановить медиа из резервной копии {key: dataURL}. */
+export async function importAllMedia(map: Record<string, string>): Promise<void> {
+  const store = await tx('readwrite');
+  for (const [key, dataUrl] of Object.entries(map)) {
+    const blob = await (await fetch(dataUrl)).blob();
+    store.put(blob, key);
+  }
+}

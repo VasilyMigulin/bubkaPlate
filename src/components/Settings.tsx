@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { exportAllMedia, importAllMedia } from '../lib/idbMedia';
 import { createPortal } from 'react-dom';
 import { useStore } from '../state/store';
 import { isPremium } from './Paywall';
@@ -93,27 +94,30 @@ export function Settings({ open, onClose }: { open: boolean; onClose: () => void
     onClose();
   };
 
-  const exportData = () => {
+  const exportData = async () => {
     const dump: Record<string, string> = {};
     for (let i = 0; i < localStorage.length; i++) {
       const k = localStorage.key(i)!;
       if (k.startsWith('bubka-plate')) dump[k] = localStorage.getItem(k)!;
     }
-    const blob = new Blob([JSON.stringify({ app: 'bubka-plate', exported: new Date().toISOString(), data: dump }, null, 2)], { type: 'application/json' });
+    showToast('💾', 'Собираем копию…', 'Фото и видео тоже войдут');
+    const media = await exportAllMedia();
+    const blob = new Blob([JSON.stringify({ app: 'bubka-plate', exported: new Date().toISOString(), data: dump, media })], { type: 'application/json' });
     const a = document.createElement('a');
     a.href = URL.createObjectURL(blob);
     a.download = 'bubka-backup.json';
     a.click();
-    showToast('💾', 'Копия скачана', 'Файл можно открыть на другом устройстве');
+    showToast('💾', 'Копия скачана', 'Дневник, фото и видео — в одном файле');
   };
 
   const importData = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
     try {
-      const parsed = JSON.parse(await file.text()) as { app?: string; data?: Record<string, string> };
+      const parsed = JSON.parse(await file.text()) as { app?: string; data?: Record<string, string>; media?: Record<string, string> };
       if (parsed.app !== 'bubka-plate' || !parsed.data) throw new Error('bad');
       Object.entries(parsed.data).forEach(([k, v]) => localStorage.setItem(k, v));
+      if (parsed.media) await importAllMedia(parsed.media);
       location.reload();
     } catch { showToast('🤔', 'Файл не похож на копию bubka plate'); }
   };
