@@ -7,6 +7,8 @@ import { Catalog } from './screens/Catalog';
 import { Recipes } from './screens/Recipes';
 import { Safety } from './screens/Safety';
 import { Onboarding } from './screens/Onboarding';
+import { WelcomeAuth } from './screens/WelcomeAuth';
+import { useAuth } from './lib/auth';
 import { Settings } from './components/Settings';
 import { ProductSheet } from './components/ProductSheet';
 import { FOODS } from './data/foods';
@@ -55,6 +57,8 @@ function Shell() {
     return id ? FOODS.find((f) => f.id === id) ?? null : null;
   });
   const { profile, ageMonths, ageMonthsReal, log, introduced, windows, activeId } = useStore();
+  const { enabled: cloudOn, user, ready: authReady } = useAuth();
+  const [skippedAuth, setSkippedAuth] = useState(() => localStorage.getItem('bubka-plate-auth-skip') === '1');
   const achCtx = useMemo(() => ({ log, introduced, windows, activeId }), [log, introduced, windows, activeId]);
   const lvl = levelOf(computeXP(achCtx));
   const hasNewBadges = useMemo(() => {
@@ -143,6 +147,12 @@ function Shell() {
       document.removeEventListener('touchend', onEnd);
     };
   }, []);
+  // Пока проверяем сессию — ничего не мигаем
+  if (cloudOn && !authReady) return <div className="app" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}><div className="onb-logo">🍽️</div></div>;
+  // Первый запуск с облаком: сначала регистрация/вход (или явный отказ)
+  if (!profile && cloudOn && !user && !skippedAuth) {
+    return <WelcomeAuth onSkip={() => { localStorage.setItem('bubka-plate-auth-skip', '1'); setSkippedAuth(true); }} />;
+  }
   if (!profile) return <Onboarding />;
   const head = HEAD[tab];
   return (
