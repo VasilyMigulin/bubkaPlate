@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { FOODS, photosOf } from '../data/foods';
 import { MAIN_PHOTOS } from '../data/mainPhotos';
+import { Media } from './Media';
 import { useStore } from '../state/store';
 import type { Food, LogEntry } from '../types';
 
@@ -126,7 +127,7 @@ export function MonthFilm({ onClose }: { onClose: () => void }) {
         x.fillStyle = '#2E2B27'; x.font = '800 64px -apple-system, sans-serif'; x.fillText(v, bx + 34, 396);
         x.fillStyle = '#8C8579'; x.font = '650 28px -apple-system, sans-serif'; x.fillText(t, bx + 34, 448);
       });
-      const ph = m.photos.slice(0, 4);
+      const ph = m.photos.filter((p) => p.startsWith('data:image')).slice(0, 4);
       if (ph.length) {
         const imgs = await Promise.all(ph.map(loadImg));
         const size = ph.length === 1 ? 640 : 310;
@@ -215,7 +216,7 @@ export function MonthFilm({ onClose }: { onClose: () => void }) {
         <div className="mfs-slide" key="p">
           <div className="mfs-kicker">Моменты месяца</div>
           <div className={`mfs-photos n${Math.min(m.photos.length, 4)}`}>
-            {m.photos.slice(0, 4).map((p, i) => <img key={i} src={p} alt="момент" style={{ animationDelay: `${i * 0.1}s` }} />)}
+            {m.photos.slice(0, 4).map((p, i) => <Media key={i} src={p} />)}
           </div>
           {m.photos.length > 4 && <p className="mfs-lead">и ещё {m.photos.length - 4} в дневнике</p>}
         </div>

@@ -4,6 +4,7 @@ import { photosOf, resolveFoodRef } from '../data/foods';
 import { MAIN_PHOTOS } from '../data/mainPhotos';
 import { useStore } from '../state/store';
 import { Lightbox } from './Lightbox';
+import { Media } from './Media';
 import { DoctorReport } from './DoctorReport';
 
 function dayLabel(ts: number): string {
@@ -63,7 +64,7 @@ export function DiaryView({ onClose }: { onClose: () => void }) {
               {(l.note || photosOf(l).length > 0) && (
                 <div className="fl-extra">
                   {photosOf(l).map((p, pi) => (
-                    <img key={pi} className="fl-photo tappable" src={p} alt="момент" onClick={() => setLightbox({ src: p, alt: name })} />
+                    <Media key={pi} src={p} className="fl-photo tappable" onClick={() => setLightbox({ src: p, alt: name })} />
                   ))}
                   {l.note && <div className="fl-note">{l.note}</div>}
                 </div>

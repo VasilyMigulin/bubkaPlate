@@ -10,6 +10,7 @@ import { DiaryView } from '../components/DiaryView';
 import { MonthFilm } from '../components/MonthFilm';
 import { Achievements } from '../components/Achievements';
 import { GrannyCard } from '../components/GrannyCard';
+import { Media } from '../components/Media';
 import { ProductSheet } from '../components/ProductSheet';
 import { RULE3_TEXT } from '../data/glossary';
 import { Lightbox } from '../components/Lightbox';
@@ -544,7 +545,7 @@ export function MyPlate({ goCatalog }: { goCatalog: () => void }) {
             {(l.note || photosOf(l).length > 0) && (
               <div className="fl-extra">
                 {photosOf(l).map((p, pi) => (
-                  <img key={pi} className="fl-photo tappable" src={p} alt="момент" onClick={() => setLightbox({ src: p, alt: name + ' · момент' })} />
+                  <Media key={pi} src={p} className="fl-photo tappable" onClick={() => setLightbox({ src: p, alt: name + ' · момент' })} />
                 ))}
                 {l.note && <div className="fl-note">{l.note}</div>}
               </div>

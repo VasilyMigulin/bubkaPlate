@@ -10,6 +10,8 @@ import { RECIPES, type Recipe } from '../data/recipes';
 import { useStore } from '../state/store';
 import { FoodIcon } from './FoodIcon';
 import { Lightbox } from './Lightbox';
+import { Media } from './Media';
+import { putMedia } from '../lib/idbMedia';
 import { RecipeSheet } from './RecipeSheet';
 import { ServeShape } from './ServeShape';
 import './ProductSheet.css';
@@ -139,9 +141,6 @@ export function ProductSheet({ food, onClose, openLog }: { food: Food; onClose: 
     return { cls: '', text: 'ещё не пробовали' };
   };
 
-  const fileToDataURL = (f: File) => new Promise<string>((res, rej) => {
-    const r = new FileReader(); r.onload = () => res(r.result as string); r.onerror = rej; r.readAsDataURL(f);
-  });
   const onPhoto = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = [...(e.target.files ?? [])];
     if (!files.length) return;
@@ -149,14 +148,14 @@ export function ProductSheet({ food, onClose, openLog }: { food: Food; onClose: 
     for (const f of files) {
       if (f.type.startsWith('image/')) out.push(await compressImage(f));
       else if (f.type.startsWith('video/')) {
-        if (f.size > 25 * 1024 * 1024) { showToast('🎬', 'Видео великовато', 'До 25 МБ — снимите покороче'); continue; }
-        out.push(await fileToDataURL(f));
+        if (f.size > 300 * 1024 * 1024) { showToast('🎬', 'Слишком длинное видео', 'До 300 МБ — обычно это пара минут'); continue; }
+        out.push(await putMedia(f));
       }
     }
     setPhotos((prev) => [...prev, ...out].slice(0, 5));
     e.target.value = '';
   };
-  const isVideo = (m: string) => m.startsWith('data:video');
+  const isVid = (m: string) => m.startsWith('data:video') || m.startsWith('idb:');
 
   const saveEntry = () => {
     if (!selRx) return;
@@ -429,17 +428,15 @@ export function ProductSheet({ food, onClose, openLog }: { food: Food; onClose: 
               <div className="rx-label">Заметка для себя <span className="rx-opt-tag">необязательно</span></div>
               <textarea className="rx-note" placeholder="Сколько съел, как реагировал, понравилось ли…" value={note} onChange={(e) => setNote(e.target.value)} rows={3} />
 
-              <div className="rx-label">Фото и видео моментов <span className="rx-opt-tag">до 5 штук</span></div>
+              <div className="rx-label">Фото и видео моментов <span className="rx-opt-tag">до 5 · видео до 300 МБ</span></div>
               <input ref={fileRef} type="file" accept="image/*,video/*" multiple style={{ display: 'none' }} onChange={onPhoto} />
               <input ref={camRef} type="file" accept="image/*,video/*" capture="environment" style={{ display: 'none' }} onChange={onPhoto} />
               {photos.length > 0 && (
                 <div className="rx-photos-grid">
                   {photos.map((p, i) => (
                     <div key={i} className="rx-photo-wrap">
-                      {isVideo(p)
-                        ? <video className="rx-photo" src={p} muted playsInline />
-                        : <img className="rx-photo" src={p} alt="момент" />}
-                      {isVideo(p) && <span className="rx-vid-mark">▶</span>}
+                      <Media src={p} className="rx-photo" />
+                      {isVid(p) && <span className="rx-vid-mark">▶</span>}
                       <button className="rx-photo-del" onClick={() => setPhotos((arr) => arr.filter((_, j) => j !== i))} aria-label="Удалить">✕</button>
                     </div>
                   ))}

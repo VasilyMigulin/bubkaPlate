@@ -6,6 +6,8 @@ import type { Food } from '../types';
 import { ProductSheet } from './ProductSheet';
 import { ShopSheet } from './ShopSheet';
 import { Lightbox } from './Lightbox';
+import { Media } from './Media';
+import { putMedia } from '../lib/idbMedia';
 import { useStore } from '../state/store';
 
 interface CookEntry { ts: number; rx?: 'loved' | 'liked' | 'meh'; note?: string; media?: string[] }
@@ -30,9 +32,6 @@ function compressImage(file: File, max = 640, q = 0.75): Promise<string> {
     img.src = URL.createObjectURL(file);
   });
 }
-const fileToDataURL = (f: File) => new Promise<string>((res, rej) => {
-  const r = new FileReader(); r.onload = () => res(r.result as string); r.onerror = rej; r.readAsDataURL(f);
-});
 
 /** Полноэкранная карточка рецепта (портал — работает из каталога и из карточки продукта). */
 export function RecipeSheet({ recipe, onClose }: { recipe: Recipe; onClose: () => void }) {
@@ -68,7 +67,7 @@ export function RecipeSheet({ recipe, onClose }: { recipe: Recipe; onClose: () =
     const out: string[] = [];
     for (const f of files) {
       if (f.type.startsWith('image/')) out.push(await compressImage(f));
-      else if (f.type.startsWith('video/')) { if (f.size <= 25 * 1024 * 1024) out.push(await fileToDataURL(f)); else showToast('🎬', 'Видео великовато', 'До 25 МБ'); }
+      else if (f.type.startsWith('video/')) { if (f.size <= 300 * 1024 * 1024) out.push(await putMedia(f)); else showToast('🎬', 'Слишком длинное видео', 'До 300 МБ'); }
     }
     setMedia((prev) => [...prev, ...out].slice(0, 5));
     e.target.value = '';
@@ -162,9 +161,7 @@ export function RecipeSheet({ recipe, onClose }: { recipe: Recipe; onClose: () =
             <div className="section-t">Как получалось у вас</div>
             <div className="cook-gallery">
               {cooks.flatMap((c) => c.media ?? []).map((m, i) => (
-                m.startsWith('data:video')
-                  ? <video key={i} src={m} className="tappable" muted playsInline onClick={() => setLightbox(m)} />
-                  : <img key={i} src={m} className="tappable" alt="ваше блюдо" onClick={() => setLightbox(m)} />
+                <Media key={i} src={m} className="tappable" onClick={() => setLightbox(m)} />
               ))}
             </div>
           </>
@@ -199,7 +196,7 @@ export function RecipeSheet({ recipe, onClose }: { recipe: Recipe; onClose: () =
               <div className="cook-media-grid">
                 {media.map((m, i) => (
                   <div key={i} className="cook-media-wrap">
-                    {m.startsWith('data:video') ? <video src={m} muted playsInline /> : <img src={m} alt="блюдо" />}
+                    <Media src={m} />
                     <button className="rx-photo-del" onClick={() => setMedia((arr) => arr.filter((_, j) => j !== i))} aria-label="Удалить">✕</button>
                   </div>
                 ))}
