@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { exportAllMedia, importAllMedia } from '../lib/idbMedia';
+import { AccountSection } from './AccountSection';
 import { createPortal } from 'react-dom';
 import { useStore } from '../state/store';
 import { isPremium } from './Paywall';
@@ -191,6 +192,8 @@ export function Settings({ open, onClose }: { open: boolean; onClose: () => void
           }}>Удалить этого малыша</button>
         )}
 
+        <AccountSection />
+
         <div className="bs-label">Подписка</div>
         <button className="set-row" onClick={() => { setPrem(isPremium()); setSubOpen(true); }}>
           <span className="set-e">✨</span>
@@ -218,7 +221,7 @@ export function Settings({ open, onClose }: { open: boolean; onClose: () => void
         </button>
         <input ref={importRef} type="file" accept="application/json" style={{ display: 'none' }} onChange={importData} />
         <div className="sub" style={{ margin: '8px 2px 0', lineHeight: 1.45 }}>
-          Аккаунты и облачная синхронизация — в разработке. Пока данные живут на устройстве, а перенести их можно файлом копии.
+          Резервная копия работает всегда — даже без аккаунта. С аккаунтом данные ещё и синхронизируются между устройствами автоматически.
         </div>
 
         <div className="bs-label">О приложении</div>

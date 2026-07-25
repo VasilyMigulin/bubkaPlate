@@ -131,7 +131,11 @@ export function StoreProvider({ children: kids }: { children: ReactNode }) {
 
   useEffect(() => {
     const data: PersistedV2 = { v: 2, active: activeId ?? '', children: childList };
-    try { localStorage.setItem(KEY, JSON.stringify(data)); } catch { /* ignore quota */ }
+    try {
+      localStorage.setItem(KEY, JSON.stringify(data));
+      localStorage.setItem('bubka-plate-mtime', String(Date.now()));
+      window.dispatchEvent(new Event('bubka-saved')); // облачная синхронизация подхватит
+    } catch { /* ignore quota */ }
   }, [childList, activeId]);
 
   const showToast = useCallback((icon: string, title: string, sub?: string) => {
