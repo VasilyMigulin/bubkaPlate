@@ -13,6 +13,12 @@ export function WelcomeAuth({ onSkip }: { onSkip: () => void }) {
   const [msg, setMsg] = useState<string | null>(null);
   const [ok, setOk] = useState<string | null>(null);
 
+  const tryOAuth = async (prov: 'google' | 'apple') => {
+    setMsg(null);
+    const err = await signInWith(prov);
+    if (err) setMsg(`Вход через ${prov === 'apple' ? 'Apple' : 'Google'} ещё настраивается — пока зарегистрируйтесь по почте.`);
+  };
+
   const submit = async () => {
     setMsg(null); setOk(null);
     if (!email.trim() || pass.length < 6) { setMsg('Введите почту и пароль от 6 символов'); return; }
@@ -35,15 +41,16 @@ export function WelcomeAuth({ onSkip }: { onSkip: () => void }) {
       <div className="wa-body">
         {!emailMode ? (
           <>
-            <button className="acc-oauth google" onClick={() => signInWith('google')}>
+            <button className="acc-oauth google" onClick={() => tryOAuth('google')}>
               <span className="acc-oauth-g">G</span> Продолжить с Google
             </button>
-            <button className="acc-oauth apple" onClick={() => signInWith('apple')}>
+            <button className="acc-oauth apple" onClick={() => tryOAuth('apple')}>
                Продолжить с Apple
             </button>
             <button className="acc-oauth" onClick={() => { setEmailMode(true); setMode('up'); }}>
               ✉️ Зарегистрироваться по почте
             </button>
+            {msg && <div className="acc-msg err">{msg}</div>}
             <div className="acc-or"><span>первый раз?</span></div>
             <div className="wa-why">Аккаунт нужен, чтобы дневник хранился в облаке и открывался на телефоне мамы и папы. Данные под защитой — их видите только вы.</div>
           </>
@@ -66,6 +73,7 @@ export function WelcomeAuth({ onSkip }: { onSkip: () => void }) {
         )}
       </div>
 
+      <div className="wa-consent">Продолжая, вы соглашаетесь на обработку данных для работы приложения. Мы храним их защищённо и не передаём третьим лицам.</div>
       <div className="wa-foot">
         <button className="wa-skip" onClick={() => {
           if (confirm('Без аккаунта дневник хранится только на этом устройстве:\n\n• не синхронизируется с другими устройствами\n• может пропасть, если очистить браузер или удалить приложение\n• не восстановится при потере телефона\n\nПродолжить без аккаунта?')) onSkip();
@@ -92,6 +100,7 @@ export function WelcomeAuth({ onSkip }: { onSkip: () => void }) {
         .acc-msg.ok { background:var(--accent-soft); color:var(--accent); }
         .wa-foot { margin-top:auto; padding:24px; text-align:center; }
         .wa-skip { border:none; background:none; font-family:inherit; font-size:15px; font-weight:750; color:var(--text); cursor:pointer; }
+        .wa-consent { font-size:11px; color:var(--text2); line-height:1.5; text-align:center; padding:0 28px; margin-top:8px; }
         .wa-skip-note { font-size:11.5px; color:var(--text2); line-height:1.45; margin-top:8px; max-width:300px; margin-left:auto; margin-right:auto; }
       `}</style>
     </div>

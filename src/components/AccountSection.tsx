@@ -56,10 +56,10 @@ export function AccountSection() {
       <div className="acc-card">
         <div className="acc-lead">{mode === 'in' ? 'Войдите, чтобы данные хранились в облаке и открывались на любом устройстве.' : 'Создайте аккаунт — дневник малыша будет в безопасности и на всех устройствах.'}</div>
 
-        <button className="acc-oauth google" onClick={() => signInWith('google')}>
+        <button className="acc-oauth google" onClick={async () => { const e = await signInWith('google'); if (e) setMsg('Вход через Google ещё настраивается — пока по почте'); }}>
           <span className="acc-oauth-g">G</span> Продолжить с Google
         </button>
-        <button className="acc-oauth apple" onClick={() => signInWith('apple')}>
+        <button className="acc-oauth apple" onClick={async () => { const e = await signInWith('apple'); if (e) setMsg('Вход через Apple ещё настраивается — пока по почте'); }}>
            Продолжить с Apple
         </button>
         <div className="acc-or"><span>или почтой</span></div>
