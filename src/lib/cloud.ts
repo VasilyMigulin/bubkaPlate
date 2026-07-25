@@ -4,8 +4,8 @@ import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 
 // ── Ключи проекта Supabase (публичные, могут лежать в коде открыто) ──
 // Взять на supabase.com → Project Settings → API: Project URL и anon public key.
-const SUPABASE_URL = '';       // напр. 'https://abcdxyz.supabase.co'
-const SUPABASE_ANON_KEY = '';  // напр. 'eyJhbGciOi...'
+const SUPABASE_URL = 'https://sgsskqhffatfizemkmks.supabase.co';
+const SUPABASE_ANON_KEY = 'sb_publishable_iVUcC7oj5-YW8pkc-cuFrA_9BSpf01x';
 
 export const cloudEnabled = !!(SUPABASE_URL && SUPABASE_ANON_KEY);
 
