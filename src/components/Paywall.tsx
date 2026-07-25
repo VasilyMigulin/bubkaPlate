@@ -15,8 +15,10 @@ export function Paywall({ open, onClose, onSuccess }: { open: boolean; onClose: 
   if (!open) return null;
 
   const buy = () => {
+    // Демо-режим: реальная оплата подключается при публикации в App Store / Google Play.
+    // Сейчас просто открываем все функции для тестирования — деньги не списываются.
     localStorage.setItem(PREMIUM_KEY, '1');
-    showToast('💛', 'Добро пожаловать в bubka+', '7 дней бесплатно, отменить можно в любой момент');
+    showToast('✨', 'bubka+ открыт (демо)', 'Все функции разблокированы для теста');
     onSuccess?.();
     onClose();
   };
@@ -51,7 +53,8 @@ export function Paywall({ open, onClose, onSuccess }: { open: boolean; onClose: 
           </button>
         </div>
 
-        <button className="btn btn-primary" style={{ marginTop: 14 }} onClick={buy}>Попробовать 7 дней бесплатно</button>
+        <button className="btn btn-primary" style={{ marginTop: 14 }} onClick={buy}>✨ Открыть bubka+ (демо-режим)</button>
+        <div className="sub" style={{ textAlign: 'center', marginTop: 8, fontSize: 11.5 }}>Демо: деньги не списываются. Настоящая оплата подключится при публикации в App Store и Google Play.</div>
         <div className="pw-fine">Затем {tariff === 'year' ? '1 990 ₽ в год' : '299 ₽ в месяц'}. Отменить можно в любой момент.</div>
         <button className="pw-restore" onClick={() => showToast('🔄', 'Покупки восстановлены')}>Восстановить покупки</button>
 

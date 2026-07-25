@@ -200,3 +200,12 @@ button:active { transform: scale(.965); }
 .rx-photo-btns { display:flex; gap:8px; }
 .rx-photo-btns .rx-photo-add { flex:1; }
 .fl-extra .fl-photo { margin-right:6px; }
+
+/* Поля ввода — единый премиальный стиль во всём приложении */
+.em-input { border:1.5px solid var(--hairline); background:var(--card); border-radius:13px; padding:13px 14px;
+  font-family:inherit; font-size:15px; color:var(--text); outline:none; transition:border-color .18s, box-shadow .18s; -webkit-appearance:none; }
+.em-input::placeholder { color:var(--text2); }
+.em-input:focus { border-color:var(--accent); box-shadow:0 0 0 3px var(--accent-soft); }
+textarea.em-input, .rx-note { border:1.5px solid var(--hairline); background:var(--card); border-radius:13px; padding:12px 14px;
+  font-family:inherit; font-size:15px; color:var(--text); outline:none; width:100%; resize:vertical; transition:border-color .18s, box-shadow .18s; }
+.rx-note:focus { border-color:var(--accent); box-shadow:0 0 0 3px var(--accent-soft); }
